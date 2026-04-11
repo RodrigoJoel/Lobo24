@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Lobo24 — Panel de Administración</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/admin.css"/>
+  
+</head>
+<body>
+
+<!-- LOADING -->
+<div id="adminLoading">
+  <div class="al-logo">LOBO<span>24</span></div>
+  <div class="al-bar"><div class="al-bar-inner"></div></div>
+  <div class="al-text">CONECTANDO CON FIREBASE...</div>
+</div>
+
+<!-- TOPBAR -->
+<header class="topbar">
+  <div class="logo">
+    <div class="logo-mark">🐺</div>
+    <div class="logo-name">LOBO<span>24</span></div>
+    <span class="logo-badge">ADMIN</span>
+  </div>
+  <div class="topbar-right">
+    <div id="savingBadge">⚡ Guardando...</div>
+    <a href="index.html" class="back-btn">← Volver al sitio</a>
+    <div class="admin-user">
+      <div class="admin-avatar">👤</div>
+      <span>Administrador</span>
+    </div>
+  </div>
+</header>
+
+<div class="layout">
+  <!-- SIDEBAR -->
+  <nav class="sidebar">
+    <div class="sidebar-section">General</div>
+    <div class="nav-item active" onclick="navigate('dashboard',this)"><span class="nav-icon">📊</span><span>Dashboard</span></div>
+    <div class="nav-item" onclick="navigate('topbar',this)"><span class="nav-icon">📢</span><span>Barra superior</span></div>
+    <div class="nav-item" onclick="navigate('carousel',this)"><span class="nav-icon">🖼️</span><span>Carrusel hero</span></div>
+    <div class="nav-item" onclick="navigate('promos',this)"><span class="nav-icon">🏷️</span><span>Promos laterales</span></div>
+    <div class="nav-item" onclick="navigate('banner',this)"><span class="nav-icon">📱</span><span>Banner app</span></div>
+    <div class="nav-divider"></div>
+    <div class="sidebar-section">Catálogo</div>
+    <div class="nav-item" onclick="navigate('best',this)"><span class="nav-icon">⭐</span><span>Más vendidos</span></div>
+    <div class="nav-item" onclick="navigate('newp',this)"><span class="nav-icon">🔥</span><span>Novedades</span></div>
+    <div class="nav-item" onclick="navigate('categories',this)"><span class="nav-icon">🗂️</span><span>Categorías</span></div>
+    <div class="nav-divider"></div>
+    <div class="sidebar-section">Sitio</div>
+    <div class="nav-item" onclick="navigate('sections',this)"><span class="nav-icon">👁️</span><span>Secciones</span></div>
+    <div class="sidebar-footer"><p>Lobo24 Admin v2.0<br>Firebase conectado ✅</p></div>
+  </nav>
+
+  <main class="main" id="mainContent"></main>
+</div>
+
+<!-- EDIT PRODUCT MODAL -->
+<div class="modal-back" id="editModal">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <div class="modal-title">EDITAR <span style="color:var(--purple-lt)">PRODUCTO</span></div>
+    <input type="hidden" id="mDocId"/>
+    <input type="hidden" id="mCollection"/>
+    <div class="field"><label>Nombre</label><input id="mName"/></div>
+    <div class="field"><label>Marca</label><input id="mBrand"/></div>
+    <div class="field-row">
+      <div class="field"><label>Precio ($)</label><input id="mPrice" type="number"/></div>
+      <div class="field"><label>Precio tachado ($)</label><input id="mOld" type="number" placeholder="0 = sin tachado"/></div>
+    </div>
+    <div class="field">
+      <label>URL imagen</label>
+      <input id="mImg" placeholder="https://..." oninput="previewImg('mImg','mImgPrev')"/>
+      <div class="img-preview-wrap"><div class="img-preview" id="mImgPrev"><span>Vista previa</span></div></div>
+    </div>
+    <div class="field"><label>Badge</label>
+      <select id="mBadge"><option value="">Ninguno</option><option value="new">NUEVO</option><option value="offer">OFERTA</option><option value="hot">HOT</option></select>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="saveEditModal()">💾 Guardar cambios</button>
+      <button class="btn btn-ghost" onclick="closeModal()">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast-wrap" id="toastWrap"></div>
+
+<!-- ══════════════════════════════════════
+     FIREBASE SDK
+══════════════════════════════════════ -->
+<script type="module">
+import { initializeApp }    from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
+import { getFirestore, doc, collection, onSnapshot, setDoc, addDoc, deleteDoc, updateDoc, getDocs }
+  from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyBiN4r47hmNycD7aZjkZa6XakZSzXwbL8Q",
+  authDomain: "lobo24-9e46b.firebaseapp.com",
+  projectId: "lobo24-9e46b",
+  storageBucket: "lobo24-9e46b.firebasestorage.app",
+  messagingSenderId: "922799111894",
+  appId: "1:922799111894:web:bfd10fffc39a63fcd7d377"
+};
+
+const fbApp = initializeApp(firebaseConfig);
+const db    = getFirestore(fbApp);
+
+/* ── Exponemos db y helpers globalmente ── */
+window.db = db;
+window.fsDoc        = doc;
+window.fsCollection = collection;
+window.fsSetDoc     = setDoc;
+window.fsAddDoc     = addDoc;
+window.fsDeleteDoc  = deleteDoc;
+window.fsUpdateDoc  = updateDoc;
+window.fsGetDocs    = getDocs;
+window.fsOnSnapshot = onSnapshot;
+
+/* ── CARGA INICIAL DE DATOS ── */
+async function loadAll() {
+  // Config general
+  const configSnap = await getDocs(collection(db,'config'));
+  configSnap.forEach(d => { window.CONF[d.id] = d.data(); });
+
+  // Carousel
+  const carSnap = await getDocs(collection(db,'carousel'));
+  window.DATA.carousel = carSnap.docs.map(d=>({docId:d.id,...d.data()})).sort((a,b)=>(a.order||0)-(b.order||0));
+
+  // Promos
+  const promoSnap = await getDocs(collection(db,'promos'));
+  window.DATA.promos = promoSnap.docs.map(d=>({docId:d.id,...d.data()})).sort((a,b)=>(a.order||0)-(b.order||0));
+
+// Categories
+const catSnap = await getDocs(collection(db,'categories'));
+window.DATA.categories = catSnap.docs.map(d=>({docId:d.id,...d.data()})).sort((a,b)=>(a.order||0)-(b.order||0));
+console.log("Categorías cargadas:", window.DATA.categories.length); // Debería decir 12
+
+  // Best sellers
+  const bestSnap = await getDocs(collection(db,'bestSellers'));
+  window.DATA.best = bestSnap.docs.map(d=>({docId:d.id,...d.data()}));
+
+  // New products
+  const newSnap = await getDocs(collection(db,'newProducts'));
+  window.DATA.newProds = newSnap.docs.map(d=>({docId:d.id,...d.data()}));
+
+  // Sections
+  const secSnap = await getDocs(collection(db,'config'));
+  secSnap.forEach(d => { if(d.id==='sections') window.DATA.sections = d.data(); });
+
+  // Quitar loading
+  document.getElementById('adminLoading').classList.add('fade');
+  setTimeout(()=>document.getElementById('adminLoading').remove(), 500);
+
+  // Si Firestore está vacío, subir datos iniciales
+  if (!window.DATA.carousel.length) await seedFirestore();
+
+  // Render inicial
+  render('dashboard');
+}
+
+/* ── SEED: poblar Firestore la primera vez ── */
+async function seedFirestore() {
+  showToast('🌱 Primera vez: cargando datos iniciales en Firebase...');
+
+  const defaultCarousel = [
+    { order:0, img:'https://images.unsplash.com/photo-1534723452862-4c874986ebad?w=1400&q=80', tag:'Delivery en tiempo récord',  title:'EL MERCADO\nQUE NUNCA\nDUERME.',       desc:'Todo lo que necesitás, a cualquier hora. Entrega rápida a tu puerta.',        btnText:'🛒 Ver productos', btnLink:'#elBest' },
+    { order:1, img:'https://images.unsplash.com/photo-1488459716781-31db52582fe9?w=1400&q=80', tag:'🔥 Ofertas de la semana',     title:'HASTA 30%\nDE\nDESCUENTO',            desc:'En bebidas, snacks y limpieza. ¡No te lo pierdas esta semana!',               btnText:'🔥 Ver ofertas',   btnLink:'ofertas.html' },
+    { order:2, img:'https://images.unsplash.com/photo-1542838132-92c53300491e?w=1400&q=80', tag:'🛵 Sin costo de envío',         title:'ENVÍO\nGRATIS\nTODA LA NOCHE',        desc:'En compras superiores a $5000. Pedí hasta las 6am y llegamos igual.',         btnText:'🛵 Pedir ahora',   btnLink:'#elBest' },
+  ];
+  for (const s of defaultCarousel) { const ref = await fsAddDoc(fsCollection(db,'carousel'), s); window.DATA.carousel.push({docId:ref.id,...s}); }
+
+  const defaultPromos = [
+    { order:0, label:'Promo del día',  title:'2×1 EN\nBEBIDAS', img:'https://images.unsplash.com/photo-1544145945-f90425340c7e?w=800&q=80' },
+    { order:1, label:'Llegó el finde', title:'PIZZA &\nSNACKS',  img:'https://images.unsplash.com/photo-1513104890138-7c749659a591?w=800&q=80' },
+  ];
+  for (const p of defaultPromos) { const ref = await fsAddDoc(fsCollection(db,'promos'), p); window.DATA.promos.push({docId:ref.id,...p}); }
+
+  const defaultCats = [
+    {order:0,name:'Bebidas',emoji:'🥤',count:186,slug:'bebidas'},{order:1,name:'Snacks',emoji:'🍪',count:243,slug:'snacks'},
+    {order:2,name:'Carnicería',emoji:'🥩',count:62,slug:'carniceria'},{order:3,name:'Verduras',emoji:'🥦',count:98,slug:'verduras'},
+    {order:4,name:'Limpieza',emoji:'🧴',count:124,slug:'limpieza'},{order:5,name:'Congelados',emoji:'🧊',count:77,slug:'congelados'},
+    {order:6,name:'Lácteos',emoji:'🧀',count:91,slug:'lacteos'},{order:7,name:'Panadería',emoji:'🍞',count:55,slug:'panaderia'},
+    {order:8,name:'Almacén',emoji:'🍝',count:312,slug:'almacen'},{order:9,name:'Mascotas',emoji:'🐾',count:43,slug:'mascotas'},
+    {order:10,name:'Higiene',emoji:'🧼',count:89,slug:'higiene'},{order:11,name:'Bebé',emoji:'🍼',count:34,slug:'bebe'},
+  ];
+  for (const c of defaultCats) { const ref = await fsAddDoc(fsCollection(db,'categories'), c); window.DATA.categories.push({docId:ref.id,...c}); }
+
+  const defaultBest = [
+    {name:'Coca-Cola 2.25L',brand:'Coca-Cola',price:2200,old:2600,img:'https://images.unsplash.com/photo-1622483767028-3f66f32aef97?w=400&q=80',badge:'offer'},
+    {name:'Papas Lays Clásicas 135g',brand:'Lays',price:850,old:null,img:'https://images.unsplash.com/photo-1566478989037-eec170784d0b?w=400&q=80',badge:'hot'},
+    {name:'Leche Entera 1L',brand:'La Serenísima',price:680,old:null,img:'https://images.unsplash.com/photo-1563636619-e9143da7973b?w=400&q=80',badge:null},
+    {name:'Agua Mineral 6×1.5L',brand:'Villavicencio',price:1800,old:null,img:'https://images.unsplash.com/photo-1548839140-29a749e1cf4d?w=400&q=80',badge:'new'},
+    {name:'Cerveza Quilmes 1L',brand:'Quilmes',price:1400,old:1700,img:'https://images.unsplash.com/photo-1535958636474-b021ee887b13?w=400&q=80',badge:'offer'},
+    {name:'Yogur Danone Frutilla x4',brand:'Danone',price:1100,old:null,img:'https://images.unsplash.com/photo-1488477181946-6428a0291777?w=400&q=80',badge:null},
+    {name:'Galletitas Oreo x3',brand:'Oreo',price:780,old:900,img:'https://images.unsplash.com/photo-1558961363-fa8fdf82db35?w=400&q=80',badge:'offer'},
+    {name:'Jugo Cepita Naranja 1L',brand:'Cepita',price:650,old:null,img:'https://images.unsplash.com/photo-1600271886742-f049cd451bba?w=400&q=80',badge:null},
+  ];
+  for (const p of defaultBest) { const ref = await fsAddDoc(fsCollection(db,'bestSellers'), p); window.DATA.best.push({docId:ref.id,...p}); }
+
+  const defaultNew = [
+    {name:'Sprite Limón 1.5L',brand:'Sprite',price:1400,old:null,img:'https://images.unsplash.com/photo-1581636625402-29b2a704ef13?w=400&q=80',badge:'new'},
+    {name:'Queso Cremoso Milkaut 400g',brand:'Milkaut',price:2100,old:null,img:'https://images.unsplash.com/photo-1486297678162-eb2a19b0a32d?w=400&q=80',badge:'new'},
+    {name:'Pizza Muzzarella 500g',brand:'La Salteña',price:3500,old:3900,img:'https://images.unsplash.com/photo-1513104890138-7c749659a591?w=400&q=80',badge:'offer'},
+    {name:'Detergente Magistral 1L',brand:'Magistral',price:890,old:null,img:'https://images.unsplash.com/photo-1585421514738-01798e348b17?w=400&q=80',badge:'new'},
+  ];
+  for (const p of defaultNew) { const ref = await fsAddDoc(fsCollection(db,'newProducts'), p); window.DATA.newProds.push({docId:ref.id,...p}); }
+
+  await fsSetDoc(fsDoc(db,'config','general'), { topbar:'🐺 <strong>LOBO24</strong> — Entregas en 30 minutos · Abierto las 24 horas · Envío gratis en compras +$5000', bannerDesc:'Pedidos más rápidos, notificaciones de ofertas y seguimiento en tiempo real.' });
+  await fsSetDoc(fsDoc(db,'config','sections'), { topbar:true, stats:true, categories:true, offers:true, best:true, banner:true, newProds:true });
+
+  window.DATA.sections = { topbar:true, stats:true, categories:true, offers:true, best:true, banner:true, newProds:true };
+  window.CONF.general  = { topbar:'🐺 <strong>LOBO24</strong> — Entregas en 30 minutos · Abierto las 24 horas · Envío gratis en compras +$5000', bannerDesc:'Pedidos más rápidos, notificaciones de ofertas y seguimiento en tiempo real.' };
+
+  showToast('✅ Datos iniciales cargados en Firebase');
+}
+
+window._loadAll = loadAll;
+loadAll();
+</script>
+
+<script src="/js/admin-script.js"></script>
+</body>
+</html>

@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="dark">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Lobo24 — Minimarket Online</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/styles.css"/>
+</head>
+<body>
+
+<!-- LOADING SCREEN -->
+<!--<div id="loadingScreen">
+  <div class="loading-logo">LOBO<span>24</span></div>
+  <div class="loading-bar"><div class="loading-bar-inner"></div></div>
+  <div class="loading-text">CARGANDO TIENDA...</div>
+</div>-->
+
+<!-- TOPBAR -->
+<div class="topbar" id="elTopbar">
+  <span id="topbarText">🐺 <strong>LOBO24</strong> — Cargando...</span>
+</div>
+
+<!-- NAVBAR -->
+<nav class="navbar">
+  <a href="index.html" class="logo">
+   <!-- <div class="logo-icon">🐺</div>-->
+    <img src="/imagenes/iconoLobo24.png" alt="Lobo24 Logo" class="logo-img"/>
+    <div class="logo-text">LOBO<span>24</span></div>
+  </a>
+  <div class="search-wrap">
+    <input type="text" id="searchInput" placeholder="Buscá productos, marcas..."/>
+    <button onclick="handleSearch()">🔍</button>
+  </div>
+  <div class="nav-actions">
+    <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" title="Modo oscuro / claro">🌙</button>
+  <div id="userStatusContainer">
+    <button class="nav-btn" onclick="openModal()"><span>👤</span> Ingresar</button>
+  </div>
+
+  <button class="nav-btn primary cart-btn" onclick="toggleCart()">
+    <span>🛒</span> Carrito
+    <span class="cart-count" id="cartCount">0</span>
+  </button>
+</nav>
+
+<!-- CATEGORY NAV -->
+<div class="cat-nav">
+  <a href="#" class="active"><span class="icon">⭐</span> Destacados</a>
+  <a href="bebidas.html"><span class="icon">🥤</span> Bebidas</a>
+  <a href="snacks.html"><span class="icon">🍪</span> Snacks</a>
+  <a href="carniceria.html"><span class="icon">🥩</span> Carnicería</a>
+  <a href="verduras.html"><span class="icon">🥦</span> Verduras</a>
+  <a href="limpieza.html"><span class="icon">🧴</span> Limpieza</a>
+  <a href="congelados.html"><span class="icon">🧊</span> Congelados</a>
+  <a href="lacteos.html"><span class="icon">🧀</span> Lácteos</a>
+  <a href="panaderia.html"><span class="icon">🍞</span> Panadería</a>
+  <a href="mascotas.html"><span class="icon">🐾</span> Mascotas</a>
+  <a href="ofertas.html"><span class="icon">🔥</span> Ofertas</a>
+</div>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-carousel animate" id="heroCarousel">
+    <div class="carousel-track" id="carouselTrack"></div>
+    <button class="carousel-ctrl carousel-prev" onclick="carouselMove(-1)">&#8249;</button>
+    <button class="carousel-ctrl carousel-next" onclick="carouselMove(1)">&#8250;</button>
+    <div class="carousel-dots" id="carouselDots"></div>
+  </div>
+  <div class="hero-side">
+    <div class="promo-card animate" style="animation-delay:.1s" id="promoCard1">
+      <img class="promo-bg" id="promoBg1" src="" alt="promo1"/>
+      <div class="promo-overlay"></div>
+      <div class="promo-content">
+        <div class="promo-label" id="promoLabel1"></div>
+        <div class="promo-title" id="promoTitle1"></div>
+      </div>
+    </div>
+    <div class="promo-card animate" style="animation-delay:.15s" id="promoCard2">
+      <img class="promo-bg" id="promoBg2" src="" alt="promo2"/>
+      <div class="promo-overlay"></div>
+      <div class="promo-content">
+        <div class="promo-label" id="promoLabel2"></div>
+        <div class="promo-title" id="promoTitle2"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- STATS -->
+<div class="stats-bar" id="elStats">
+<!--  <div class="stat-item"><div class="stat-icon">⚡</div><div class="stat-text"><strong>30 min</strong><span>Tiempo de entrega</span></div></div>-->
+  <div class="stat-item"><div class="stat-icon">🕐</div><div class="stat-text"><strong>24/7</strong><span>Siempre abierto</span></div></div>
+  <div class="stat-item"><div class="stat-icon">🛍️</div><div class="stat-text"><strong>+3.000</strong><span>Productos disponibles</span></div></div>
+<!--  <div class="stat-item"><div class="stat-icon">💳</div><div class="stat-text"><strong>6 cuotas</strong><span>Sin interés</span></div></div>-->
+</div>
+
+<!-- CATEGORIES -->
+<section class="section animate" id="elCategories">
+  <div class="section-header">
+    <div><div class="section-title">EXPLORAR <span>CATEGORÍAS</span></div><div class="section-sub">Encontrá todo lo que necesitás</div></div>
+    <a href="#" class="see-all">Ver todas →</a>
+  </div>
+  <div class="categories-grid" id="categoriesGrid"></div>
+</section>
+
+<!-- OFFERS -->
+<section class="section animate" id="elOffers" style="padding-top:0">
+  <div class="section-header">
+    <div><div class="section-title">OFERTAS <span>DEL DÍA</span></div><div class="section-sub">Descuentos que no te podés perder</div></div>
+    <a href="ofertas.html" class="see-all">Ver todas →</a>
+  </div>
+  <div class="offers-strip">
+    <div class="offer-card"><div class="offer-emoji">🥤</div><div class="offer-info"><div class="offer-pct">30%</div><div class="offer-cat">En bebidas</div></div></div>
+    <div class="offer-card"><div class="offer-emoji">🍫</div><div class="offer-info"><div class="offer-pct">2×1</div><div class="offer-cat">En chocolates</div></div></div>
+    <div class="offer-card"><div class="offer-emoji">🧴</div><div class="offer-info"><div class="offer-pct">20%</div><div class="offer-cat">En limpieza</div></div></div>
+    <div class="offer-card"><div class="offer-emoji">🍕</div><div class="offer-info"><div class="offer-pct">15%</div><div class="offer-cat">En congelados</div></div></div>
+  </div>
+</section>
+
+<!-- BEST SELLERS -->
+<section class="section animate" id="elBest">
+  <div class="section-header">
+    <div><div class="section-title">MÁS <span>VENDIDOS</span></div><div class="section-sub">Los favoritos de nuestra comunidad</div></div>
+    <a href="#" class="see-all">Ver todos →</a>
+  </div>
+  <div class="products-grid" id="productsGrid"></div>
+</section>
+
+<!-- BANNER APP -->
+<div class="banner-promo animate" id="elBanner">
+  <div class="banner-inner">
+    <div class="banner-left">
+      <h2>DESCARGÁ<br>LA <em>APP</em> LOBO24</h2>
+      <p id="bannerDesc">Cargando...</p>
+    </div>
+    <div class="banner-right">
+      <div class="download-btns">
+        <div class="dl-btn"><div class="dl-icon">🍎</div><div class="dl-btn-text"><strong>App Store</strong><span>Disponible en iOS</span></div></div>
+        <div class="dl-btn"><div class="dl-icon">🤖</div><div class="dl-btn-text"><strong>Google Play</strong><span>Disponible en Android</span></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- NOVEDADES -->
+<section class="section animate" id="elNew">
+  <div class="section-header">
+    <div><div class="section-title">NOVEDADES <span>🔥</span></div><div class="section-sub">Nuevos productos esta semana</div></div>
+    <a href="#" class="see-all">Ver todos →</a>
+  </div>
+  <div class="products-grid" id="newProductsGrid"></div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-top">
+    <div class="footer-brand">
+      <div style="font-family:var(--font-head);font-size:32px">LOBO<span style="color:var(--accent)">24</span></div>
+      <p>El minimarket que nunca cierra. Todo lo que necesitás, cuando lo necesitás, en tu puerta en minutos.</p>
+      <div style="margin-top:16px;display:flex;gap:10px">
+        <a href="#" style="font-size:20px">📷</a><a href="#" style="font-size:20px">📘</a><a href="#" style="font-size:20px">🐦</a><a href="#" style="font-size:20px">💬</a>
+      </div>
+    </div>
+    <div class="footer-col"><h4>Empresa</h4><ul><li><a href="#">Sobre Lobo24</a></li><li><a href="#">Trabajá con nosotros</a></li><li><a href="#">Prensa</a></li><li><a href="#">Blog</a></li></ul></div>
+    <div class="footer-col"><h4>Ayuda</h4><ul><li><a href="#">Centro de ayuda</a></li><li><a href="#">Seguí tu pedido</a></li><li><a href="#">Devoluciones</a></li><li><a href="#">Contacto</a></li></ul></div>
+    <div class="footer-col"><h4>Legal</h4><ul><li><a href="#">Términos de uso</a></li><li><a href="#">Privacidad</a></li><li><a href="#">Cookies</a></li></ul></div>
+  </div>
+
+  <div class="footer-bottom">
+    <div class="admin-footer-wrap">
+      <a href="admin.html" class="admin-link-text">
+        <i class="fas fa-cog"></i> Panel de Administración
+      </a>
+    </div>
+    
+    <span>© 2025 Lobo24 — Todos los derechos reservados</span>
+    <span>🐺 Abierto 24/7 · Siempre para vos</span>
+  </div>
+</footer>
+
+<!-- CART -->
+<div class="drawer-overlay" id="drawerOverlay" onclick="toggleCart()"></div>
+<div class="cart-drawer" id="cartDrawer">
+  <div class="drawer-header"><h2>TU CARRITO 🛒</h2><button class="drawer-close" onclick="toggleCart()">✕</button></div>
+  <div class="drawer-items" id="drawerItems"><div class="drawer-empty"><div class="empty-icon">🛒</div><p>Tu carrito está vacío.<br>¡Agregá algo rico!</p></div></div>
+  <div class="drawer-footer" id="drawerFooter" style="display:none">
+    <div class="total-row"><span>Total</span><strong id="cartTotal">$0</strong></div>
+    <button class="checkout-btn" onclick="checkout()">Finalizar compra →</button>
+  </div>
+</div>
+
+<!-- LOGIN MODAL -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <button class="modal-close-x" onclick="closeModal()">✕</button>
+    <div class="modal-logo">
+      <div style="font-family:var(--font-head);font-size:40px;text-align:center">LOBO<span style="color:var(--accent)">24</span></div>
+      <p>Tu mercado de confianza</p>
+    </div>
+    <div class="modal-tabs">
+      <div class="modal-tab active" id="tabLogin" onclick="switchTab('login')">Iniciar sesión</div>
+      <div class="modal-tab" id="tabReg" onclick="switchTab('reg')">Crear cuenta</div>
+    </div>
+    <div id="formLogin">
+      <div class="form-group"><label>Email</label><input type="email" placeholder="tu@email.com"/></div>
+      <div class="form-group"><label>Contraseña</label><input type="password" placeholder="••••••••"/></div>
+      <button class="modal-submit" onclick="handleLogin()">Ingresar</button>
+      <div class="modal-sep">¿Olvidaste tu contraseña?</div>
+    </div>
+    <div id="formReg" style="display:none">
+      <div class="form-group"><label>Nombre completo</label><input type="text" placeholder="Juan Pérez"/></div>
+      <div class="form-group"><label>Email</label><input type="email" placeholder="tu@email.com"/></div>
+      <div class="form-group"><label>Contraseña</label><input type="password" placeholder="Mínimo 8 caracteres"/></div>
+      <div class="form-group"><label>Teléfono</label><input type="tel" placeholder="+54 9 xxx xxx xxxx"/></div>
+      <button class="modal-submit" onclick="handleRegister()">Crear cuenta</button>
+    </div>
+  </div>
+</div>
+
+
+
+<!-- SYNC INDICATOR -->
+<div class="sync-dot" id="syncDot">EN VIVO</div>
+
+<!-- TOAST -->
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- ══════════════════════════════════════
+     FIREBASE SDK
+══════════════════════════════════════ -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
+import { getFirestore, doc, collection, onSnapshot, getDocs, setDoc, getDoc } 
+from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-auth.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyBiN4r47hmNycD7aZjkZa6XakZSzXwbL8Q",
+  authDomain: "lobo24-9e46b.firebaseapp.com",
+  projectId: "lobo24-9e46b",
+  storageBucket: "lobo24-9e46b.firebasestorage.app",
+  messagingSenderId: "922799111894",
+  appId: "1:922799111894:web:bfd10fffc39a63fcd7d377"
+};
+
+const app = initializeApp(firebaseConfig);
+const db  = getFirestore(app);
+const auth = getAuth(app);
+
+
+
+/* ── CAROUSEL (tiempo real) ── */
+onSnapshot(collection(db, 'carousel'), snap => {
+  const slides = snap.docs
+    .map(d => ({ id: d.id, ...d.data() }))
+    .sort((a,b) => (a.order||0) - (b.order||0));
+  if (slides.length) buildCarousel(slides);
+});
+
+/* ── PROMOS (tiempo real) ── */
+onSnapshot(collection(db, 'promos'), snap => {
+  const promos = snap.docs.map(d => ({ id: d.id, ...d.data() })).sort((a,b)=>(a.order||0)-(b.order||0));
+  promos.forEach((p, i) => {
+    const n = i + 1;
+    const bg = document.getElementById(`promoBg${n}`);
+    const lbl = document.getElementById(`promoLabel${n}`);
+    const ttl = document.getElementById(`promoTitle${n}`);
+    if (bg)  bg.src = p.img || '';
+    if (lbl) lbl.textContent = p.label || '';
+    if (ttl) ttl.innerHTML = (p.title || '').replace(/\n/g, '<br>');
+  });
+});
+
+/* ── CONFIG GENERAL (tiempo real) ── */
+onSnapshot(doc(db, 'config', 'general'), snap => {
+  if (!snap.exists()) return;
+  const data = snap.data();
+  if (data.topbar)     document.getElementById('topbarText').innerHTML = data.topbar;
+  if (data.bannerDesc) document.getElementById('bannerDesc').textContent = data.bannerDesc;
+});
+
+/* ── SECCIONES (tiempo real) ── */
+onSnapshot(doc(db, 'config', 'sections'), snap => {
+  if (!snap.exists()) return;
+  const s = snap.data();
+  const map = {
+    topbar:     document.getElementById('elTopbar'),
+    stats:      document.getElementById('elStats'),
+    categories: document.getElementById('elCategories'),
+    offers:     document.getElementById('elOffers'),
+    best:       document.getElementById('elBest'),
+    banner:     document.getElementById('elBanner'),
+    newProds:   document.getElementById('elNew'),
+  };
+  Object.entries(s).forEach(([k,v]) => { if (map[k]) map[k].style.display = v ? '' : 'none'; });
+});
+
+/* ── CATEGORÍAS (tiempo real) ── */
+onSnapshot(collection(db, 'categories'), snap => {
+  const cats = snap.docs
+    .map(d => ({ id: d.id, ...d.data() }))
+    .sort((a,b) => (a.order||0) - (b.order||0));
+  if (cats.length) buildCategories(cats);
+});
+
+/* ── PRODUCTOS MÁS VENDIDOS (tiempo real) ── */
+onSnapshot(collection(db, 'bestSellers'), snap => {
+  const prods = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  window._bestProds = prods;
+  renderProducts(prods, 'productsGrid');
+});
+
+/* ── NOVEDADES (tiempo real) ── */
+onSnapshot(collection(db, 'newProducts'), snap => {
+  const prods = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  window._newProds = prods;
+  renderProducts(prods, 'newProductsGrid');
+});
+
+/* ── OCULTAR LOADING ── */
+// Esperamos a que al menos config cargue
+const unsub = onSnapshot(doc(db, 'config', 'general'), () => {
+  setTimeout(() => {
+    const loading = document.getElementById('loadingScreen');
+    if (loading) {
+      loading.classList.add('fade');
+      setTimeout(() => loading.remove(), 600);
+    }
+  }, 400);
+  unsub();
+});
+// Hacer funciones accesibles globalmente para scripts.js
+window.fbAuth = { auth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, db, doc, setDoc, getDoc };
+
+// Escuchar cambios en el estado de autenticación
+onAuthStateChanged(auth, async (user) => {
+  const container = document.getElementById('userStatusContainer');
+  if (user) {
+    // Usuario logueado: obtener datos de Firestore (como el nombre)
+    const userDoc = await getDoc(doc(db, "users", user.uid));
+    const userData = userDoc.exists() ? userDoc.data() : { name: "Usuario" };
+    const inicial = userData.name.charAt(0).toUpperCase();
+
+    container.innerHTML = `
+      <div class="user-profile-menu">
+        <div class="user-avatar" onclick="toggleUserDropdown()">${inicial}</div>
+        <div class="user-dropdown" id="userDropdown">
+          <div class="dropdown-header">Hola, <strong>${userData.name.split(' ')[0]}</strong></div>
+          <a href="#"><i class="fas fa-user"></i> Mi cuenta</a>
+          <a href="#"><i class="fas fa-shopping-bag"></i> Mis compras</a>
+          <a href="#"><i class="fas fa-star"></i> Mis puntos</a>
+          <hr>
+          <button onclick="handleLogout()" class="logout-btn">Cerrar sesión</button>
+        </div>
+      </div>
+    `;
+  } else {
+    // Usuario no logueado
+    container.innerHTML = `<button class="nav-btn" onclick="openModal()"><span>👤</span> Ingresar</button>`;
+  }
+});
+
+</script>
+
+
+<script src="/js/scripts.js"></script>
+</body>
+</html>
