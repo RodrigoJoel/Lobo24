@@ -1,3 +1,24 @@
+document.addEventListener("DOMContentLoaded", () => {
+
+    const token = localStorage.getItem('admin_session_token');
+    const expiry = localStorage.getItem('admin_session_expiry');
+
+    // ❌ No hay sesión
+    if (!token || !expiry) {
+        window.location.href = "admin-login.html";
+        return;
+    }
+
+    // ❌ Sesión vencida
+    if (Date.now() > parseInt(expiry)) {
+        localStorage.removeItem('admin_session_token');
+        localStorage.removeItem('admin_session_expiry');
+        window.location.href = "admin-login.html";
+        return;
+    }
+
+});
+
 /* ══════════════════════════════════════════
    GLOBAL DATA (llenado por Firebase)
 ══════════════════════════════════════════ */

@@ -29,9 +29,13 @@
   <div class="topbar-right">
     <div id="savingBadge">⚡ Guardando...</div>
     <a href="index.html" class="back-btn">← Volver al sitio</a>
-    <div class="admin-user">
+    <div class="admin-user" onclick="toggleAdminMenu()">
       <div class="admin-avatar">👤</div>
       <span>Administrador</span>
+
+      <div id="adminDropdown" class="admin-dropdown">
+        <button onclick="logoutAdmin()">🚪 Cerrar sesión</button>
+      </div>
     </div>
   </div>
 </header>
@@ -108,6 +112,33 @@ const firebaseConfig = {
 
 const fbApp = initializeApp(firebaseConfig);
 const db    = getFirestore(fbApp);
+// Mostrar / ocultar menú
+window.toggleAdminMenu = function() {
+  document.getElementById("adminDropdown").classList.toggle("show");
+};
+
+// Cerrar si clic afuera
+window.addEventListener("click", function(e) {
+  if (!e.target.closest(".admin-user")) {
+    document.getElementById("adminDropdown")?.classList.remove("show");
+  }
+});
+
+// 🚪 Logout real con Firebase
+window.logoutAdmin = async function() {
+  try {
+    await signOut(auth);
+
+    // Limpiar localStorage por si usás algo
+    localStorage.removeItem("admin_session_token");
+    localStorage.removeItem("admin_session_expiry");
+
+    window.location.href = "admin-login.html";
+  } catch (error) {
+    alert("Error al cerrar sesión");
+    console.error(error);
+  }
+};
 
 /* ── Exponemos db y helpers globalmente ── */
 window.db = db;
@@ -161,6 +192,7 @@ console.log("Categorías cargadas:", window.DATA.categories.length); // Debería
   // Render inicial
   render('dashboard');
 }
+
 
 /* ── SEED: poblar Firestore la primera vez ── */
 async function seedFirestore() {
@@ -219,6 +251,21 @@ async function seedFirestore() {
 }
 
 window._loadAll = loadAll;
+import { getAuth, onAuthStateChanged, signOut } 
+  from "https://www.gstatic.com/firebasejs/11.0.0/firebase-auth.js";
+
+const auth = getAuth(fbApp);
+window.auth = auth;
+
+// 🔐 PROTECCIÓN DE RUTA
+onAuthStateChanged(auth, (user) => {
+  if (!user) {
+    // No está logueado → afuera
+    window.location.href = "admin-login.html";
+  } else {
+    console.log("Admin logueado:", user.email);
+  }
+});
 loadAll();
 </script>
 

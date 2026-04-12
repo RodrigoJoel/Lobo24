@@ -169,3 +169,37 @@ img{display:block}
     z-index: 10;
     background: var(--bg3);
 }
+.admin-user {
+  position: relative;
+  cursor: pointer;
+}
+
+.admin-dropdown {
+  position: absolute;
+  top: 120%;
+  right: 0;
+  background: #1a1a1a;
+  border-radius: 8px;
+  padding: 10px;
+  display: none;
+  min-width: 150px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+}
+
+.admin-dropdown button {
+  width: 100%;
+  background: none;
+  border: none;
+  color: #fff;
+  padding: 10px;
+  cursor: pointer;
+  text-align: left;
+}
+
+.admin-dropdown button:hover {
+  background: rgba(255,255,255,0.1);
+}
+
+.admin-dropdown.show {
+  display: block;
+}
