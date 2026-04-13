@@ -3,12 +3,12 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Lobo24 — Bebidas</title>
+  <title>Lobo24 — Snacks</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/styles.css"/>
-  <link rel="stylesheet" href="css/bebidas.css"/>
+  <link rel="stylesheet" href="css/snacks.css"/>
 </head>
 <body>
 
@@ -42,8 +42,8 @@
 <!-- CATEGORY NAV -->
 <div class="cat-nav">
   <a href="index.html"><span class="icon">⭐</span> Destacados</a>
-  <a href="bebidas.html" class="active"><span class="icon">🥤</span> Bebidas</a>
-  <a href="snacks.html"><span class="icon">🍪</span> Snacks</a>
+  <a href="bebidas.html"><span class="icon">🥤</span> Bebidas</a>
+  <a href="snacks.html" class="active"><span class="icon">🍪</span> Snacks</a>
   <a href="almacen.html"><span class="icon">🍝</span> Almacén</a>
   <a href="verduras.html"><span class="icon">🥦</span> Verduras</a>
   <a href="limpieza.html"><span class="icon">🧴</span> Limpieza</a>
@@ -60,10 +60,10 @@
     <div class="cat-breadcrumb">
       <a href="index.html">Inicio</a>
       <span>/</span>
-      <span>Bebidas</span>
+      <span>Snacks</span>
     </div>
-    <h1>SECCIÓN DE <em>BEBIDAS</em></h1>
-    <p>Agua, gaseosas, jugos, cervezas, bebidas energéticas y mucho más. Todo frío y listo para llevar.</p>
+    <h1>SECCIÓN DE <em>SNACKS</em></h1>
+    <p>Snacks saludables, dulces, salados y mucho más. Todo lo que necesitas para satisfacer tu antojo.</p>
     <div class="cat-hero-stats">
       <div class="cat-hero-stat">
         <strong id="heroTotalProds">—</strong>
@@ -85,7 +85,7 @@
 <div class="cat-search-bar">
   <div class="cat-search-inner">
     <div class="cat-search-input-wrap">
-      <input type="text" id="catSearch" placeholder="Buscar en Bebidas... ej: Coca-Cola, agua, cerveza"/>
+      <input type="text" id="catSearch" placeholder="Buscar en Snacks... ej: galletitas, caramelos, frutas secas"/>
       <span class="search-icon">🔍</span>
     </div>
     <select class="cat-sort-select" id="sortSelect" onchange="applyFilters()">
@@ -110,7 +110,7 @@
     <!-- Subcategorías -->
     <div class="filter-group">
       <div class="filter-group-title">
-        Tipo de bebida
+        Tipo de snack
         <button class="filter-clear" onclick="clearFilter('subcat')">limpiar</button>
       </div>
       <div class="filter-chips" id="subcatFilters">
@@ -118,47 +118,34 @@
           <span><span class="chip-icon">🛒</span>Todas</span>
           <span class="chip-count" id="cnt-all">0</span>
         </div>
-        <div class="filter-chip" data-subcat="agua" onclick="selectSubcat(this)">
-          <span><span class="chip-icon">💧</span>Agua</span>
-          <span class="chip-count" id="cnt-agua">0</span>
+        <div class="filter-chip" data-subcat="dulce" onclick="selectSubcat(this)">
+          <span><span class="chip-icon">🍬</span>Dulce</span>
+          <span class="chip-count" id="cnt-dulce">0</span>
         </div>
-        <div class="filter-chip" data-subcat="gaseosas" onclick="selectSubcat(this)">
-          <span><span class="chip-icon">🥤</span>Gaseosas</span>
-          <span class="chip-count" id="cnt-gaseosas">0</span>
+        <div class="filter-chip" data-subcat="salado" onclick="selectSubcat(this)">
+          <span><span class="chip-icon">🥪</span>Salado</span>
+          <span class="chip-count" id="cnt-salado">0</span>
         </div>
-        <div class="filter-chip" data-subcat="jugos" onclick="selectSubcat(this)">
-          <span><span class="chip-icon">🍊</span>Jugos y néctares</span>
-          <span class="chip-count" id="cnt-jugos">0</span>
+        <div class="filter-chip" data-subcat="frutas-secas" onclick="selectSubcat(this)">
+          <span><span class="chip-icon">🍊</span>Frutas secas</span>
+          <span class="chip-count" id="cnt-frutas-secas">0</span>
         </div>
-        <div class="filter-chip" data-subcat="energizantes" onclick="selectSubcat(this)">
-          <span><span class="chip-icon">⚡</span>Energizantes</span>
-          <span class="chip-count" id="cnt-energizantes">0</span>
+        <div class="filter-chip" data-subcat="proteicos" onclick="selectSubcat(this)">
+          <span><span class="chip-icon">�</span>Proteicos</span>
+          <span class="chip-count" id="cnt-proteicos">0</span>
         </div>
-        <div class="filter-chip" data-subcat="cervezas" onclick="selectSubcat(this)">
-          <span><span class="chip-icon">🍺</span>Cervezas</span>
-          <span class="chip-count" id="cnt-cervezas">0</span>
+        <div class="filter-chip" data-subcat="sin-tacc" onclick="selectSubcat(this)">
+          <span><span class="chip-icon">🌾</span>Sin TACC</span>
+          <span class="chip-count" id="cnt-sin-tacc">0</span>
         </div>
-        <div class="filter-chip" data-subcat="vinos" onclick="selectSubcat(this)">
-          <span><span class="chip-icon">🍷</span>Vinos</span>
-          <span class="chip-count" id="cnt-vinos">0</span>
+        <div class="filter-chip" data-subcat="veganos" onclick="selectSubcat(this)">
+          <span><span class="chip-icon">🌱</span>Veganos</span>
+          <span class="chip-count" id="cnt-veganos">0</span>
         </div>
-        <div class="filter-chip" data-subcat="espirituosas" onclick="selectSubcat(this)">
-          <span><span class="chip-icon">🥃</span>Espirituosas</span>
-          <span class="chip-count" id="cnt-espirituosas">0</span>
+        <div class="filter-chip" data-subcat="infantiles" onclick="selectSubcat(this)">
+             <span><span class="chip-icon">🧸</span>Infantiles</span>
+             <span class="chip-count" id="cnt-infantiles">0</span>
         </div>
-        <div class="filter-chip" data-subcat="sin-alcohol" onclick="selectSubcat(this)">
-          <span><span class="chip-icon">🌿</span>Sin alcohol</span>
-          <span class="chip-count" id="cnt-sin-alcohol">0</span>
-        </div>
-        <div class="filter-chip" data-subcat="isotonicos" onclick="selectSubcat(this)">
-          <span><span class="chip-icon">🏃</span>Isotónicos</span>
-          <span class="chip-count" id="cnt-isotonicos">0</span>
-        </div>
-        <div class="filter-chip" data-subcat="te-cafe" onclick="selectSubcat(this)">
-          <span><span class="chip-icon">☕</span>Té y café</span>
-          <span class="chip-count" id="cnt-te-cafe">0</span>
-        </div>
-      </div>
     </div>
 
     <!-- Rango de precio -->
@@ -360,10 +347,10 @@ onSnapshot(doc(db, 'config', 'general'), snap => {
   if (d.topbar) document.getElementById('topbarText').innerHTML = d.topbar;
 });
 
-/* Productos de bebidas en tiempo real */
-onSnapshot(collection(db, 'bebidas'), snap => {
+/* Productos de snacks en tiempo real */
+onSnapshot(collection(db, 'snacks'), snap => {
   const prods = snap.docs.map(d => ({ docId: d.id, ...d.data() }));
-  window._bebidasAll = prods;
+  window._snacksAll = prods;
   updateHeroStats(prods);
   updateSubcatCounts(prods);
   applyFilters();
@@ -395,12 +382,12 @@ onAuthStateChanged(auth, async (user) => {
 
 /* Exponer función para descontar stock al comprar */
 window.fbDescontarStock = async (docId, currentStock) => {
-  const ref = doc(db, 'bebidas', docId);
+  const ref = doc(db, 'snacks', docId);
   await updateDoc(ref, { stock: currentStock - 1 });
 };
 </script>
 
 <!-- ══ LÓGICA DE LA PÁGINA ══ -->
-<script src="js/bebidas.js"></script>
+<script src="js/snacks.js"></script>
 </body>
 </html>

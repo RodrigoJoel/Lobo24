@@ -3,12 +3,12 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Lobo24 — Bebidas</title>
+  <title>Lobo24 — Almacén</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/styles.css"/>
-  <link rel="stylesheet" href="css/bebidas.css"/>
+  <link rel="stylesheet" href="css/almacen.css"/>
 </head>
 <body>
 
@@ -42,9 +42,10 @@
 <!-- CATEGORY NAV -->
 <div class="cat-nav">
   <a href="index.html"><span class="icon">⭐</span> Destacados</a>
-  <a href="bebidas.html" class="active"><span class="icon">🥤</span> Bebidas</a>
+  <a href="bebidas.html"><span class="icon">🥤</span> Bebidas</a>
   <a href="snacks.html"><span class="icon">🍪</span> Snacks</a>
-  <a href="almacen.html"><span class="icon">🍝</span> Almacén</a>
+  <a href="almacen.html" class="active"><span class="icon">🍝</span> Almacén</a>
+<!--  <a href="carniceria.html"><span class="icon">🥩</span> Carnicería</a>-->
   <a href="verduras.html"><span class="icon">🥦</span> Verduras</a>
   <a href="limpieza.html"><span class="icon">🧴</span> Limpieza</a>
   <a href="congelados.html"><span class="icon">🧊</span> Congelados</a>
@@ -60,10 +61,10 @@
     <div class="cat-breadcrumb">
       <a href="index.html">Inicio</a>
       <span>/</span>
-      <span>Bebidas</span>
+      <span>Almacén</span>
     </div>
-    <h1>SECCIÓN DE <em>BEBIDAS</em></h1>
-    <p>Agua, gaseosas, jugos, cervezas, bebidas energéticas y mucho más. Todo frío y listo para llevar.</p>
+    <h1>SECCIÓN DE <em>ALMACÉN</em></h1>
+    <p>Productos de despensa, alimentos no perecederos y todo lo que necesitas para tu alacena. ¡Comprá al mejor precio!</p>
     <div class="cat-hero-stats">
       <div class="cat-hero-stat">
         <strong id="heroTotalProds">—</strong>
@@ -74,7 +75,7 @@
         en stock
       </div>
       <div class="cat-hero-stat">
-        <strong id="heroSubcats">8</strong>
+        <strong id="heroSubcats">29</strong>
         subcategorías
       </div>
     </div>
@@ -85,7 +86,7 @@
 <div class="cat-search-bar">
   <div class="cat-search-inner">
     <div class="cat-search-input-wrap">
-      <input type="text" id="catSearch" placeholder="Buscar en Bebidas... ej: Coca-Cola, agua, cerveza"/>
+      <input type="text" id="catSearch" placeholder="Buscar en Almacén... ej: arroz, lentejas, aceite, fideos"/>
       <span class="search-icon">🔍</span>
     </div>
     <select class="cat-sort-select" id="sortSelect" onchange="applyFilters()">
@@ -110,7 +111,7 @@
     <!-- Subcategorías -->
     <div class="filter-group">
       <div class="filter-group-title">
-        Tipo de bebida
+        Categorías
         <button class="filter-clear" onclick="clearFilter('subcat')">limpiar</button>
       </div>
       <div class="filter-chips" id="subcatFilters">
@@ -118,45 +119,121 @@
           <span><span class="chip-icon">🛒</span>Todas</span>
           <span class="chip-count" id="cnt-all">0</span>
         </div>
-        <div class="filter-chip" data-subcat="agua" onclick="selectSubcat(this)">
-          <span><span class="chip-icon">💧</span>Agua</span>
-          <span class="chip-count" id="cnt-agua">0</span>
+        <div class="filter-chip" data-subcat="arroz" onclick="selectSubcat(this)">
+          <span><span class="chip-icon">🍚</span>Arroces</span>
+          <span class="chip-count" id="cnt-arroz">0</span>
         </div>
-        <div class="filter-chip" data-subcat="gaseosas" onclick="selectSubcat(this)">
-          <span><span class="chip-icon">🥤</span>Gaseosas</span>
-          <span class="chip-count" id="cnt-gaseosas">0</span>
+        <div class="filter-chip" data-subcat="fideos" onclick="selectSubcat(this)">
+          <span><span class="chip-icon">🍝</span>Fideos y pastas</span>
+          <span class="chip-count" id="cnt-fideos">0</span>
         </div>
-        <div class="filter-chip" data-subcat="jugos" onclick="selectSubcat(this)">
-          <span><span class="chip-icon">🍊</span>Jugos y néctares</span>
-          <span class="chip-count" id="cnt-jugos">0</span>
+        <div class="filter-chip" data-subcat="legumbres" onclick="selectSubcat(this)">
+          <span><span class="chip-icon">🫘</span>Legumbres</span>
+          <span class="chip-count" id="cnt-legumbres">0</span>
         </div>
-        <div class="filter-chip" data-subcat="energizantes" onclick="selectSubcat(this)">
-          <span><span class="chip-icon">⚡</span>Energizantes</span>
-          <span class="chip-count" id="cnt-energizantes">0</span>
+        <div class="filter-chip" data-subcat="harinas" onclick="selectSubcat(this)">
+          <span><span class="chip-icon">🌾</span>Harinas</span>
+          <span class="chip-count" id="cnt-harinas">0</span>
         </div>
-        <div class="filter-chip" data-subcat="cervezas" onclick="selectSubcat(this)">
-          <span><span class="chip-icon">🍺</span>Cervezas</span>
-          <span class="chip-count" id="cnt-cervezas">0</span>
+        <div class="filter-chip" data-subcat="aceites" onclick="selectSubcat(this)">
+          <span><span class="chip-icon">🫒</span>Aceites</span>
+          <span class="chip-count" id="cnt-aceites">0</span>
         </div>
-        <div class="filter-chip" data-subcat="vinos" onclick="selectSubcat(this)">
-          <span><span class="chip-icon">🍷</span>Vinos</span>
-          <span class="chip-count" id="cnt-vinos">0</span>
+        <div class="filter-chip" data-subcat="vinagres" onclick="selectSubcat(this)">
+          <span><span class="chip-icon">🍷</span>Vinagres</span>
+          <span class="chip-count" id="cnt-vinagres">0</span>
         </div>
-        <div class="filter-chip" data-subcat="espirituosas" onclick="selectSubcat(this)">
-          <span><span class="chip-icon">🥃</span>Espirituosas</span>
-          <span class="chip-count" id="cnt-espirituosas">0</span>
+        <div class="filter-chip" data-subcat="conservas" onclick="selectSubcat(this)">
+          <span><span class="chip-icon">🥫</span>Conservas</span>
+          <span class="chip-count" id="cnt-conservas">0</span>
         </div>
-        <div class="filter-chip" data-subcat="sin-alcohol" onclick="selectSubcat(this)">
-          <span><span class="chip-icon">🌿</span>Sin alcohol</span>
-          <span class="chip-count" id="cnt-sin-alcohol">0</span>
+        <div class="filter-chip" data-subcat="salsas" onclick="selectSubcat(this)">
+          <span><span class="chip-icon">🍅</span>Salsas</span>
+          <span class="chip-count" id="cnt-salsas">0</span>
         </div>
-        <div class="filter-chip" data-subcat="isotonicos" onclick="selectSubcat(this)">
-          <span><span class="chip-icon">🏃</span>Isotónicos</span>
-          <span class="chip-count" id="cnt-isotonicos">0</span>
+        <div class="filter-chip" data-subcat="caldos" onclick="selectSubcat(this)">
+          <span><span class="chip-icon">🍜</span>Caldos y sopas</span>
+          <span class="chip-count" id="cnt-caldos">0</span>
         </div>
-        <div class="filter-chip" data-subcat="te-cafe" onclick="selectSubcat(this)">
-          <span><span class="chip-icon">☕</span>Té y café</span>
-          <span class="chip-count" id="cnt-te-cafe">0</span>
+        <div class="filter-chip" data-subcat="aderezos" onclick="selectSubcat(this)">
+          <span><span class="chip-icon">🥗</span>Aderezos</span>
+          <span class="chip-count" id="cnt-aderezos">0</span>
+        </div>
+        <div class="filter-chip" data-subcat="encurtidos" onclick="selectSubcat(this)">
+          <span><span class="chip-icon">🥒</span>Encurtidos</span>
+          <span class="chip-count" id="cnt-encurtidos">0</span>
+        </div>
+        <div class="filter-chip" data-subcat="dulces" onclick="selectSubcat(this)">
+          <span><span class="chip-icon">🍯</span>Dulces y mermeladas</span>
+          <span class="chip-count" id="cnt-dulces">0</span>
+        </div>
+        <div class="filter-chip" data-subcat="azucar" onclick="selectSubcat(this)">
+          <span><span class="chip-icon">🍬</span>Azúcar</span>
+          <span class="chip-count" id="cnt-azucar">0</span>
+        </div>
+        <div class="filter-chip" data-subcat="sal" onclick="selectSubcat(this)">
+          <span><span class="chip-icon">🧂</span>Sal y especias</span>
+          <span class="chip-count" id="cnt-sal">0</span>
+        </div>
+        <div class="filter-chip" data-subcat="yerba" onclick="selectSubcat(this)">
+          <span><span class="chip-icon">🧉</span>Yerba mate</span>
+          <span class="chip-count" id="cnt-yerba">0</span>
+        </div>
+        <div class="filter-chip" data-subcat="cafe" onclick="selectSubcat(this)">
+          <span><span class="chip-icon">☕</span>Café</span>
+          <span class="chip-count" id="cnt-cafe">0</span>
+        </div>
+        <div class="filter-chip" data-subcat="galletitas" onclick="selectSubcat(this)">
+          <span><span class="chip-icon">🍪</span>Galletitas de agua</span>
+          <span class="chip-count" id="cnt-galletitas">0</span>
+        </div>
+        <div class="filter-chip" data-subcat="pan-rallado" onclick="selectSubcat(this)">
+          <span><span class="chip-icon">🍞</span>Pan rallado</span>
+          <span class="chip-count" id="cnt-pan-rallado">0</span>
+        </div>
+        <div class="filter-chip" data-subcat="leche-polvo" onclick="selectSubcat(this)">
+          <span><span class="chip-icon">🥛</span>Leche en polvo</span>
+          <span class="chip-count" id="cnt-leche-polvo">0</span>
+        </div>
+        <div class="filter-chip" data-subcat="premezclas" onclick="selectSubcat(this)">
+          <span><span class="chip-icon">🥞</span>Premezclas</span>
+          <span class="chip-count" id="cnt-premezclas">0</span>
+        </div>
+        <div class="filter-chip" data-subcat="frutos-secos" onclick="selectSubcat(this)">
+          <span><span class="chip-icon">🥜</span>Frutos secos</span>
+          <span class="chip-count" id="cnt-frutos-secos">0</span>
+        </div>
+        <div class="filter-chip" data-subcat="alimentos-bebe" onclick="selectSubcat(this)">
+          <span><span class="chip-icon">🍼</span>Alimentos bebé</span>
+          <span class="chip-count" id="cnt-alimentos-bebe">0</span>
+        </div>
+        <div class="filter-chip" data-subcat="aceitunas" onclick="selectSubcat(this)">
+          <span><span class="chip-icon">🫒</span>Aceitunas</span>
+          <span class="chip-count" id="cnt-aceitunas">0</span>
+        </div>
+        <div class="filter-chip" data-subcat="saborizadores" onclick="selectSubcat(this)">
+          <span><span class="chip-icon">💧</span>Saborizadores</span>
+          <span class="chip-count" id="cnt-saborizadores">0</span>
+        </div>
+        <div class="filter-chip" data-subcat="reposteria" onclick="selectSubcat(this)">
+          <span><span class="chip-icon">🎂</span>Repostería</span>
+          <span class="chip-count" id="cnt-reposteria">0</span>
+        </div>
+        <div class="filter-chip" data-subcat="enlatados" onclick="selectSubcat(this)">
+          <span><span class="chip-icon">🥫</span>Enlatados</span>
+          <span class="chip-count" id="cnt-enlatados">0</span>
+        </div>
+        <div class="filter-chip" data-subcat="jugos-polvo" onclick="selectSubcat(this)">
+          <span><span class="chip-icon">🧃</span>Jugos en polvo</span>
+          <span class="chip-count" id="cnt-jugos-polvo">0</span>
+        </div>
+        <div class="filter-chip" data-subcat="postres" onclick="selectSubcat(this)">
+          <span><span class="chip-icon">🍮</span>Postres</span>
+          <span class="chip-count" id="cnt-postres">0</span>
+        </div>
+        <div class="filter-chip" data-subcat="infusiones" onclick="selectSubcat(this)">
+          <span><span class="chip-icon">🍵</span>Infusiones</span>
+          <span class="chip-count" id="cnt-infusiones">0</span>
         </div>
       </div>
     </div>
@@ -218,15 +295,14 @@
     </div>
     <div class="products-grid" id="productsGrid">
       <!-- skeletons mientras carga -->
-      ${Array(8).fill(`
-        <div class="skeleton">
-          <div class="sk-img"></div>
-          <div class="sk-body">
-            <div class="sk-line"></div>
-            <div class="sk-line short"></div>
-            <div class="sk-line price"></div>
-          </div>
-        </div>`).join('')}
+      <div class="skeleton"><div class="sk-img"></div><div class="sk-body"><div class="sk-line"></div><div class="sk-line short"></div><div class="sk-line price"></div></div></div>
+      <div class="skeleton"><div class="sk-img"></div><div class="sk-body"><div class="sk-line"></div><div class="sk-line short"></div><div class="sk-line price"></div></div></div>
+      <div class="skeleton"><div class="sk-img"></div><div class="sk-body"><div class="sk-line"></div><div class="sk-line short"></div><div class="sk-line price"></div></div></div>
+      <div class="skeleton"><div class="sk-img"></div><div class="sk-body"><div class="sk-line"></div><div class="sk-line short"></div><div class="sk-line price"></div></div></div>
+      <div class="skeleton"><div class="sk-img"></div><div class="sk-body"><div class="sk-line"></div><div class="sk-line short"></div><div class="sk-line price"></div></div></div>
+      <div class="skeleton"><div class="sk-img"></div><div class="sk-body"><div class="sk-line"></div><div class="sk-line short"></div><div class="sk-line price"></div></div></div>
+      <div class="skeleton"><div class="sk-img"></div><div class="sk-body"><div class="sk-line"></div><div class="sk-line short"></div><div class="sk-line price"></div></div></div>
+      <div class="skeleton"><div class="sk-img"></div><div class="sk-body"><div class="sk-line"></div><div class="sk-line short"></div><div class="sk-line price"></div></div></div>
     </div>
   </div>
 
@@ -290,10 +366,10 @@
       </div>
     </div>
     <div id="formReg" style="display:none">
-      <div class="form-group"><label>Nombre completo</label><input type="text" placeholder="Juan Pérez"/></div>
-      <div class="form-group"><label>Email</label><input type="email" placeholder="tu@email.com"/></div>
-      <div class="form-group"><label>Contraseña</label><input type="password" placeholder="Mínimo 8 caracteres"/></div>
-      <div class="form-group"><label>Teléfono</label><input type="tel" placeholder="+54 9 xxx xxx xxxx"/></div>
+      <div class="form-group"><label>Nombre completo</label><input type="text" id="regName" placeholder="Juan Pérez"/></div>
+      <div class="form-group"><label>Email</label><input type="email" id="regEmail" placeholder="tu@email.com"/></div>
+      <div class="form-group"><label>Contraseña</label><input type="password" id="regPass" placeholder="Mínimo 8 caracteres"/></div>
+      <div class="form-group"><label>Teléfono</label><input type="tel" id="regPhone" placeholder="+54 9 xxx xxx xxxx"/></div>
       <button class="modal-submit" onclick="handleRegister()">Crear cuenta</button>
     </div>
   </div>
@@ -360,10 +436,10 @@ onSnapshot(doc(db, 'config', 'general'), snap => {
   if (d.topbar) document.getElementById('topbarText').innerHTML = d.topbar;
 });
 
-/* Productos de bebidas en tiempo real */
-onSnapshot(collection(db, 'bebidas'), snap => {
+/* Productos de almacén en tiempo real */
+onSnapshot(collection(db, 'almacen'), snap => {
   const prods = snap.docs.map(d => ({ docId: d.id, ...d.data() }));
-  window._bebidasAll = prods;
+  window._almacenAll = prods;
   updateHeroStats(prods);
   updateSubcatCounts(prods);
   applyFilters();
@@ -395,12 +471,12 @@ onAuthStateChanged(auth, async (user) => {
 
 /* Exponer función para descontar stock al comprar */
 window.fbDescontarStock = async (docId, currentStock) => {
-  const ref = doc(db, 'bebidas', docId);
+  const ref = doc(db, 'almacen', docId);
   await updateDoc(ref, { stock: currentStock - 1 });
 };
 </script>
 
 <!-- ══ LÓGICA DE LA PÁGINA ══ -->
-<script src="js/bebidas.js"></script>
+<script src="js/almacen.js"></script>
 </body>
 </html>

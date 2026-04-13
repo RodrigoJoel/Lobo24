@@ -3,12 +3,12 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Lobo24 — Bebidas</title>
+  <title>Lobo24 — Limpieza</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/styles.css"/>
-  <link rel="stylesheet" href="css/bebidas.css"/>
+  <link rel="stylesheet" href="css/limpieza.css"/>
 </head>
 <body>
 
@@ -42,11 +42,11 @@
 <!-- CATEGORY NAV -->
 <div class="cat-nav">
   <a href="index.html"><span class="icon">⭐</span> Destacados</a>
-  <a href="bebidas.html" class="active"><span class="icon">🥤</span> Bebidas</a>
+  <a href="bebidas.html"><span class="icon">🥤</span> Bebidas</a>
   <a href="snacks.html"><span class="icon">🍪</span> Snacks</a>
   <a href="almacen.html"><span class="icon">🍝</span> Almacén</a>
   <a href="verduras.html"><span class="icon">🥦</span> Verduras</a>
-  <a href="limpieza.html"><span class="icon">🧴</span> Limpieza</a>
+  <a href="limpieza.html" class="active"><span class="icon">🧴</span> Limpieza</a>
   <a href="congelados.html"><span class="icon">🧊</span> Congelados</a>
   <a href="lacteos.html"><span class="icon">🧀</span> Lácteos</a>
   <a href="panaderia.html"><span class="icon">🍞</span> Panadería</a>
@@ -60,10 +60,10 @@
     <div class="cat-breadcrumb">
       <a href="index.html">Inicio</a>
       <span>/</span>
-      <span>Bebidas</span>
+      <span>Limpieza</span>
     </div>
-    <h1>SECCIÓN DE <em>BEBIDAS</em></h1>
-    <p>Agua, gaseosas, jugos, cervezas, bebidas energéticas y mucho más. Todo frío y listo para llevar.</p>
+    <h1>SECCIÓN DE <em>LIMPIEZA</em></h1>
+    <p>Productos de limpieza para toda la casa: cocina, baño, pisos, ropa y más. ¡Todo lo que necesitas para mantener tu hogar impecable!</p>
     <div class="cat-hero-stats">
       <div class="cat-hero-stat">
         <strong id="heroTotalProds">—</strong>
@@ -74,7 +74,7 @@
         en stock
       </div>
       <div class="cat-hero-stat">
-        <strong id="heroSubcats">8</strong>
+        <strong id="heroSubcats">15</strong>
         subcategorías
       </div>
     </div>
@@ -85,7 +85,7 @@
 <div class="cat-search-bar">
   <div class="cat-search-inner">
     <div class="cat-search-input-wrap">
-      <input type="text" id="catSearch" placeholder="Buscar en Bebidas... ej: Coca-Cola, agua, cerveza"/>
+      <input type="text" id="catSearch" placeholder="Buscar en Limpieza... ej: detergente, lavandina, jabón"/>
       <span class="search-icon">🔍</span>
     </div>
     <select class="cat-sort-select" id="sortSelect" onchange="applyFilters()">
@@ -110,7 +110,7 @@
     <!-- Subcategorías -->
     <div class="filter-group">
       <div class="filter-group-title">
-        Tipo de bebida
+        Categorías
         <button class="filter-clear" onclick="clearFilter('subcat')">limpiar</button>
       </div>
       <div class="filter-chips" id="subcatFilters">
@@ -118,45 +118,33 @@
           <span><span class="chip-icon">🛒</span>Todas</span>
           <span class="chip-count" id="cnt-all">0</span>
         </div>
-        <div class="filter-chip" data-subcat="agua" onclick="selectSubcat(this)">
-          <span><span class="chip-icon">💧</span>Agua</span>
-          <span class="chip-count" id="cnt-agua">0</span>
+        <div class="filter-chip" data-subcat="cocina" onclick="selectSubcat(this)">
+          <span><span class="chip-icon">🍳</span>Limpieza del hogar</span>
+          <span class="chip-count" id="cnt-cocina">0</span>
         </div>
-        <div class="filter-chip" data-subcat="gaseosas" onclick="selectSubcat(this)">
-          <span><span class="chip-icon">🥤</span>Gaseosas</span>
-          <span class="chip-count" id="cnt-gaseosas">0</span>
+        <div class="filter-chip" data-subcat="bano" onclick="selectSubcat(this)">
+          <span><span class="chip-icon">🚽</span>Papel y descartables</span>
+          <span class="chip-count" id="cnt-bano">0</span>
         </div>
-        <div class="filter-chip" data-subcat="jugos" onclick="selectSubcat(this)">
-          <span><span class="chip-icon">🍊</span>Jugos y néctares</span>
-          <span class="chip-count" id="cnt-jugos">0</span>
+        <div class="filter-chip" data-subcat="ropa" onclick="selectSubcat(this)">
+          <span><span class="chip-icon">👕</span>Limpieza de ropa</span>
+          <span class="chip-count" id="cnt-ropa">0</span>
         </div>
-        <div class="filter-chip" data-subcat="energizantes" onclick="selectSubcat(this)">
-          <span><span class="chip-icon">⚡</span>Energizantes</span>
-          <span class="chip-count" id="cnt-energizantes">0</span>
+        <div class="filter-chip" data-subcat="multiuso" onclick="selectSubcat(this)">
+          <span><span class="chip-icon">✨</span>Multiuso</span>
+          <span class="chip-count" id="cnt-multiuso">0</span>
         </div>
-        <div class="filter-chip" data-subcat="cervezas" onclick="selectSubcat(this)">
-          <span><span class="chip-icon">🍺</span>Cervezas</span>
-          <span class="chip-count" id="cnt-cervezas">0</span>
+        <div class="filter-chip" data-subcat="lavandina" onclick="selectSubcat(this)">
+          <span><span class="chip-icon">🧴</span>Lavandina y blanqueadores</span>
+          <span class="chip-count" id="cnt-lavandina">0</span>
         </div>
-        <div class="filter-chip" data-subcat="vinos" onclick="selectSubcat(this)">
-          <span><span class="chip-icon">🍷</span>Vinos</span>
-          <span class="chip-count" id="cnt-vinos">0</span>
+        <div class="filter-chip" data-subcat="detergente" onclick="selectSubcat(this)">
+          <span><span class="chip-icon">🧼</span>Detergentes</span>
+          <span class="chip-count" id="cnt-detergente">0</span>
         </div>
-        <div class="filter-chip" data-subcat="espirituosas" onclick="selectSubcat(this)">
-          <span><span class="chip-icon">🥃</span>Espirituosas</span>
-          <span class="chip-count" id="cnt-espirituosas">0</span>
-        </div>
-        <div class="filter-chip" data-subcat="sin-alcohol" onclick="selectSubcat(this)">
-          <span><span class="chip-icon">🌿</span>Sin alcohol</span>
-          <span class="chip-count" id="cnt-sin-alcohol">0</span>
-        </div>
-        <div class="filter-chip" data-subcat="isotonicos" onclick="selectSubcat(this)">
-          <span><span class="chip-icon">🏃</span>Isotónicos</span>
-          <span class="chip-count" id="cnt-isotonicos">0</span>
-        </div>
-        <div class="filter-chip" data-subcat="te-cafe" onclick="selectSubcat(this)">
-          <span><span class="chip-icon">☕</span>Té y café</span>
-          <span class="chip-count" id="cnt-te-cafe">0</span>
+        <div class="filter-chip" data-subcat="ambientadores" onclick="selectSubcat(this)">
+          <span><span class="chip-icon">🌸</span>Ambientadores</span>
+          <span class="chip-count" id="cnt-ambientadores">0</span>
         </div>
       </div>
     </div>
@@ -218,15 +206,14 @@
     </div>
     <div class="products-grid" id="productsGrid">
       <!-- skeletons mientras carga -->
-      ${Array(8).fill(`
-        <div class="skeleton">
-          <div class="sk-img"></div>
-          <div class="sk-body">
-            <div class="sk-line"></div>
-            <div class="sk-line short"></div>
-            <div class="sk-line price"></div>
-          </div>
-        </div>`).join('')}
+      <div class="skeleton"><div class="sk-img"></div><div class="sk-body"><div class="sk-line"></div><div class="sk-line short"></div><div class="sk-line price"></div></div></div>
+      <div class="skeleton"><div class="sk-img"></div><div class="sk-body"><div class="sk-line"></div><div class="sk-line short"></div><div class="sk-line price"></div></div></div>
+      <div class="skeleton"><div class="sk-img"></div><div class="sk-body"><div class="sk-line"></div><div class="sk-line short"></div><div class="sk-line price"></div></div></div>
+      <div class="skeleton"><div class="sk-img"></div><div class="sk-body"><div class="sk-line"></div><div class="sk-line short"></div><div class="sk-line price"></div></div></div>
+      <div class="skeleton"><div class="sk-img"></div><div class="sk-body"><div class="sk-line"></div><div class="sk-line short"></div><div class="sk-line price"></div></div></div>
+      <div class="skeleton"><div class="sk-img"></div><div class="sk-body"><div class="sk-line"></div><div class="sk-line short"></div><div class="sk-line price"></div></div></div>
+      <div class="skeleton"><div class="sk-img"></div><div class="sk-body"><div class="sk-line"></div><div class="sk-line short"></div><div class="sk-line price"></div></div></div>
+      <div class="skeleton"><div class="sk-img"></div><div class="sk-body"><div class="sk-line"></div><div class="sk-line short"></div><div class="sk-line price"></div></div></div>
     </div>
   </div>
 
@@ -290,10 +277,10 @@
       </div>
     </div>
     <div id="formReg" style="display:none">
-      <div class="form-group"><label>Nombre completo</label><input type="text" placeholder="Juan Pérez"/></div>
-      <div class="form-group"><label>Email</label><input type="email" placeholder="tu@email.com"/></div>
-      <div class="form-group"><label>Contraseña</label><input type="password" placeholder="Mínimo 8 caracteres"/></div>
-      <div class="form-group"><label>Teléfono</label><input type="tel" placeholder="+54 9 xxx xxx xxxx"/></div>
+      <div class="form-group"><label>Nombre completo</label><input type="text" id="regName" placeholder="Juan Pérez"/></div>
+      <div class="form-group"><label>Email</label><input type="email" id="regEmail" placeholder="tu@email.com"/></div>
+      <div class="form-group"><label>Contraseña</label><input type="password" id="regPass" placeholder="Mínimo 8 caracteres"/></div>
+      <div class="form-group"><label>Teléfono</label><input type="tel" id="regPhone" placeholder="+54 9 xxx xxx xxxx"/></div>
       <button class="modal-submit" onclick="handleRegister()">Crear cuenta</button>
     </div>
   </div>
@@ -360,10 +347,10 @@ onSnapshot(doc(db, 'config', 'general'), snap => {
   if (d.topbar) document.getElementById('topbarText').innerHTML = d.topbar;
 });
 
-/* Productos de bebidas en tiempo real */
-onSnapshot(collection(db, 'bebidas'), snap => {
+/* Productos de limpieza en tiempo real */
+onSnapshot(collection(db, 'limpieza'), snap => {
   const prods = snap.docs.map(d => ({ docId: d.id, ...d.data() }));
-  window._bebidasAll = prods;
+  window._limpiezaAll = prods;
   updateHeroStats(prods);
   updateSubcatCounts(prods);
   applyFilters();
@@ -395,12 +382,12 @@ onAuthStateChanged(auth, async (user) => {
 
 /* Exponer función para descontar stock al comprar */
 window.fbDescontarStock = async (docId, currentStock) => {
-  const ref = doc(db, 'bebidas', docId);
+  const ref = doc(db, 'limpieza', docId);
   await updateDoc(ref, { stock: currentStock - 1 });
 };
 </script>
 
 <!-- ══ LÓGICA DE LA PÁGINA ══ -->
-<script src="js/bebidas.js"></script>
+<script src="js/limpieza.js"></script>
 </body>
 </html>
