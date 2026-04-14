@@ -1,4 +1,4 @@
-  /* ══ PÁGINA BEBIDAS ══════════════════════════════════════ */
+  /* ══ SECCIONES ════════════════════════════════════ */
 
   /* Hero de categoría */
   .cat-hero {
@@ -7,15 +7,6 @@
     padding: 40px 32px;
     position: relative;
     overflow: hidden;
-  }
-  .cat-hero::before {
-    content: '🧴';
-    position: absolute;
-    right: 80px; top: 50%;
-    transform: translateY(-50%);
-    font-size: 160px;
-    opacity: .06;
-    line-height: 1;
   }
   .cat-hero-inner {
     max-width: 1400px;

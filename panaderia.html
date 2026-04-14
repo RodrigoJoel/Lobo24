@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Lobo24 — Almacén</title>
+  <title>Lobo24 — Panadería</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
@@ -11,7 +11,7 @@
   <link rel="stylesheet" href="css/secciones.css"/>
   <style>
     .cat-hero::before {
-      content: '🍝';
+      content: '🥨';
       position: absolute;
       right: 80px;
       top: 50%;
@@ -57,13 +57,12 @@
   <a href="index.html"><span class="icon">⭐</span> Destacados</a>
   <a href="bebidas.html"><span class="icon">🥤</span> Bebidas</a>
   <a href="snacks.html"><span class="icon">🍪</span> Snacks</a>
-  <a href="almacen.html" class="active"><span class="icon">🍝</span> Almacén</a>
-<!--  <a href="carniceria.html"><span class="icon">🥩</span> Carnicería</a>-->
+  <a href="almacen.html"><span class="icon">🍝</span> Almacén</a>
   <a href="verduras.html"><span class="icon">🥦</span> Verduras</a>
   <a href="limpieza.html"><span class="icon">🧴</span> Limpieza</a>
   <a href="congelados.html"><span class="icon">🧊</span> Congelados</a>
   <a href="lacteos.html"><span class="icon">🧀</span> Lácteos</a>
-  <a href="panaderia.html"><span class="icon">🍞</span> Panadería</a>
+  <a href="panaderia.html" class="active"><span class="icon">🍞</span> Panadería</a>
   <a href="mascotas.html"><span class="icon">🐾</span> Mascotas</a>
   <a href="ofertas.html"><span class="icon">🔥</span> Ofertas</a>
 </div>
@@ -74,10 +73,10 @@
     <div class="cat-breadcrumb">
       <a href="index.html">Inicio</a>
       <span>/</span>
-      <span>Almacén</span>
+      <span>Panadería</span>
     </div>
-    <h1>SECCIÓN DE <em>ALMACÉN</em></h1>
-    <p>Productos de despensa, alimentos no perecederos y todo lo que necesitas para tu alacena. ¡Comprá al mejor precio!</p>
+    <h1>SECCIÓN DE <em>PANADERÍA</em></h1>
+    <p>Panes, facturas, tortillas, galletitas y productos de panificación recién horneados para disfrutar en casa.</p>
     <div class="cat-hero-stats">
       <div class="cat-hero-stat">
         <strong id="heroTotalProds">—</strong>
@@ -88,7 +87,7 @@
         en stock
       </div>
       <div class="cat-hero-stat">
-        <strong id="heroSubcats">29</strong>
+        <strong id="heroSubcats">7</strong>
         subcategorías
       </div>
     </div>
@@ -99,7 +98,7 @@
 <div class="cat-search-bar">
   <div class="cat-search-inner">
     <div class="cat-search-input-wrap">
-      <input type="text" id="catSearch" placeholder="Buscar en Almacén... ej: arroz, lentejas, aceite, fideos"/>
+      <input type="text" id="catSearch" placeholder="Buscar en Panadería... ej: pan, facturas, tortillas, galletas"/>
       <span class="search-icon">🔍</span>
     </div>
     <select class="cat-sort-select" id="sortSelect" onchange="applyFilters()">
@@ -132,122 +131,37 @@
           <span><span class="chip-icon">🛒</span>Todas</span>
           <span class="chip-count" id="cnt-all">0</span>
         </div>
-        <div class="filter-chip" data-subcat="arroz" onclick="selectSubcat(this)">
-          <span><span class="chip-icon">🍚</span>Arroces</span>
-          <span class="chip-count" id="cnt-arroz">0</span>
+        <div class="filter-chip" data-subcat="panes" onclick="selectSubcat(this)">
+          <span><span class="chip-icon">🍞</span>Panes</span>
+          <span class="chip-count" id="cnt-panes">0</span>
         </div>
-        <div class="filter-chip" data-subcat="fideos" onclick="selectSubcat(this)">
-          <span><span class="chip-icon">🍝</span>Fideos y pastas</span>
-          <span class="chip-count" id="cnt-fideos">0</span>
+        <div class="filter-chip" data-subcat="facturas" onclick="selectSubcat(this)">
+          <span><span class="chip-icon">🥐</span>Facturas</span>
+          <span class="chip-count" id="cnt-facturas">0</span>
         </div>
-        <div class="filter-chip" data-subcat="legumbres" onclick="selectSubcat(this)">
-          <span><span class="chip-icon">🫘</span>Legumbres</span>
-          <span class="chip-count" id="cnt-legumbres">0</span>
-        </div>
-        <div class="filter-chip" data-subcat="harinas" onclick="selectSubcat(this)">
-          <span><span class="chip-icon">🌾</span>Harinas</span>
-          <span class="chip-count" id="cnt-harinas">0</span>
-        </div>
-        <div class="filter-chip" data-subcat="aceites" onclick="selectSubcat(this)">
-          <span><span class="chip-icon">🫒</span>Aceites</span>
-          <span class="chip-count" id="cnt-aceites">0</span>
-        </div>
-        <div class="filter-chip" data-subcat="vinagres" onclick="selectSubcat(this)">
-          <span><span class="chip-icon">🍷</span>Vinagres</span>
-          <span class="chip-count" id="cnt-vinagres">0</span>
-        </div>
-        <div class="filter-chip" data-subcat="conservas" onclick="selectSubcat(this)">
-          <span><span class="chip-icon">🥫</span>Conservas</span>
-          <span class="chip-count" id="cnt-conservas">0</span>
-        </div>
-        <div class="filter-chip" data-subcat="salsas" onclick="selectSubcat(this)">
-          <span><span class="chip-icon">🍅</span>Salsas</span>
-          <span class="chip-count" id="cnt-salsas">0</span>
-        </div>
-        <div class="filter-chip" data-subcat="caldos" onclick="selectSubcat(this)">
-          <span><span class="chip-icon">🍜</span>Caldos y sopas</span>
-          <span class="chip-count" id="cnt-caldos">0</span>
-        </div>
-        <div class="filter-chip" data-subcat="aderezos" onclick="selectSubcat(this)">
-          <span><span class="chip-icon">🥗</span>Aderezos</span>
-          <span class="chip-count" id="cnt-aderezos">0</span>
-        </div>
-        <div class="filter-chip" data-subcat="encurtidos" onclick="selectSubcat(this)">
-          <span><span class="chip-icon">🥒</span>Encurtidos</span>
-          <span class="chip-count" id="cnt-encurtidos">0</span>
-        </div>
-        <div class="filter-chip" data-subcat="dulces" onclick="selectSubcat(this)">
-          <span><span class="chip-icon">🍯</span>Dulces y mermeladas</span>
-          <span class="chip-count" id="cnt-dulces">0</span>
-        </div>
-        <div class="filter-chip" data-subcat="azucar" onclick="selectSubcat(this)">
-          <span><span class="chip-icon">🍬</span>Azúcar</span>
-          <span class="chip-count" id="cnt-azucar">0</span>
-        </div>
-        <div class="filter-chip" data-subcat="sal" onclick="selectSubcat(this)">
-          <span><span class="chip-icon">🧂</span>Sal y especias</span>
-          <span class="chip-count" id="cnt-sal">0</span>
-        </div>
-        <div class="filter-chip" data-subcat="yerba" onclick="selectSubcat(this)">
-          <span><span class="chip-icon">🧉</span>Yerba mate</span>
-          <span class="chip-count" id="cnt-yerba">0</span>
-        </div>
-        <div class="filter-chip" data-subcat="cafe" onclick="selectSubcat(this)">
-          <span><span class="chip-icon">☕</span>Café</span>
-          <span class="chip-count" id="cnt-cafe">0</span>
+        <div class="filter-chip" data-subcat="tortillas" onclick="selectSubcat(this)">
+          <span><span class="chip-icon">🌯</span>Tortillas</span>
+          <span class="chip-count" id="cnt-tortillas">0</span>
         </div>
         <div class="filter-chip" data-subcat="galletitas" onclick="selectSubcat(this)">
-          <span><span class="chip-icon">🍪</span>Galletitas de agua</span>
+          <span><span class="chip-icon">🍪</span>Galletitas</span>
           <span class="chip-count" id="cnt-galletitas">0</span>
         </div>
-        <div class="filter-chip" data-subcat="pan-rallado" onclick="selectSubcat(this)">
-          <span><span class="chip-icon">🍞</span>Pan rallado</span>
-          <span class="chip-count" id="cnt-pan-rallado">0</span>
+        <div class="filter-chip" data-subcat="budines" onclick="selectSubcat(this)">
+          <span><span class="chip-icon">🍰</span>Budines</span>
+          <span class="chip-count" id="cnt-budines">0</span>
         </div>
-        <div class="filter-chip" data-subcat="leche-polvo" onclick="selectSubcat(this)">
-          <span><span class="chip-icon">🥛</span>Leche en polvo</span>
-          <span class="chip-count" id="cnt-leche-polvo">0</span>
+        <div class="filter-chip" data-subcat="tostadas" onclick="selectSubcat(this)">
+          <span><span class="chip-icon">🍞</span>Tostadas</span>
+          <span class="chip-count" id="cnt-tostadas">0</span>
         </div>
-        <div class="filter-chip" data-subcat="premezclas" onclick="selectSubcat(this)">
-          <span><span class="chip-icon">🥞</span>Premezclas</span>
-          <span class="chip-count" id="cnt-premezclas">0</span>
+        <div class="filter-chip" data-subcat="prepizzas" onclick="selectSubcat(this)">
+          <span><span class="chip-icon">🍕</span>Prepizzas</span>
+          <span class="chip-count" id="cnt-prepizzas">0</span>
         </div>
-        <div class="filter-chip" data-subcat="frutos-secos" onclick="selectSubcat(this)">
-          <span><span class="chip-icon">🥜</span>Frutos secos</span>
-          <span class="chip-count" id="cnt-frutos-secos">0</span>
-        </div>
-        <div class="filter-chip" data-subcat="alimentos-bebe" onclick="selectSubcat(this)">
-          <span><span class="chip-icon">🍼</span>Alimentos bebé</span>
-          <span class="chip-count" id="cnt-alimentos-bebe">0</span>
-        </div>
-        <div class="filter-chip" data-subcat="aceitunas" onclick="selectSubcat(this)">
-          <span><span class="chip-icon">🫒</span>Aceitunas</span>
-          <span class="chip-count" id="cnt-aceitunas">0</span>
-        </div>
-        <div class="filter-chip" data-subcat="saborizadores" onclick="selectSubcat(this)">
-          <span><span class="chip-icon">💧</span>Saborizadores</span>
-          <span class="chip-count" id="cnt-saborizadores">0</span>
-        </div>
-        <div class="filter-chip" data-subcat="reposteria" onclick="selectSubcat(this)">
-          <span><span class="chip-icon">🎂</span>Repostería</span>
-          <span class="chip-count" id="cnt-reposteria">0</span>
-        </div>
-        <div class="filter-chip" data-subcat="enlatados" onclick="selectSubcat(this)">
-          <span><span class="chip-icon">🥫</span>Enlatados</span>
-          <span class="chip-count" id="cnt-enlatados">0</span>
-        </div>
-        <div class="filter-chip" data-subcat="jugos-polvo" onclick="selectSubcat(this)">
-          <span><span class="chip-icon">🧃</span>Jugos en polvo</span>
-          <span class="chip-count" id="cnt-jugos-polvo">0</span>
-        </div>
-        <div class="filter-chip" data-subcat="postres" onclick="selectSubcat(this)">
-          <span><span class="chip-icon">🍮</span>Postres</span>
-          <span class="chip-count" id="cnt-postres">0</span>
-        </div>
-        <div class="filter-chip" data-subcat="infusiones" onclick="selectSubcat(this)">
-          <span><span class="chip-icon">🍵</span>Infusiones</span>
-          <span class="chip-count" id="cnt-infusiones">0</span>
-        </div>
+        <div class="filter-chip" data-subcat="sin-tacc" onclick="selectSubcat(this)">
+          <span><span class="chip-icon">🚫🌾</span>Sin TACC</span>
+          <span class="chip-count" id="cnt-sin-tacc">0</span>
       </div>
     </div>
 
@@ -449,10 +363,10 @@ onSnapshot(doc(db, 'config', 'general'), snap => {
   if (d.topbar) document.getElementById('topbarText').innerHTML = d.topbar;
 });
 
-/* Productos de almacén en tiempo real */
-onSnapshot(collection(db, 'almacen'), snap => {
+/* Productos de panadería en tiempo real */
+onSnapshot(collection(db, 'panaderia'), snap => {
   const prods = snap.docs.map(d => ({ docId: d.id, ...d.data() }));
-  window._almacenAll = prods;
+  window._panaderiaAll = prods;
   updateHeroStats(prods);
   updateSubcatCounts(prods);
   applyFilters();
@@ -484,12 +398,12 @@ onAuthStateChanged(auth, async (user) => {
 
 /* Exponer función para descontar stock al comprar */
 window.fbDescontarStock = async (docId, currentStock) => {
-  const ref = doc(db, 'almacen', docId);
+  const ref = doc(db, 'panaderia', docId);
   await updateDoc(ref, { stock: currentStock - 1 });
 };
 </script>
 
 <!-- ══ LÓGICA DE LA PÁGINA ══ -->
-<script src="js/almacen.js"></script>
+<script src="js/panaderia.js"></script>
 </body>
 </html>

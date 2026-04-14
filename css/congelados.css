@@ -1,4 +1,4 @@
-  /* ══ PÁGINA BEBIDAS ══════════════════════════════════════ */
+  /* ══ PÁGINA CONGELADOS ════════════════════════════════════ */
 
   /* Hero de categoría */
   .cat-hero {
@@ -9,7 +9,7 @@
     overflow: hidden;
   }
   .cat-hero::before {
-    content: '🧴';
+    content: '🧊';
     position: absolute;
     right: 80px; top: 50%;
     transform: translateY(-50%);
