@@ -85,7 +85,7 @@ function resetAllFilters() {
 
 /* ─── Aplicar todos los filtros ─── */
 function applyFilters() {
-  const all = window._limpiezaAll || [];
+  const all = window._mascotasAll || [];
 
   // Leer búsqueda y sort en tiempo real
   const catSearch = document.getElementById('catSearch');
@@ -154,7 +154,7 @@ function renderProducts(list) {
     grid.innerHTML = `
       <div class="no-results">
         <div class="nr-icon">🔍</div>
-        <p>No encontramos productos de limpieza con esos filtros.</p>
+        <p>No encontramos productos de mascotas con esos filtros.</p>
         <button onclick="resetAllFilters()">Limpiar filtros</button>
       </div>`;
     return;
@@ -256,14 +256,14 @@ function removeFilterTag(key) {
   }
 }
 
-/* ─── Contadores de subcategorías (LIMPIEZA) ─── */
+/* ─── Contadores de subcategorías (MASCOTAS) ─── */
 function updateSubcatCounts(prods) {
   const counts = {};
   prods.forEach(p => { counts[p.subcat] = (counts[p.subcat] || 0) + 1; });
   
-  // Subcategorías de LIMPIEZA
+  // Subcategorías de MASCOTAS)
   const subcats = [
-    'cocina', 'bano', 'ropa', 'multiuso', 'lavandina', 'detergente', 'ambientadores'
+    'perros', 'gatos', 'higiene', 'snacks', 'arena', 'accesorios'
   ];
   
   subcats.forEach(s => {
@@ -299,7 +299,7 @@ function updateHeroStats(prods) {
 let cart = {};
 
 function addToCart(docId, e) {
-  const prods = window._limpiezaAll || [];
+  const prods = window._mascotasAll || [];
   const p = prods.find(x => x.docId === docId);
   if (!p) return;
 
@@ -331,7 +331,7 @@ function addToCart(docId, e) {
 
 function changeQty(docId, d) {
   if (!cart[docId]) return;
-  const p = (window._limpiezaAll || []).find(x => x.docId === docId);
+  const p = (window._mascotasAll || []).find(x => x.docId === docId);
   const stock = p?.stock ?? null;
 
   if (d > 0 && stock !== null && cart[docId].qty >= stock) {

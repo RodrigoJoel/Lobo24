@@ -257,23 +257,21 @@ function removeFilterTag(key) {
 }
 
 /* ─── Contadores de subcategorías (LÁCTEOS) ─── */
+/* ─── Contadores de subcategorías (LÁCTEOS) ─── */
 function updateSubcatCounts(prods) {
   const counts = {};
-  prods.forEach(p => { counts[p.subcat] = (counts[p.subcat] || 0) + 1; });
+  prods.forEach(p => { 
+    if (p.subcat) {
+      counts[p.subcat] = (counts[p.subcat] || 0) + 1;
+    }
+  });
   
-  // Subcategorías de LÁCTEOS
-  const subcats = [
-    leche = 'leche',
-    quesos = 'quesos',
-    yogures = 'yogures',
-    manteca = 'manteca y cremas',
-    postres = 'postres',
-    huevos = 'huevos',
-  ];
+  // IMPORTANTE: Estos valores deben coincidir EXACTAMENTE con los data-subcat del HTML
+  const subcats = ['leches', 'quesos', 'yogures', 'manteca', 'postres', 'huevos'];
   
   subcats.forEach(s => {
     const el = document.getElementById('cnt-' + s);
-    const n  = counts[s] || 0;
+    const n = counts[s] || 0;
     if (el) el.textContent = n;
   });
   
@@ -304,7 +302,7 @@ function updateHeroStats(prods) {
 let cart = {};
 
 function addToCart(docId, e) {
-  const prods = window._almacenAll || [];
+  const prods = window._lacteosAll || [];
   const p = prods.find(x => x.docId === docId);
   if (!p) return;
 
@@ -336,7 +334,7 @@ function addToCart(docId, e) {
 
 function changeQty(docId, d) {
   if (!cart[docId]) return;
-  const p = (window._almacenAll || []).find(x => x.docId === docId);
+  const p = (window._lacteosAll || []).find(x => x.docId === docId);
   const stock = p?.stock ?? null;
 
   if (d > 0 && stock !== null && cart[docId].qty >= stock) {

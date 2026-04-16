@@ -282,6 +282,7 @@ function updateSubcatCounts(prods) {
 }
 
 /* ─── Stats del hero ─── */
+/* ─── Stats del hero ─── */
 function updateHeroStats(prods) {
   const totalEl = document.getElementById('heroTotalProds');
   const inStockEl = document.getElementById('heroInStock');
@@ -292,7 +293,11 @@ function updateHeroStats(prods) {
     const inStock = prods.filter(p => p.stock === null || p.stock > 0).length;
     inStockEl.textContent = inStock;
   }
-  if (subcatsEl) subcatsEl.textContent = '29';
+  // Actualizar dinámicamente el número de subcategorías
+  if (subcatsEl) {
+    const totalSubcats = document.querySelectorAll('#subcatFilters .filter-chip[data-subcat]:not([data-subcat="all"])').length;
+    subcatsEl.textContent = totalSubcats;
+  }
 }
 
 /* ─── CART ─── */

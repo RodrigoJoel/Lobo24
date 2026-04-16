@@ -27,9 +27,61 @@ window.CATEGORY_CONFIG = {
     ["alimentos-bebe", "🍼 Alimentos bebé"],["aceitunas", "🫒 Aceitunas"],["saborizadores", "💧 Saborizadores"],["reposteria", "🎂 Repostería"],["enlatados", "🥫 Enlatados (atún, paté)"],
     ["jugos-polvo", "🧃 Jugos en polvo"],["postres", "🍮 Postres (flan, gelatina)"],["infusiones", "🍵 Infusiones (té, manzanilla)"]] 
 },
-  verduras: { label: "Verduras", singleLabel: "producto", title: "GESTIÓN DE <span>VERDURAS</span>", icon: "🥦", emptyIcon: "🥦", pageSub: "Gestión de frutas, verduras y productos frescos.", subcategories: [["hoja","🥬 De hoja"],["hortalizas","🥕 Hortalizas"],["tuberculos","🥔 Tubérculos"],["frutas","🍎 Frutas"],["organicos","🌿 Orgánicos"],["ensaladas","🥗 Ensaladas listas"]] },
-  limpieza: { label: "Limpieza", singleLabel: "producto", title: "GESTIÓN DE <span>LIMPIEZA</span>", icon: "🧴", emptyIcon: "🧴", pageSub: "Gestión de artículos de limpieza para hogar y ropa.", subcategories: [["limpieza del hogar","🫧 Limpieza del hogar"],["papel y descartables","🧻 Papel y descartables"],["limpieza de ropa","👕 Limpieza de ropa"],["multiuso","🪣 Multiuso"],["lavandina y blanqueadores","🧽 Lavandina y blanqueadores"],["detergentes","🧼 Detergentes"],["ambientadores","🌸 Ambientadores"]] },
-  congelados: { label: "Congelados", singleLabel: "producto", title: "GESTIÓN DE <span>CONGELADOS</span>", icon: "🧊", emptyIcon: "🧊", pageSub: "Gestión de alimentos congelados y listos para hornear.", subcategories: [["helados y postres congelados","🍨 Helados y postres congelados"],["pizzas y empanadas","🍕🥟 Pizzas y empanadas"],["medallones y hamburgesas","🍔 Medallones y hamburgesas"],["frutas y verduras  congeladas","🥦 Frutas y verduras congeladas"],["hielo","🧊 Hielo"],["rebozados","🍗 Rebozados"],["papas fritas congeladas","🍟 Papas fritas congeladas"],["masas congeladas","🍞 Masas congeladas"]] },
+  higiene: { 
+  label: "Higiene",
+  singleLabel: "producto", 
+  title: "GESTIÓN DE <span>HIGIENE</span>", 
+  icon: "🧼", 
+  emptyIcon: "🧼", 
+  pageSub: "Gestión de productos de higiene personal, cuidado corporal y farmacia.", 
+  subcategories: [
+    ["cuidado-personal", "🚿 Cuidado personal"],
+    ["farmacia", "💊 Farmacia"],
+    ["bucal", "🦷 Higiene bucal"],
+    ["capilar", "💇‍♂️ Cuidado capilar"],
+    ["corporal", "🧴 Cuidado corporal"],
+    ["facial", "🧖‍♀️ Cuidado facial"],
+    ["perfumeria", "🌸 Perfumería"],
+    ["proteccion", "☀️ Protección solar"],
+    ["infantil", "👶 Infantil"],
+    ["desodorantes", "🫧 Desodorantes"]
+  ] 
+},
+  limpieza: { 
+  label: "Limpieza", 
+  singleLabel: "producto", 
+  title: "GESTIÓN DE <span>LIMPIEZA</span>", 
+  icon: "🧴", 
+  emptyIcon: "🧴", 
+  pageSub: "Gestión de artículos de limpieza para hogar y ropa.", 
+  subcategories: [
+    ["cocina", "🍳 Limpieza del hogar"],
+    ["bano", "🚽 Papel y descartables"],
+    ["ropa", "👕 Limpieza de ropa"],
+    ["multiuso", "✨ Multiuso"],
+    ["lavandina", "🧴 Lavandina y blanqueadores"],
+    ["detergente", "🧼 Detergentes"],
+    ["ambientadores", "🌸 Ambientadores"]
+  ] 
+},
+  congelados: { 
+  label: "Congelados", 
+  singleLabel: "producto", 
+  title: "GESTIÓN DE <span>CONGELADOS</span>", 
+  icon: "🧊", 
+  emptyIcon: "🧊", 
+  pageSub: "Gestión de alimentos congelados y listos para hornear.", 
+  subcategories: [
+    ["helados","🍨 Helados y postres congelados"],
+    ["pizzas","🍕🥟 Pizzas y empanadas"],
+    ["medallones","🍔 Medallones y hamburgesas"],
+    ["verduras","🥦 Frutas y verduras congeladas"],
+    ["hielo","🧊 Hielo"],
+    ["rebozados","🍗 Rebozados"],
+    ["papas","🍟 Papas fritas congeladas"],
+    ["masas","🍞 Masas congeladas"]
+  ] 
+},
   lacteos: { label: "Lácteos", singleLabel: "producto", title: "GESTIÓN DE <span>LÁCTEOS</span>", icon: "🧀", emptyIcon: "🧀", pageSub: "Gestión de leches, quesos, yogures y derivados.", subcategories: [["leches","🥛 Leches"],["quesos","🧀 Quesos"],["yogures","🍶 Yogures"],["manteca","🧈 Manteca y crema"],["postres","🍮 Postres"],["huevos","🥚 Huevos"]] },
   panaderia: { label: "Panadería", singleLabel: "producto", title: "GESTIÓN DE <span>PANADERÍA</span>", icon: "🍞", emptyIcon: "🍞", pageSub: "Gestión de panificados, facturas y productos dulces.", subcategories: [["panes","🍞 Panes"],["facturas","🥐 Facturas"],["tortillas","🫓 Tortillas"],["budines","🍰 Budines"],["galletas","🧁 Galletas"],["sin-tacc","🌾 Sin TACC"],["prepizzas","🍕 PREPIZZAS"],["tostadas","🍞 TOSTADAS"]] },
   mascotas: { label: "Mascotas", singleLabel: "producto", title: "GESTIÓN DE <span>MASCOTAS</span>", icon: "🐾", emptyIcon: "🐾", pageSub: "Gestión de alimento, higiene y accesorios para mascotas.", subcategories: [["perros","🐶 Perros"],["gatos","🐱 Gatos"],["higiene","🧴 Higiene"],["snacks","🦴 Snacks"],["arena","🪨 Arena"],["accesorios","🎾 Accesorios"]] },
@@ -347,7 +399,7 @@ function dashboard() {
           <button class="btn btn-ghost" onclick="navigate('bebidas',null)" style="justify-content:flex-start">🥤 Bebidas</button>
           <button class="btn btn-ghost" onclick="navigate('snacks',null)" style="justify-content:flex-start">🍪 Snacks</button>
           <button class="btn btn-ghost" onclick="navigate('almacen',null)" style="justify-content:flex-start">🍝 Almacén</button>
-          <button class="btn btn-ghost" onclick="navigate('verduras',null)" style="justify-content:flex-start">🥦 Verduras</button>
+          <button class="btn btn-ghost" onclick="navigate('higiene',null)" style="justify-content:flex-start">🧼 Higiene</button>
           <button class="btn btn-ghost" onclick="navigate('limpieza',null)" style="justify-content:flex-start">🧴 Limpieza</button>
           <button class="btn btn-ghost" onclick="navigate('congelados',null)" style="justify-content:flex-start">🧊 Congelados</button>
           <button class="btn btn-ghost" onclick="navigate('lacteos',null)" style="justify-content:flex-start">🧀 Lácteos</button>

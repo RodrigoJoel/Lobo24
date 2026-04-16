@@ -50,15 +50,35 @@ function carouselMove(dir) {
 /* ══════════════════════════════════════
    CATEGORIES
 ══════════════════════════════════════ */
+
+/*
+  Renderiza categorías usando el conteo REAL de productos
+  cacheado en window._catCounts (actualizado por el módulo Firebase).
+  Fallback al campo 'count' del admin mientras carga.
+*/
 function buildCategories(cats) {
-  document.getElementById('categoriesGrid').innerHTML = cats.map(c =>
-    `<a class="category-card" href="${c.slug||'#'}.html">
-      <div class="cat-emoji">${c.emoji||'🛒'}</div>
-      <div class="cat-name">${c.name||''}</div>
-      <div class="cat-count">${c.count||0} productos</div>
-    </a>`
-  ).join('');
+  const grid = document.getElementById('categoriesGrid');
+  if (!grid) return;
+  grid.innerHTML = cats.map(c => {
+    const slug  = c.slug || '';
+    const cache = window._catCounts || {};
+    const count = (typeof cache[slug] === 'number') ? cache[slug] : (c.count || 0);
+    return `<a class="category-card" href="${slug}.html">
+      <div class="cat-emoji">${c.emoji || '🛒'}</div>
+      <div class="cat-name">${c.name || ''}</div>
+      <div class="cat-count" id="catcount-${slug}">${count} productos</div>
+    </a>`;
+  }).join('');
 }
+
+/* Actualiza el contador de una categoría sin rerenderizar toda la grilla */
+function updateCategoryCount(slug, count) {
+  if (!window._catCounts) window._catCounts = {};
+  window._catCounts[slug] = count;
+  const el = document.getElementById('catcount-' + slug);
+  if (el) el.textContent = count + ' productos';
+}
+window.updateCategoryCount = updateCategoryCount;
 
 /* ══════════════════════════════════════
    PRODUCTS

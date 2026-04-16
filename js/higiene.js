@@ -85,7 +85,7 @@ function resetAllFilters() {
 
 /* ─── Aplicar todos los filtros ─── */
 function applyFilters() {
-  const all = window._limpiezaAll || [];
+  const all = window._higieneAll || [];
 
   // Leer búsqueda y sort en tiempo real
   const catSearch = document.getElementById('catSearch');
@@ -154,7 +154,7 @@ function renderProducts(list) {
     grid.innerHTML = `
       <div class="no-results">
         <div class="nr-icon">🔍</div>
-        <p>No encontramos productos de limpieza con esos filtros.</p>
+        <p>No encontramos productos de higiene con esos filtros.</p>
         <button onclick="resetAllFilters()">Limpiar filtros</button>
       </div>`;
     return;
@@ -256,19 +256,33 @@ function removeFilterTag(key) {
   }
 }
 
-/* ─── Contadores de subcategorías (LIMPIEZA) ─── */
+/* ─── Contadores de subcategorías (HIGIENE) ─── */
+/* ─── Contadores de subcategorías (HIGIENE) ─── */
 function updateSubcatCounts(prods) {
   const counts = {};
-  prods.forEach(p => { counts[p.subcat] = (counts[p.subcat] || 0) + 1; });
+  prods.forEach(p => { 
+    if (p.subcat) {
+      counts[p.subcat] = (counts[p.subcat] || 0) + 1;
+    }
+  });
   
-  // Subcategorías de LIMPIEZA
+  // IMPORTANTE: Estos valores deben coincidir EXACTAMENTE con los data-subcat del HTML
   const subcats = [
-    'cocina', 'bano', 'ropa', 'multiuso', 'lavandina', 'detergente', 'ambientadores'
+    'cuidado-personal',
+    'farmacia',
+    'bucal',
+    'capilar',
+    'corporal',
+    'facial',
+    'perfumeria',
+    'proteccion',
+    'infantil',
+    'desodorantes'
   ];
   
   subcats.forEach(s => {
     const el = document.getElementById('cnt-' + s);
-    const n  = counts[s] || 0;
+    const n = counts[s] || 0;
     if (el) el.textContent = n;
   });
   
@@ -299,7 +313,7 @@ function updateHeroStats(prods) {
 let cart = {};
 
 function addToCart(docId, e) {
-  const prods = window._limpiezaAll || [];
+  const prods = window._higieneAll || [];
   const p = prods.find(x => x.docId === docId);
   if (!p) return;
 
@@ -331,7 +345,7 @@ function addToCart(docId, e) {
 
 function changeQty(docId, d) {
   if (!cart[docId]) return;
-  const p = (window._limpiezaAll || []).find(x => x.docId === docId);
+  const p = (window._higieneAll || []).find(x => x.docId === docId);
   const stock = p?.stock ?? null;
 
   if (d > 0 && stock !== null && cart[docId].qty >= stock) {

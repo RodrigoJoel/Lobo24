@@ -52,7 +52,7 @@
   <a href="bebidas.html"><span class="icon">🥤</span> Bebidas</a>
   <a href="snacks.html"><span class="icon">🍪</span> Snacks</a>
   <a href="almacen.html"><span class="icon">🍝</span> Almacén</a>
-  <!--<a href="verduras.html"><span class="icon">🥦</span> Verduras</a>-->
+  <a href="higiene.html"><span class="icon">🧼</span> Higiene</a>
   <a href="limpieza.html"><span class="icon">🧴</span> Limpieza</a>
   <a href="congelados.html"><span class="icon">🧊</span> Congelados</a>
   <a href="lacteos.html"><span class="icon">🧀</span> Lácteos</a>
@@ -301,6 +301,13 @@
 ══════════════════════════════════════ -->
 <!-- Reemplazá el bloque <script type="module"> en index.html por este -->
 
+<!--
+  ══════════════════════════════════════════════════════════════
+  REEMPLAZÁ el bloque <script type="module"> en tu index.html
+  por este. El único cambio real está en la sección
+  "CONTADORES DE CATEGORÍAS" al final del módulo.
+  ══════════════════════════════════════════════════════════════
+-->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
 import { getFirestore, doc, collection, onSnapshot, getDocs, setDoc, getDoc }
@@ -327,39 +334,28 @@ const app  = initializeApp(firebaseConfig);
 const db   = getFirestore(app);
 const auth = getAuth(app);
 
-/* ─── Exponemos auth y helpers a scripts.js ─── */
+/* ── Exponer helpers a scripts.js ── */
 window.fbAuth = {
-  auth,
-  createUserWithEmailAndPassword,
-  signInWithEmailAndPassword,
-  signOut,
-  db,
-  doc,
-  setDoc,
-  getDoc
+  auth, createUserWithEmailAndPassword, signInWithEmailAndPassword,
+  signOut, db, doc, setDoc, getDoc
 };
-
-/*
-  CLAVE: exponemos sendPasswordResetEmail como función independiente.
-  scripts.js la llama como: await window.fbSendPasswordReset(email)
-*/
 window.fbSendPasswordReset = (email) => sendPasswordResetEmail(auth, email);
 
-/* ─── CAROUSEL (tiempo real) ─── */
+/* ── CAROUSEL ── */
 onSnapshot(collection(db, 'carousel'), snap => {
   const slides = snap.docs
     .map(d => ({ id: d.id, ...d.data() }))
     .sort((a,b) => (a.order||0) - (b.order||0));
-  if (slides.length) buildCarousel(slides);
+  if (slides.length && typeof buildCarousel === 'function') buildCarousel(slides);
 });
 
-/* ─── PROMOS (tiempo real) ─── */
+/* ── PROMOS ── */
 onSnapshot(collection(db, 'promos'), snap => {
   const promos = snap.docs
     .map(d => ({ id: d.id, ...d.data() }))
     .sort((a,b) => (a.order||0) - (b.order||0));
   promos.forEach((p, i) => {
-    const n   = i + 1;
+    const n = i + 1;
     const bg  = document.getElementById(`promoBg${n}`);
     const lbl = document.getElementById(`promoLabel${n}`);
     const ttl = document.getElementById(`promoTitle${n}`);
@@ -369,15 +365,17 @@ onSnapshot(collection(db, 'promos'), snap => {
   });
 });
 
-/* ─── CONFIG GENERAL (tiempo real) ─── */
+/* ── CONFIG GENERAL ── */
 onSnapshot(doc(db, 'config', 'general'), snap => {
   if (!snap.exists()) return;
   const data = snap.data();
-  if (data.topbar)     document.getElementById('topbarText').innerHTML       = data.topbar;
-  if (data.bannerDesc) document.getElementById('bannerDesc').textContent     = data.bannerDesc;
+  const tb = document.getElementById('topbarText');
+  const bd = document.getElementById('bannerDesc');
+  if (tb && data.topbar)     tb.innerHTML       = data.topbar;
+  if (bd && data.bannerDesc) bd.textContent     = data.bannerDesc;
 });
 
-/* ─── SECCIONES (tiempo real) ─── */
+/* ── SECCIONES ── */
 onSnapshot(doc(db, 'config', 'sections'), snap => {
   if (!snap.exists()) return;
   const s = snap.data();
@@ -390,32 +388,34 @@ onSnapshot(doc(db, 'config', 'sections'), snap => {
     banner:     document.getElementById('elBanner'),
     newProds:   document.getElementById('elNew'),
   };
-  Object.entries(s).forEach(([k, v]) => { if (map[k]) map[k].style.display = v ? '' : 'none'; });
+  Object.entries(s).forEach(([k, v]) => {
+    if (map[k]) map[k].style.display = v ? '' : 'none';
+  });
 });
 
-/* ─── CATEGORÍAS (tiempo real) ─── */
+/* ── CATEGORÍAS (datos de la colección, para nombre/emoji/orden) ── */
 onSnapshot(collection(db, 'categories'), snap => {
   const cats = snap.docs
     .map(d => ({ id: d.id, ...d.data() }))
     .sort((a,b) => (a.order||0) - (b.order||0));
-  if (cats.length) buildCategories(cats);
+  if (cats.length && typeof buildCategories === 'function') buildCategories(cats);
 });
 
-/* ─── PRODUCTOS MÁS VENDIDOS (tiempo real) ─── */
+/* ── BEST SELLERS ── */
 onSnapshot(collection(db, 'bestSellers'), snap => {
   const prods = snap.docs.map(d => ({ id: d.id, ...d.data() }));
   window._bestProds = prods;
-  renderProducts(prods, 'productsGrid');
+  if (typeof renderProducts === 'function') renderProducts(prods, 'productsGrid');
 });
 
-/* ─── NOVEDADES (tiempo real) ─── */
+/* ── NOVEDADES ── */
 onSnapshot(collection(db, 'newProducts'), snap => {
   const prods = snap.docs.map(d => ({ id: d.id, ...d.data() }));
   window._newProds = prods;
-  renderProducts(prods, 'newProductsGrid');
+  if (typeof renderProducts === 'function') renderProducts(prods, 'newProductsGrid');
 });
 
-/* ─── OCULTAR LOADING ─── */
+/* ── OCULTAR LOADING ── */
 const unsubLoad = onSnapshot(doc(db, 'config', 'general'), () => {
   const loading = document.getElementById('loadingScreen');
   if (loading) {
@@ -425,7 +425,49 @@ const unsubLoad = onSnapshot(doc(db, 'config', 'general'), () => {
   unsubLoad();
 });
 
-/* ─── AUTH STATE ─── */
+/* ──────────────────────────────────────────────────────────────
+   CONTADORES REALES DE CATEGORÍAS
+   
+   Por cada colección de categoría, escuchamos en tiempo real
+   cuántos documentos tiene. Cuando cambia (porque el admin
+   agregó o eliminó un producto), actualizamos el contador
+   en el DOM automáticamente.
+   
+   Si una colección no existe todavía en Firestore, simplemente
+   devuelve 0 sin tirar error.
+────────────────────────────────────────────────────────────── */
+const CATEGORY_SLUGS = [
+  'bebidas',
+  'snacks',
+  'almacen',
+  'higiene',
+  'limpieza',
+  'congelados',
+  'lacteos',
+  'panaderia',
+  'mascotas',
+  'ofertas'
+];
+
+// Inicializar caché vacía
+window._catCounts = {};
+
+CATEGORY_SLUGS.forEach(slug => {
+  onSnapshot(collection(db, slug), snap => {
+    const count = snap.size; // número de documentos en la colección
+
+    // Guardar en caché y actualizar el DOM
+    // (updateCategoryCount está definida en scripts.js)
+    if (typeof updateCategoryCount === 'function') {
+      updateCategoryCount(slug, count);
+    } else {
+      // scripts.js aún no cargó, guardar en caché igual
+      window._catCounts[slug] = count;
+    }
+  });
+});
+
+/* ── AUTH STATE ── */
 onAuthStateChanged(auth, async (user) => {
   const container = document.getElementById('userStatusContainer');
   if (!container) return;
@@ -440,9 +482,9 @@ onAuthStateChanged(auth, async (user) => {
         <div class="user-avatar" onclick="toggleUserDropdown()">${inicial}</div>
         <div class="user-dropdown" id="userDropdown">
           <div class="dropdown-header">Hola, <strong>${userData.name.split(' ')[0]}</strong></div>
-          <a href="#"><i class="fas fa-user"></i> Mi cuenta</a>
-          <a href="#"><i class="fas fa-shopping-bag"></i> Mis compras</a>
-          <a href="#"><i class="fas fa-star"></i> Mis puntos</a>
+          <a href="#">👤 Mi cuenta</a>
+          <a href="#">🛍️ Mis compras</a>
+          <a href="#">⭐ Mis puntos</a>
           <hr>
           <button onclick="handleLogout()" class="logout-btn">Cerrar sesión</button>
         </div>

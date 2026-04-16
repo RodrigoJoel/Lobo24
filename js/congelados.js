@@ -257,17 +257,21 @@ function removeFilterTag(key) {
 }
 
 /* ─── Contadores de subcategorías (CONGELADOS) ─── */
+/* ─── Contadores de subcategorías (CONGELADOS) ─── */
 function updateSubcatCounts(prods) {
   const counts = {};
-  prods.forEach(p => { counts[p.subcat] = (counts[p.subcat] || 0) + 1; });
+  prods.forEach(p => { 
+    if (p.subcat) {
+      counts[p.subcat] = (counts[p.subcat] || 0) + 1;
+    }
+  });
   
-  // Subcategorías de CONGELADOS
-  const subcats = [
-    'helados y postres congelados', 'pizzas y empanadas','medallones y hamburgesas', 'frutas y verduras congeladas', 'hielo','rebozados','papas fritas congeladas','masas congeladas'];
+  // IMPORTANTE: Estos valores deben coincidir EXACTAMENTE con los data-subcat del HTML
+  const subcats = ['helados', 'pizzas', 'medallones', 'verduras', 'hielo', 'rebozados', 'papas', 'masas'];
   
   subcats.forEach(s => {
     const el = document.getElementById('cnt-' + s);
-    const n  = counts[s] || 0;
+    const n = counts[s] || 0;
     if (el) el.textContent = n;
   });
   

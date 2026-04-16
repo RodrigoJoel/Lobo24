@@ -230,10 +230,22 @@ function updateSubcatCounts(prods) {
 }
 
 /* ─── Stats del hero ─── */
+/* ─── Stats del hero ─── */
 function updateHeroStats(prods) {
-  document.getElementById('heroTotalProds').textContent = prods.length;
-  const inStock = prods.filter(p => p.stock === null || p.stock > 0).length;
-  document.getElementById('heroInStock').textContent = inStock;
+  const totalEl = document.getElementById('heroTotalProds');
+  const inStockEl = document.getElementById('heroInStock');
+  const subcatsEl = document.getElementById('heroSubcats');
+  
+  if (totalEl) totalEl.textContent = prods.length;
+  if (inStockEl) {
+    const inStock = prods.filter(p => p.stock === null || p.stock > 0).length;
+    inStockEl.textContent = inStock;
+  }
+  // Contar subcategorías reales (excluyendo "Todas")
+  if (subcatsEl) {
+    const totalSubcats = document.querySelectorAll('#subcatFilters .filter-chip[data-subcat]:not([data-subcat="all"])').length;
+    subcatsEl.textContent = totalSubcats;
+  }
 }
 
 /* ─── CART ─── */

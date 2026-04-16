@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Lobo24 — Snacks</title>
+  <title>Lobo24 — Ofertas</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
@@ -11,7 +11,7 @@
   <link rel="stylesheet" href="css/secciones.css"/>
   <style>
     .cat-hero::before {
-      content: '🍬';
+      content: '🔥';
       position: absolute;
       right: 80px;
       top: 50%;
@@ -54,7 +54,7 @@
 
 <!-- CATEGORY NAV -->
 <div class="cat-nav">
-  <a href="#" class="active"><span class="icon">⭐</span> Destacados</a>
+  <a href="index.html"><span class="icon">⭐</span> Destacados</a>
   <a href="bebidas.html"><span class="icon">🥤</span> Bebidas</a>
   <a href="snacks.html"><span class="icon">🍪</span> Snacks</a>
   <a href="almacen.html"><span class="icon">🍝</span> Almacén</a>
@@ -64,7 +64,7 @@
   <a href="lacteos.html"><span class="icon">🧀</span> Lácteos</a>
   <a href="panaderia.html"><span class="icon">🍞</span> Panadería</a>
   <a href="mascotas.html"><span class="icon">🐾</span> Mascotas</a>
-  <a href="ofertas.html"><span class="icon">🔥</span> Ofertas</a>
+  <a href="ofertas.html" class="active"><span class="icon">🔥</span> Ofertas</a>
 </div>
 
 <!-- HERO CATEGORÍA -->
@@ -73,10 +73,10 @@
     <div class="cat-breadcrumb">
       <a href="index.html">Inicio</a>
       <span>/</span>
-      <span>Snacks</span>
+      <span>Ofertas</span>
     </div>
-    <h1>SECCIÓN DE <em>SNACKS</em></h1>
-    <p>Snacks saludables, dulces, salados y mucho más. Todo lo que necesitas para satisfacer tu antojo.</p>
+    <h1>SECCIÓN DE <em>OFERTAS</em></h1>
+    <p>Productos destacados con descuentos imperdibles. Ofertas flash, 2x1, combos y más. ¡Aprovechá los precios bajos!</p>
     <div class="cat-hero-stats">
       <div class="cat-hero-stat">
         <strong id="heroTotalProds">—</strong>
@@ -87,7 +87,7 @@
         en stock
       </div>
       <div class="cat-hero-stat">
-        <strong id="heroSubcats">8</strong>
+        <strong id="heroSubcats">6</strong>
         subcategorías
       </div>
     </div>
@@ -98,7 +98,7 @@
 <div class="cat-search-bar">
   <div class="cat-search-inner">
     <div class="cat-search-input-wrap">
-      <input type="text" id="catSearch" placeholder="Buscar en Snacks... ej: galletitas, caramelos, frutas secas"/>
+      <input type="text" id="catSearch" placeholder="Buscar en Ofertas... ej: 2x1, combo, descuento"/>
       <span class="search-icon">🔍</span>
     </div>
     <select class="cat-sort-select" id="sortSelect" onchange="applyFilters()">
@@ -123,7 +123,7 @@
     <!-- Subcategorías -->
     <div class="filter-group">
       <div class="filter-group-title">
-        Tipo de snack
+        Tipo de oferta
         <button class="filter-clear" onclick="clearFilter('subcat')">limpiar</button>
       </div>
       <div class="filter-chips" id="subcatFilters">
@@ -131,39 +131,32 @@
           <span><span class="chip-icon">🛒</span>Todas</span>
           <span class="chip-count" id="cnt-all">0</span>
         </div>
-        <div class="filter-chip" data-subcat="papas-fritas" onclick="selectSubcat(this)">
-          <span><span class="chip-icon">🥔</span>Papas fritas</span>
-          <span class="chip-count" id="cnt-papas-fritas">0</span>
+        <div class="filter-chip" data-subcat="flash" onclick="selectSubcat(this)">
+          <span><span class="chip-icon">⚡</span>Oferta flash</span>
+          <span class="chip-count" id="cnt-flash">0</span>
         </div>
-        <div class="filter-chip" data-subcat="galletitas" onclick="selectSubcat(this)">
-          <span><span class="chip-icon">🍪</span>Galletitas</span>
-          <span class="chip-count" id="cnt-galletitas">0</span>
+        <div class="filter-chip" data-subcat="2x1" onclick="selectSubcat(this)">
+          <span><span class="chip-icon">🛍️</span>2x1</span>
+          <span class="chip-count" id="cnt-2x1">0</span>
         </div>
-        <div class="filter-chip" data-subcat="chocolates" onclick="selectSubcat(this)">
-          <span><span class="chip-icon">🍫</span>Chocolates</span>
-          <span class="chip-count" id="cnt-chocolates">0</span>
+        <div class="filter-chip" data-subcat="combo" onclick="selectSubcat(this)">
+          <span><span class="chip-icon">🎁</span>Combo</span>
+          <span class="chip-count" id="cnt-combo">0</span>
         </div>
-        <div class="filter-chip" data-subcat="gomitas" onclick="selectSubcat(this)">
-          <span><span class="chip-icon">🍬</span>Gomitas</span>
-          <span class="chip-count" id="cnt-gomitas">0</span>
+        <div class="filter-chip" data-subcat="bebidas" onclick="selectSubcat(this)">
+          <span><span class="chip-icon">🥤</span>Bebidas</span>
+          <span class="chip-count" id="cnt-bebidas">0</span>
         </div>
-        <div class="filter-chip" data-subcat="salados" onclick="selectSubcat(this)">
-          <span><span class="chip-icon">🥨</span>Salados</span>
-          <span class="chip-count" id="cnt-salados">0</span>
+        <div class="filter-chip" data-subcat="snacks" onclick="selectSubcat(this)">
+          <span><span class="chip-icon">🍪</span>Snacks</span>
+          <span class="chip-count" id="cnt-snacks">0</span>
         </div>
-        <div class="filter-chip" data-subcat="frutos-secos" onclick="selectSubcat(this)">
-          <span><span class="chip-icon">🥜</span>Frutos secos</span>
-          <span class="chip-count" id="cnt-frutos-secos">0</span>
-        </div>
-        <div class="filter-chip" data-subcat="barritas" onclick="selectSubcat(this)">
-          <span><span class="chip-icon">🍯</span>Barritas</span>
-          <span class="chip-count" id="cnt-barritas">0</span>
-        </div>
-        <div class="filter-chip" data-subcat="alfajores" onclick="selectSubcat(this)">
-          <span><span class="chip-icon">🍫</span>Alfajores</span>
-          <span class="chip-count" id="cnt-alfajores">0</span>
+        <div class="filter-chip" data-subcat="hogar" onclick="selectSubcat(this)">
+          <span><span class="chip-icon">🏠</span>Hogar</span>
+          <span class="chip-count" id="cnt-hogar">0</span>
         </div>
       </div>
+    </div>
 
     <!-- Rango de precio -->
     <div class="filter-group">
@@ -222,15 +215,14 @@
     </div>
     <div class="products-grid" id="productsGrid">
       <!-- skeletons mientras carga -->
-      ${Array(8).fill(`
-        <div class="skeleton">
-          <div class="sk-img"></div>
-          <div class="sk-body">
-            <div class="sk-line"></div>
-            <div class="sk-line short"></div>
-            <div class="sk-line price"></div>
-          </div>
-        </div>`).join('')}
+      <div class="skeleton"><div class="sk-img"></div><div class="sk-body"><div class="sk-line"></div><div class="sk-line short"></div><div class="sk-line price"></div></div></div>
+      <div class="skeleton"><div class="sk-img"></div><div class="sk-body"><div class="sk-line"></div><div class="sk-line short"></div><div class="sk-line price"></div></div></div>
+      <div class="skeleton"><div class="sk-img"></div><div class="sk-body"><div class="sk-line"></div><div class="sk-line short"></div><div class="sk-line price"></div></div></div>
+      <div class="skeleton"><div class="sk-img"></div><div class="sk-body"><div class="sk-line"></div><div class="sk-line short"></div><div class="sk-line price"></div></div></div>
+      <div class="skeleton"><div class="sk-img"></div><div class="sk-body"><div class="sk-line"></div><div class="sk-line short"></div><div class="sk-line price"></div></div></div>
+      <div class="skeleton"><div class="sk-img"></div><div class="sk-body"><div class="sk-line"></div><div class="sk-line short"></div><div class="sk-line price"></div></div></div>
+      <div class="skeleton"><div class="sk-img"></div><div class="sk-body"><div class="sk-line"></div><div class="sk-line short"></div><div class="sk-line price"></div></div></div>
+      <div class="skeleton"><div class="sk-img"></div><div class="sk-body"><div class="sk-line"></div><div class="sk-line short"></div><div class="sk-line price"></div></div></div>
     </div>
   </div>
 
@@ -294,10 +286,10 @@
       </div>
     </div>
     <div id="formReg" style="display:none">
-      <div class="form-group"><label>Nombre completo</label><input type="text" placeholder="Juan Pérez"/></div>
-      <div class="form-group"><label>Email</label><input type="email" placeholder="tu@email.com"/></div>
-      <div class="form-group"><label>Contraseña</label><input type="password" placeholder="Mínimo 8 caracteres"/></div>
-      <div class="form-group"><label>Teléfono</label><input type="tel" placeholder="+54 9 xxx xxx xxxx"/></div>
+      <div class="form-group"><label>Nombre completo</label><input type="text" id="regName" placeholder="Juan Pérez"/></div>
+      <div class="form-group"><label>Email</label><input type="email" id="regEmail" placeholder="tu@email.com"/></div>
+      <div class="form-group"><label>Contraseña</label><input type="password" id="regPass" placeholder="Mínimo 8 caracteres"/></div>
+      <div class="form-group"><label>Teléfono</label><input type="tel" id="regPhone" placeholder="+54 9 xxx xxx xxxx"/></div>
       <button class="modal-submit" onclick="handleRegister()">Crear cuenta</button>
     </div>
   </div>
@@ -364,10 +356,10 @@ onSnapshot(doc(db, 'config', 'general'), snap => {
   if (d.topbar) document.getElementById('topbarText').innerHTML = d.topbar;
 });
 
-/* Productos de snacks en tiempo real */
-onSnapshot(collection(db, 'snacks'), snap => {
+/* Productos de ofertas en tiempo real */
+onSnapshot(collection(db, 'ofertas'), snap => {
   const prods = snap.docs.map(d => ({ docId: d.id, ...d.data() }));
-  window._snacksAll = prods;
+  window._ofertasAll = prods;
   updateHeroStats(prods);
   updateSubcatCounts(prods);
   applyFilters();
@@ -399,12 +391,12 @@ onAuthStateChanged(auth, async (user) => {
 
 /* Exponer función para descontar stock al comprar */
 window.fbDescontarStock = async (docId, currentStock) => {
-  const ref = doc(db, 'snacks', docId);
+  const ref = doc(db, 'ofertas', docId);
   await updateDoc(ref, { stock: currentStock - 1 });
 };
 </script>
 
 <!-- ══ LÓGICA DE LA PÁGINA ══ -->
-<script src="js/snacks.js"></script>
+<script src="js/ofertas.js"></script>
 </body>
 </html>

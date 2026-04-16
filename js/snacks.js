@@ -214,18 +214,30 @@ function removeFilterTag(key) {
 }
 
 /* ─── Contadores de subcategorías (SNACKS) ─── */
+/* ─── Contadores de subcategorías (SNACKS) ─── */
 function updateSubcatCounts(prods) {
   const counts = {};
-  prods.forEach(p => { counts[p.subcat] = (counts[p.subcat] || 0) + 1; });
+  prods.forEach(p => { 
+    if (p.subcat) {
+      counts[p.subcat] = (counts[p.subcat] || 0) + 1;
+    }
+  });
   
-  // Subcategorías de SNACKS
-  const subcats = ['dulce', 'salado', 'frutas-secas', 'proteicos', 'sin-tacc', 'veganos', 'infantiles'];
-  let total = 0;
+  // Estos valores deben coincidir con los data-subcat del HTML
+  const subcats = [
+    'papas-fritas',
+    'galletitas', 
+    'chocolates',
+    'gomitas',
+    'salados',
+    'frutos-secos',
+    'barritas',
+    'alfajores'
+  ];
   
   subcats.forEach(s => {
     const el = document.getElementById('cnt-' + s);
-    const n  = counts[s] || 0;
-    total += n;
+    const n = counts[s] || 0;
     if (el) el.textContent = n;
   });
   
