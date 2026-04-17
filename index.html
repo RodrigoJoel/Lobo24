@@ -7,6 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="stylesheet" href="css/styles.css"/>
 </head>
 <body>
@@ -74,7 +75,16 @@
       <img class="promo-bg" id="promoBg1" src="" alt="promo1"/>
       <div class="promo-overlay"></div>
       <div class="promo-content">
-        <div class="promo-label" id="promoLabel1"></div>
+        <div class="promo-label" id="promoLabel1" onclick="window.location.href='bebidas.html'"></div>
+        <style>
+          #promoCard1 { cursor: pointer; }
+          #promoCard1 img { pointer-events: none; }
+        </style>
+        <script>
+          document.getElementById('promoCard1').addEventListener('click', () => {
+            window.location.href = 'bebidas.html';
+          });
+        </script>
         <div class="promo-title" id="promoTitle1"></div>
       </div>
     </div>
@@ -82,7 +92,16 @@
       <img class="promo-bg" id="promoBg2" src="" alt="promo2"/>
       <div class="promo-overlay"></div>
       <div class="promo-content">
-        <div class="promo-label" id="promoLabel2"></div>
+        <div class="promo-label" id="promoLabel2" onclick="window.location.href='snacks.html'"></div>
+        <style>
+          #promoCard2 { cursor: pointer; }
+          #promoCard2 img { pointer-events: none; }
+        </style>
+        <script>
+          document.getElementById('promoCard2').addEventListener('click', () => {
+            window.location.href = 'snacks.html';
+          });
+        </script>
         <div class="promo-title" id="promoTitle2"></div>
       </div>
     </div>
@@ -107,17 +126,14 @@
 </section>
 
 <!-- OFFERS -->
+<!-- OFFERS -->
 <section class="section animate" id="elOffers" style="padding-top:0">
   <div class="section-header">
-    <div><div class="section-title">OFERTAS <span>DEL DÍA</span></div><div class="section-sub">Descuentos que no te podés perder</div></div>
+    <div><div class="section-title">OFERTAS <span>DEL DÍA</span></div>
+    <div class="section-sub">Descuentos que no te podés perder</div></div>
     <a href="ofertas.html" class="see-all">Ver todas →</a>
   </div>
-  <div class="offers-strip">
-    <div class="offer-card"><div class="offer-emoji">🥤</div><div class="offer-info"><div class="offer-pct">30%</div><div class="offer-cat">En bebidas</div></div></div>
-    <div class="offer-card"><div class="offer-emoji">🍫</div><div class="offer-info"><div class="offer-pct">2×1</div><div class="offer-cat">En chocolates</div></div></div>
-    <div class="offer-card"><div class="offer-emoji">🧴</div><div class="offer-info"><div class="offer-pct">20%</div><div class="offer-cat">En limpieza</div></div></div>
-    <div class="offer-card"><div class="offer-emoji">🍕</div><div class="offer-info"><div class="offer-pct">15%</div><div class="offer-cat">En congelados</div></div></div>
-  </div>
+  <div class="offers-strip" id="offersStrip"></div>
 </section>
 
 <!-- BEST SELLERS -->
@@ -160,8 +176,18 @@
     <div class="footer-brand">
       <div style="font-family:var(--font-head);font-size:32px">LOBO<span style="color:var(--accent)">24</span></div>
       <p>El minimarket que nunca cierra. Todo lo que necesitás, cuando lo necesitás, en tu puerta en minutos.</p>
-      <div style="margin-top:16px;display:flex;gap:10px">
-        <a href="#" style="font-size:20px">📷</a><a href="#" style="font-size:20px">📘</a><a href="#" style="font-size:20px">🐦</a><a href="#" style="font-size:20px">💬</a>
+      <div class="social-links">
+        <a href="https://www.instagram.com/minimarket_lobo24/" target="_blank" class="social-btn instagram">
+          <i class="fab fa-instagram"></i>
+        </a>
+
+        <a href="https://www.facebook.com/minimarketlobo24/?ref=NONE_xav_ig_profile_page_web#" target="_blank" class="social-btn facebook">
+          <i class="fab fa-facebook-f"></i>
+        </a>
+
+        <a href="https://api.whatsapp.com/message/UOEZNW4JNST4C1?autoload=1&app_absent=0&utm_source=ig" target="_blank" class="social-btn whatsapp">
+          <i class="fab fa-whatsapp"></i>
+        </a>
       </div>
     </div>
     <div class="footer-col"><h4>Empresa</h4><ul><li><a href="#">Sobre Lobo24</a></li><li><a href="#">Trabajá con nosotros</a></li><li><a href="#">Prensa</a></li><li><a href="#">Blog</a></li></ul></div>
@@ -299,15 +325,7 @@
 <!-- ══════════════════════════════════════
      FIREBASE SDK
 ══════════════════════════════════════ -->
-<!-- Reemplazá el bloque <script type="module"> en index.html por este -->
 
-<!--
-  ══════════════════════════════════════════════════════════════
-  REEMPLAZÁ el bloque <script type="module"> en tu index.html
-  por este. El único cambio real está en la sección
-  "CONTADORES DE CATEGORÍAS" al final del módulo.
-  ══════════════════════════════════════════════════════════════
--->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
 import { getFirestore, doc, collection, onSnapshot, getDocs, setDoc, getDoc }
@@ -466,6 +484,35 @@ CATEGORY_SLUGS.forEach(slug => {
     }
   });
 });
+/* ─── OFERTAS DEL DÍA (tiempo real) ─── */
+onSnapshot(collection(db, 'offersStrip'), snap => {
+  const offers = snap.docs
+    .map(d => ({ id: d.id, ...d.data() }))
+    .sort((a,b) => (a.order||0) - (b.order||0));
+  
+  const container = document.getElementById('offersStrip');
+  if (container) {
+    if (offers.length === 0) {
+      container.innerHTML = `
+        <div class="offer-card" style="background:var(--bg3);justify-content:center">
+          <div class="offer-info">
+            <div class="offer-pct">🔥</div>
+            <div class="offer-cat">Próximamente</div>
+          </div>
+        </div>`;
+    } else {
+      container.innerHTML = offers.map(offer => `
+        <div class="offer-card">
+          <div class="offer-emoji">${offer.emoji || '🏷️'}</div>
+          <div class="offer-info">
+            <div class="offer-pct">${offer.discount || '0%'}</div>
+            <div class="offer-cat">${offer.category || ''}</div>
+          </div>
+        </div>
+      `).join('');
+    }
+  }
+});
 
 /* ── AUTH STATE ── */
 onAuthStateChanged(auth, async (user) => {
@@ -482,9 +529,9 @@ onAuthStateChanged(auth, async (user) => {
         <div class="user-avatar" onclick="toggleUserDropdown()">${inicial}</div>
         <div class="user-dropdown" id="userDropdown">
           <div class="dropdown-header">Hola, <strong>${userData.name.split(' ')[0]}</strong></div>
-          <a href="#">👤 Mi cuenta</a>
-          <a href="#">🛍️ Mis compras</a>
-          <a href="#">⭐ Mis puntos</a>
+          <a href="usuario.html">👤 Mi cuenta</a>
+          <a href="usuario.html?tab=compras">🛍️ Mis compras</a>
+          <a href="usuario.html?tab=puntos">⭐ Mis puntos</a>
           <hr>
           <button onclick="handleLogout()" class="logout-btn">Cerrar sesión</button>
         </div>

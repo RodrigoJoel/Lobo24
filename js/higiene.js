@@ -28,13 +28,8 @@ function selectStock(el) {
 /* ─── Toggle badge ─── */
 function toggleBadge(b) {
   const btn = document.getElementById('badge' + b.charAt(0).toUpperCase() + b.slice(1));
-  if (filters.badges.has(b)) { 
-    filters.badges.delete(b); 
-    if (btn) btn.classList.remove('active'); 
-  } else { 
-    filters.badges.add(b); 
-    if (btn) btn.classList.add('active'); 
-  }
+  if (filters.badges.has(b)) { filters.badges.delete(b); btn.classList.remove('active'); }
+  else { filters.badges.add(b); btn.classList.add('active'); }
   applyFilters();
 }
 
@@ -43,16 +38,12 @@ function clearFilter(type) {
   if (type === 'subcat') {
     filters.subcat = 'all';
     document.querySelectorAll('#subcatFilters .filter-chip').forEach(c => c.classList.remove('active'));
-    const allChip = document.querySelector('[data-subcat="all"]');
-    if (allChip) allChip.classList.add('active');
+    document.querySelector('[data-subcat="all"]').classList.add('active');
   }
   if (type === 'price') {
-    filters.priceMin = 0; 
-    filters.priceMax = Infinity;
-    const priceMin = document.getElementById('priceMin');
-    const priceMax = document.getElementById('priceMax');
-    if (priceMin) priceMin.value = '';
-    if (priceMax) priceMax.value = '';
+    filters.priceMin = 0; filters.priceMax = Infinity;
+    document.getElementById('priceMin').value = '';
+    document.getElementById('priceMax').value = '';
   }
   if (type === 'badge') {
     filters.badges.clear();
@@ -63,23 +54,14 @@ function clearFilter(type) {
 
 /* ─── Resetear todo ─── */
 function resetAllFilters() {
-  clearFilter('subcat'); 
-  clearFilter('price'); 
-  clearFilter('badge');
+  clearFilter('subcat'); clearFilter('price'); clearFilter('badge');
   filters.stock  = 'all';
   filters.search = '';
   filters.sort   = 'default';
-  
-  const catSearch = document.getElementById('catSearch');
-  const sortSelect = document.getElementById('sortSelect');
-  
-  if (catSearch) catSearch.value = '';
-  if (sortSelect) sortSelect.value = 'default';
-  
+  document.getElementById('catSearch').value = '';
+  document.getElementById('sortSelect').value = 'default';
   document.querySelectorAll('[data-stock]').forEach(c => c.classList.remove('active'));
-  const allStock = document.querySelector('[data-stock="all"]');
-  if (allStock) allStock.classList.add('active');
-  
+  document.querySelector('[data-stock="all"]').classList.add('active');
   applyFilters();
 }
 
@@ -88,17 +70,12 @@ function applyFilters() {
   const all = window._higieneAll || [];
 
   // Leer búsqueda y sort en tiempo real
-  const catSearch = document.getElementById('catSearch');
-  const sortSelect = document.getElementById('sortSelect');
-  
-  filters.search = (catSearch?.value || '').toLowerCase().trim();
-  filters.sort   = sortSelect?.value || 'default';
+  filters.search = (document.getElementById('catSearch')?.value || '').toLowerCase().trim();
+  filters.sort   = document.getElementById('sortSelect')?.value || 'default';
 
   // Leer precio
-  const priceMin = document.getElementById('priceMin');
-  const priceMax = document.getElementById('priceMax');
-  const pMin = parseFloat(priceMin?.value) || 0;
-  const pMax = parseFloat(priceMax?.value) || Infinity;
+  const pMin = parseFloat(document.getElementById('priceMin')?.value) || 0;
+  const pMax = parseFloat(document.getElementById('priceMax')?.value) || Infinity;
   filters.priceMin = pMin;
   filters.priceMax = pMax;
 
@@ -126,9 +103,7 @@ function applyFilters() {
 
   renderProducts(result);
   renderActiveFilterTags();
-  
-  const countNum = document.getElementById('countNum');
-  if (countNum) countNum.textContent = result.length;
+  document.getElementById('countNum').textContent = result.length;
 }
 
 /* ─── Ordenar ─── */
@@ -154,7 +129,7 @@ function renderProducts(list) {
     grid.innerHTML = `
       <div class="no-results">
         <div class="nr-icon">🔍</div>
-        <p>No encontramos productos de higiene con esos filtros.</p>
+        <p>No encontramos productos en Higiene con esos filtros.</p>
         <button onclick="resetAllFilters()">Limpiar filtros</button>
       </div>`;
     return;
@@ -164,6 +139,7 @@ function renderProducts(list) {
     const stock     = p.stock ?? null;  // null = sin control de stock (ilimitado)
     const sinStock  = stock !== null && stock <= 0;
     const stockBajo = stock !== null && stock > 0 && stock <= 5;
+    const stockOk   = stock === null || stock > 5;
 
     const stockBadgeHtml = sinStock  ? `<span class="stock-badge out">Sin stock</span>`
                          : stockBajo ? `<span class="stock-badge low">¡Últimas ${stock}!</span>`
@@ -179,7 +155,7 @@ function renderProducts(list) {
         ${p.badge ? `<span class="product-badge badge-${p.badge}">${p.badge==='offer'?'OFERTA':p.badge==='new'?'NUEVO':'🔥 HOT'}</span>` : ''}
         ${stockBadgeHtml}
         <div class="product-img">
-          <img src="${p.img||''}" alt="${p.name||''}" loading="lazy" onerror="this.src='https://via.placeholder.com/200x200?text=Sin+imagen'"/>
+          <img src="${p.img||''}" alt="${p.name||''}" loading="lazy"/>
           <div class="out-overlay">SIN STOCK</div>
         </div>
         <div class="product-body">
@@ -208,26 +184,19 @@ function renderProducts(list) {
 /* ─── Tags de filtros activos ─── */
 function renderActiveFilterTags() {
   const wrap = document.getElementById('activeFilterTags');
-  if (!wrap) return;
-  
   const tags = [];
 
   if (filters.subcat !== 'all') {
-    const chip = document.querySelector(`[data-subcat="${filters.subcat}"] .chip-icon`);
-    const icon = chip?.textContent || '';
-    const subcatName = filters.subcat.replace(/-/g, ' ');
-    tags.push({ label: icon + ' ' + subcatName, key: 'subcat' });
+    const label = document.querySelector(`[data-subcat="${filters.subcat}"] .chip-icon`)?.textContent || '';
+    tags.push({ label: label + ' ' + filters.subcat, key: 'subcat' });
   }
-  if (filters.search) tags.push({ label: `🔍 "${filters.search}"`, key: 'search' });
+  if (filters.search) tags.push({ label: `"${filters.search}"`, key: 'search' });
   if (filters.priceMin > 0 || filters.priceMax !== Infinity) {
     const max = filters.priceMax === Infinity ? '∞' : `$${filters.priceMax}`;
-    tags.push({ label: `💰 $${filters.priceMin} — ${max}`, key: 'price' });
+    tags.push({ label: `$${filters.priceMin} — ${max}`, key: 'price' });
   }
-  filters.badges.forEach(b => {
-    const badgeLabel = b === 'offer' ? '🔖 OFERTA' : b === 'new' ? '✨ NUEVO' : '🔥 HOT';
-    tags.push({ label: badgeLabel, key: `badge-${b}` });
-  });
-  if (filters.stock === 'in') tags.push({ label: '✅ En stock', key: 'stock' });
+  filters.badges.forEach(b => tags.push({ label: b.toUpperCase(), key: `badge-${b}` }));
+  if (filters.stock === 'in') tags.push({ label: 'En stock', key: 'stock' });
 
   wrap.innerHTML = tags.map(t => `
     <span class="active-filter-tag">
@@ -238,22 +207,10 @@ function renderActiveFilterTags() {
 
 function removeFilterTag(key) {
   if (key === 'subcat') clearFilter('subcat');
-  else if (key === 'search') { 
-    filters.search = ''; 
-    const catSearch = document.getElementById('catSearch');
-    if (catSearch) catSearch.value = ''; 
-    applyFilters(); 
-  }
+  else if (key === 'search') { filters.search=''; document.getElementById('catSearch').value=''; applyFilters(); }
   else if (key === 'price') clearFilter('price');
   else if (key.startsWith('badge-')) toggleBadge(key.replace('badge-',''));
-  else if (key === 'stock') { 
-    filters.stock = 'all'; 
-    const allStock = document.querySelector('[data-stock="all"]');
-    const inStock = document.querySelector('[data-stock="in"]');
-    if (allStock) allStock.classList.add('active');
-    if (inStock) inStock.classList.remove('active');
-    applyFilters(); 
-  }
+  else if (key === 'stock') { filters.stock='all'; document.querySelector('[data-stock="all"]').classList.add('active'); document.querySelector('[data-stock="in"]').classList.remove('active'); applyFilters(); }
 }
 
 /* ─── Contadores de subcategorías (HIGIENE) ─── */
@@ -266,7 +223,7 @@ function updateSubcatCounts(prods) {
     }
   });
   
-  // IMPORTANTE: Estos valores deben coincidir EXACTAMENTE con los data-subcat del HTML
+  // Estos valores deben coincidir con los data-subcat del HTML
   const subcats = [
     'cuidado-personal',
     'farmacia',
@@ -288,24 +245,21 @@ function updateSubcatCounts(prods) {
   
   const allEl = document.getElementById('cnt-all');
   if (allEl) allEl.textContent = prods.length;
+  
+  // Actualizar contador de subcategorías en el hero
+  const heroSubcats = document.getElementById('heroSubcats');
+  if (heroSubcats) heroSubcats.textContent = subcats.length;
 }
 
-/* ─── Stats del hero ─── */
 /* ─── Stats del hero ─── */
 function updateHeroStats(prods) {
   const totalEl = document.getElementById('heroTotalProds');
   const inStockEl = document.getElementById('heroInStock');
-  const subcatsEl = document.getElementById('heroSubcats');
   
   if (totalEl) totalEl.textContent = prods.length;
   if (inStockEl) {
     const inStock = prods.filter(p => p.stock === null || p.stock > 0).length;
     inStockEl.textContent = inStock;
-  }
-  // Contar subcategorías reales (excluyendo "Todas")
-  if (subcatsEl) {
-    const totalSubcats = document.querySelectorAll('#subcatFilters .filter-chip[data-subcat]:not([data-subcat="all"])').length;
-    subcatsEl.textContent = totalSubcats;
   }
 }
 
@@ -319,7 +273,7 @@ function addToCart(docId, e) {
 
   const stock = p.stock ?? null;
   if (stock !== null && stock <= 0) {
-    showToast('❌ Este producto no tiene stock disponible');
+    showToast('❌ Esta oferta no tiene stock disponible');
     return;
   }
 
@@ -338,14 +292,14 @@ function addToCart(docId, e) {
   showToast(`✅ ${p.name} agregado al carrito`);
   if (e) { 
     const b = e.target; 
-    b.style.transform = 'scale(1.3)'; 
-    setTimeout(() => b.style.transform = '', 200); 
+    b.style.transform='scale(1.3)'; 
+    setTimeout(()=>b.style.transform='',200); 
   }
 }
 
 function changeQty(docId, d) {
   if (!cart[docId]) return;
-  const p = (window._higieneAll || []).find(x => x.docId === docId);
+  const p = (window._higieneAll||[]).find(x=>x.docId===docId);
   const stock = p?.stock ?? null;
 
   if (d > 0 && stock !== null && cart[docId].qty >= stock) {
@@ -362,7 +316,7 @@ function changeQty(docId, d) {
 function updateCartUI() {
   const cartCountEl = document.getElementById('cartCount');
   if (cartCountEl) {
-    cartCountEl.textContent = Object.values(cart).reduce((s, i) => s + i.qty, 0);
+    cartCountEl.textContent = Object.values(cart).reduce((s,i)=>s+i.qty,0);
   }
   renderCartItems();
 }
@@ -381,10 +335,10 @@ function renderCartItems() {
   if (c) {
     c.innerHTML = items.map(i => `
       <div class="cart-item">
-        <div class="cart-item-img"><img src="${i.img || ''}" alt="${i.name || ''}"/></div>
+        <div class="cart-item-img"><img src="${i.img||''}" alt="${i.name||''}"/></div>
         <div class="cart-item-info">
-          <div class="cart-item-name">${i.name || ''}</div>
-          <div class="cart-item-price">$${(Number(i.price || 0) * i.qty).toLocaleString('es-AR')}</div>
+          <div class="cart-item-name">${i.name||''}</div>
+          <div class="cart-item-price">$${(Number(i.price||0)*i.qty).toLocaleString('es-AR')}</div>
         </div>
         <div class="qty-ctrl">
           <button class="qty-btn" onclick="changeQty('${i.docId}',-1)">−</button>
@@ -396,7 +350,7 @@ function renderCartItems() {
   
   const cartTotal = document.getElementById('cartTotal');
   if (cartTotal) {
-    cartTotal.textContent = `$${items.reduce((s, i) => s + Number(i.price || 0) * i.qty, 0).toLocaleString('es-AR')}`;
+    cartTotal.textContent = `$${items.reduce((s,i)=>s+Number(i.price||0)*i.qty,0).toLocaleString('es-AR')}`;
   }
   if (f) f.style.display = 'block';
 }
@@ -410,7 +364,7 @@ function toggleCart() {
 
 function checkout() {
   showToast('🎉 Redirigiendo al checkout...');
-  setTimeout(() => toggleCart(), 800);
+  setTimeout(()=>toggleCart(), 800);
 }
 
 /* ─── Tema ─── */
@@ -418,14 +372,14 @@ let theme = localStorage.getItem('lob24theme') || 'dark';
 function applyTheme(t) {
   document.documentElement.setAttribute('data-theme', t);
   const themeToggle = document.getElementById('themeToggle');
-  if (themeToggle) themeToggle.textContent = t === 'dark' ? '🌙' : '☀️';
+  if (themeToggle) themeToggle.textContent = t==='dark'?'🌙':'☀️';
   localStorage.setItem('lob24theme', t);
   theme = t;
 }
-function toggleTheme() { applyTheme(theme === 'dark' ? 'light' : 'dark'); }
+function toggleTheme() { applyTheme(theme==='dark'?'light':'dark'); }
 
 /* ─── Modal login ─── */
-function openModal() { 
+function openModal()  { 
   const modal = document.getElementById('modalOverlay');
   if (modal) modal.classList.add('open');
 }
@@ -436,7 +390,7 @@ function closeModal() {
 
 const modalOverlay = document.getElementById('modalOverlay');
 if (modalOverlay) {
-  modalOverlay.addEventListener('click', function(e) { if (e.target === this) closeModal(); });
+  modalOverlay.addEventListener('click', function(e){ if(e.target===this) closeModal(); });
 }
 
 function switchTab(t) {
@@ -445,10 +399,10 @@ function switchTab(t) {
   const formLogin = document.getElementById('formLogin');
   const formReg = document.getElementById('formReg');
   
-  if (tabLogin) tabLogin.classList.toggle('active', t === 'login');
-  if (tabReg) tabReg.classList.toggle('active', t === 'reg');
-  if (formLogin) formLogin.style.display = t === 'login' ? 'block' : 'none';
-  if (formReg) formReg.style.display = t === 'reg' ? 'block' : 'none';
+  if (tabLogin) tabLogin.classList.toggle('active', t==='login');
+  if (tabReg) tabReg.classList.toggle('active', t==='reg');
+  if (formLogin) formLogin.style.display = t==='login'?'block':'none';
+  if (formReg) formReg.style.display = t==='reg'?'block':'none';
 }
 
 /* ─── Forgot password ─── */
@@ -470,7 +424,7 @@ function closeForgotModal() {
 
 const forgotModal = document.getElementById('forgotModal');
 if (forgotModal) {
-  forgotModal.addEventListener('click', function(e) { if (e.target === this) closeForgotModal(); });
+  forgotModal.addEventListener('click', function(e){ if(e.target===this) closeForgotModal(); });
 }
 
 async function sendResetEmail() {
@@ -479,22 +433,22 @@ async function sendResetEmail() {
   const btn = document.getElementById('resetBtn');
   
   if (!email) { 
-    if (msg) { msg.textContent = '⚠️ Ingresá un email válido'; msg.style.color = '#f87171'; }
+    if (msg) { msg.textContent='⚠️ Ingresá un email válido'; msg.style.color='#f87171'; }
     return; 
   }
   
-  if (btn) btn.disabled = true;
-  if (btn) btn.textContent = 'Enviando...';
+  if (btn) btn.disabled=true;
+  if (btn) btn.textContent='Enviando...';
   
   try {
     await window.fbSendPasswordReset(email);
-    if (msg) { msg.textContent = `📩 Enlace enviado a ${email}`; msg.style.color = '#4ade80'; }
-    setTimeout(() => closeForgotModal(), 4000);
+    if (msg) { msg.textContent=`📩 Enlace enviado a ${email}`; msg.style.color='#4ade80'; }
+    setTimeout(()=>closeForgotModal(), 4000);
   } catch(err) {
-    if (msg) { msg.textContent = '❌ Error: ' + err.message; msg.style.color = '#f87171'; }
+    if (msg) { msg.textContent='❌ Error: '+err.message; msg.style.color='#f87171'; }
   } finally { 
-    if (btn) btn.disabled = false;
-    if (btn) btn.textContent = 'Enviar enlace';
+    if (btn) btn.disabled=false;
+    if (btn) btn.textContent='Enviar enlace';
   }
 }
 
@@ -503,7 +457,7 @@ async function handleLogin() {
   const email = document.getElementById('loginEmail')?.value.trim();
   const pass = document.getElementById('loginPass')?.value;
   
-  if (!email || !pass) { 
+  if (!email||!pass) { 
     showToast('⚠️ Ingresá email y contraseña'); 
     return; 
   }
@@ -519,12 +473,12 @@ async function handleLogin() {
 }
 
 async function handleRegister() {
-  const name = document.getElementById('regName')?.value.trim();
-  const email = document.getElementById('regEmail')?.value.trim();
-  const pass = document.getElementById('regPass')?.value;
-  const phone = document.getElementById('regPhone')?.value.trim();
+  const name = document.querySelector('#formReg input[placeholder="Juan Pérez"]')?.value.trim();
+  const email = document.querySelector('#formReg input[type="email"]')?.value.trim();
+  const pass = document.querySelector('#formReg input[type="password"]')?.value;
+  const phone = document.querySelector('#formReg input[type="tel"]')?.value.trim();
   
-  if (!name || !email || !pass || pass.length < 6) { 
+  if (!name||!email||pass.length<6) { 
     showToast('⚠️ Completá todos los datos (contraseña mínimo 6 caracteres)'); 
     return; 
   }
@@ -532,11 +486,11 @@ async function handleRegister() {
   try {
     const { auth, createUserWithEmailAndPassword, db, doc, setDoc } = window.fbAuth;
     const res = await createUserWithEmailAndPassword(auth, email, pass);
-    await setDoc(doc(db, 'users', res.user.uid), { name, email, phone, points: 0, createdAt: new Date() });
+    await setDoc(doc(db,'users',res.user.uid),{name,email,phone,points:0,createdAt:new Date()});
     closeModal(); 
     showToast('🎉 ¡Cuenta creada exitosamente!');
   } catch(err) { 
-    showToast('❌ Error: ' + err.message); 
+    showToast('❌ Error: '+err.message); 
   }
 }
 
@@ -553,7 +507,7 @@ function toggleUserDropdown() {
 
 window.addEventListener('click', e => {
   if (!e.target.matches('.user-avatar')) {
-    document.querySelectorAll('.user-dropdown').forEach(d => d.classList.remove('show'));
+    document.querySelectorAll('.user-dropdown').forEach(d=>d.classList.remove('show'));
   }
 });
 
@@ -575,13 +529,13 @@ function handleSearch() {
     if (catSearchEl) catSearchEl.value = q;
     applyFilters();
     const catSearchBar = document.querySelector('.cat-search-bar');
-    if (catSearchBar) catSearchBar.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    if (catSearchBar) catSearchBar.scrollIntoView({ behavior:'smooth', block:'center' });
   }
 }
 
 const searchInput = document.getElementById('searchInput');
 if (searchInput) {
-  searchInput.addEventListener('keydown', e => { if (e.key === 'Enter') handleSearch(); });
+  searchInput.addEventListener('keydown', e=>{ if(e.key==='Enter') handleSearch(); });
 }
 
 /* ─── Toast ─── */
@@ -592,10 +546,10 @@ function showToast(msg) {
   const container = document.getElementById('toastContainer');
   if (container) {
     container.appendChild(t);
-    requestAnimationFrame(() => requestAnimationFrame(() => t.classList.add('show')));
-    setTimeout(() => { 
+    requestAnimationFrame(()=>requestAnimationFrame(()=>t.classList.add('show')));
+    setTimeout(()=>{ 
       t.classList.remove('show'); 
-      setTimeout(() => t.remove(), 400); 
+      setTimeout(()=>t.remove(),400); 
     }, 3500);
   }
 }

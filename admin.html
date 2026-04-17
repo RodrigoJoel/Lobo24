@@ -43,7 +43,7 @@
     <div class="nav-item" onclick="navigate('carousel',this)"><span class="nav-icon">🖼️</span><span>Carrusel hero</span></div>
     <div class="nav-item" onclick="navigate('promos',this)"><span class="nav-icon">🏷️</span><span>Promos laterales</span></div>
     <div class="nav-item" onclick="navigate('banner',this)"><span class="nav-icon">📱</span><span>Banner app</span></div>
-
+    <div class="nav-item" onclick="navigate('offersStrip',this)"><span class="nav-icon">🏷️</span><span>Ofertas del día</span></div>
     <div class="nav-divider"></div>
 
     <div class="sidebar-section">Catálogo</div>
@@ -192,7 +192,14 @@ async function loadAll() {
 
   const newSnap = await getDocs(collection(db, "newProducts"));
   window.DATA.newProds = newSnap.docs.map((d) => ({ docId: d.id, ...d.data() }));
+  
+  const ofertasIndexSnap = await getDocs(collection(db, 'ofertasIndex'));
+  window.DATA.ofertasIndex = ofertasIndexSnap.docs.map(d => ({ docId: d.id, ...d.data() })).sort((a,b)=>(a.order||0)-(b.order||0));
 
+  // Cargar offersStrip
+  const offersStripSnap = await getDocs(collection(db, "offersStrip"));
+  window.DATA.offersStrip = offersStripSnap.docs.map(d => ({ docId: d.id, ...d.data() })).sort((a, b) => (a.order || 0) - (b.order || 0));
+  
   const secSnap = await getDocs(collection(db, "config"));
   secSnap.forEach((d) => {
     if (d.id === "sections") window.DATA.sections = d.data();
@@ -214,6 +221,7 @@ async function loadAll() {
 }
 
 function setupRealtimeListeners() {
+  // Listener para cada colección de categorías
   for (const collectionName of window.CATEGORY_COLLECTIONS) {
     onSnapshot(collection(db, collectionName), (snap) => {
       window.DATA[collectionName] = snap.docs.map((d) => ({ docId: d.id, ...d.data() }));
@@ -222,6 +230,15 @@ function setupRealtimeListeners() {
       }
     });
   }
+  
+  // Listener para offersStrip (separado, fuera del bucle)
+  onSnapshot(collection(db, 'offersStrip'), (snap) => {
+    window.DATA.offersStrip = snap.docs.map(d => ({ docId: d.id, ...d.data() }))
+      .sort((a, b) => (a.order || 0) - (b.order || 0));
+    if (window.currentPage === 'offersStrip' && typeof window.render === 'function') {
+      window.render('offersStrip');
+    }
+  });
 }
 
 onAuthStateChanged(auth, (user) => {

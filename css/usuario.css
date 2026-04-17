@@ -1,0 +1,510 @@
+/* Usuario - Estilos específicos */
+
+/* Hero */
+.user-hero {
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  padding: 40px 0;
+  position: relative;
+  overflow: hidden;
+}
+
+.user-hero::before {
+  content: '👤';
+  position: absolute;
+  right: 80px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 180px;
+  opacity: 0.05;
+  pointer-events: none;
+}
+
+.user-hero-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+.user-breadcrumb {
+  font-size: 13px;
+  color: var(--muted);
+  margin-bottom: 16px;
+}
+
+.user-breadcrumb a {
+  color: var(--purple-lt);
+  text-decoration: none;
+}
+
+.user-breadcrumb a:hover {
+  text-decoration: underline;
+}
+
+.user-hero h1 {
+  font-family: var(--font-head);
+  font-size: 42px;
+  letter-spacing: 0.04em;
+  color: var(--text);
+  margin-bottom: 12px;
+}
+
+.user-hero h1 em {
+  color: var(--purple-lt);
+  font-style: normal;
+}
+
+.user-hero p {
+  color: var(--muted);
+  font-size: 16px;
+}
+
+/* Contenedor principal */
+.user-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 40px 24px;
+}
+
+/* Tabs */
+.user-tabs {
+  display: flex;
+  gap: 8px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 32px;
+}
+
+.user-tab {
+  background: none;
+  border: none;
+  padding: 12px 24px;
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--muted);
+  cursor: pointer;
+  transition: all 0.2s;
+  border-radius: 8px 8px 0 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.user-tab i {
+  font-size: 16px;
+}
+
+.user-tab:hover {
+  color: var(--text);
+  background: var(--bg3);
+}
+
+.user-tab.active {
+  color: var(--purple-lt);
+  border-bottom: 2px solid var(--purple-lt);
+}
+
+/* Tab content */
+.user-tab-content {
+  display: none;
+  animation: fadeIn 0.3s ease;
+}
+
+.user-tab-content.active {
+  display: block;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Cards */
+.user-card {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.user-card-header {
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: linear-gradient(90deg, rgba(124,58,237,0.05), transparent);
+}
+
+.user-card-header h2 {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.user-card-header h2 i {
+  color: var(--purple-lt);
+}
+
+.user-card-body {
+  padding: 24px;
+}
+
+/* Profile info */
+.profile-info {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.info-row {
+  display: flex;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid rgba(61, 48, 88, 0.3);
+}
+
+.info-row:last-child {
+  border-bottom: none;
+}
+
+.info-label {
+  width: 180px;
+  font-size: 14px;
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.info-label i {
+  width: 20px;
+  color: var(--purple-lt);
+}
+
+.info-value {
+  flex: 1;
+  font-size: 15px;
+  color: var(--text);
+  font-weight: 500;
+}
+
+/* Form inputs */
+.form-input {
+  width: 100%;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 14px;
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 14px;
+  outline: none;
+  transition: all 0.2s;
+}
+
+.form-input:focus {
+  border-color: var(--purple);
+  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
+}
+
+/* Orders list */
+.orders-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.order-card {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  transition: all 0.2s;
+}
+
+.order-card:hover {
+  border-color: var(--purple);
+}
+
+.order-header {
+  padding: 16px 20px;
+  background: rgba(124, 58, 237, 0.05);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+.order-date {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.order-date i {
+  color: var(--purple-lt);
+}
+
+.order-total {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.order-amount {
+  font-size: 18px;
+  font-weight: bold;
+  color: var(--yellow);
+}
+
+.order-points {
+  font-size: 12px;
+  color: var(--green);
+  background: rgba(74, 222, 128, 0.1);
+  padding: 4px 10px;
+  border-radius: 20px;
+}
+
+.order-payment {
+  font-size: 12px;
+  color: var(--muted);
+  background: var(--bg4);
+  padding: 4px 10px;
+  border-radius: 20px;
+}
+
+.order-products {
+  padding: 16px 20px;
+}
+
+.order-product-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(61, 48, 88, 0.3);
+}
+
+.order-product-item:last-child {
+  border-bottom: none;
+}
+
+.order-product-name {
+  flex: 2;
+  font-size: 14px;
+  color: var(--text);
+}
+
+.order-product-qty {
+  width: 60px;
+  text-align: center;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.order-product-price {
+  width: 100px;
+  text-align: right;
+  font-size: 14px;
+  color: var(--text);
+}
+
+.order-product-subtotal {
+  width: 100px;
+  text-align: right;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--yellow);
+}
+
+/* Points summary */
+.points-summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 10px;
+  margin-bottom: 32px;
+}
+
+.points-card {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  transition: all 0.2s;
+}
+
+.points-card:hover {
+  border-color: var(--purple);
+  transform: translateY(-2px);
+}
+
+.points-card.total .points-icon {
+  background: rgba(124, 58, 237, 0.15);
+  color: var(--purple-lt);
+}
+
+.points-card.value .points-icon {
+  background: rgba(240, 192, 64, 0.15);
+  color: var(--yellow);
+}
+
+.points-card.expiring .points-icon {
+  background: rgba(248, 113, 113, 0.15);
+  color: #f87171;
+}
+
+.points-icon {
+  width: 55px;
+  height: 55px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+}
+
+.points-info {
+  flex: 1;
+}
+
+.points-label {
+  display: block;
+  font-size: 12px;
+  color: var(--muted);
+  margin-bottom: 4px;
+}
+
+.points-value {
+  display: block;
+  font-size: 28px;
+  font-weight: bold;
+  color: var(--text);
+}
+
+/* Points rules */
+.points-rules {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 20px;
+}
+
+.points-rules h3 {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.points-rules h3 i {
+  color: var(--yellow);
+}
+
+.points-rules ul {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 16px 0;
+}
+
+.points-rules li {
+  padding: 8px 0;
+  font-size: 14px;
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border-bottom: 1px solid rgba(61, 48, 88, 0.3);
+}
+
+.points-rules li:last-child {
+  border-bottom: none;
+}
+
+.points-rules li::before {
+  content: "✓";
+  color: var(--green);
+  font-weight: bold;
+}
+
+.points-example {
+  background: rgba(240, 192, 64, 0.08);
+  border-left: 3px solid var(--yellow);
+  padding: 12px 16px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 13px;
+  color: var(--yellow);
+}
+
+.points-example i {
+  font-size: 18px;
+}
+
+/* Loading spinner */
+.loading-spinner {
+  text-align: center;
+  padding: 40px;
+  color: var(--muted);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .user-hero h1 {
+    font-size: 32px;
+  }
+  
+  .user-container {
+    padding: 24px 16px;
+  }
+  
+  .user-tabs {
+    overflow-x: auto;
+  }
+  
+  .user-tab {
+    padding: 10px 16px;
+    font-size: 13px;
+  }
+  
+  .info-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+  }
+  
+  .info-label {
+    width: 100%;
+  }
+  
+  .order-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .order-product-item {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  
+  .order-product-name {
+    flex: 1 1 100%;
+  }
+  
+  .points-summary {
+    grid-template-columns: 1fr;
+  }
+}

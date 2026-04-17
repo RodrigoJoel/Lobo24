@@ -421,3 +421,4 @@ document.querySelectorAll('.animate').forEach(el => obs.observe(el));
    INIT
 ══════════════════════════════════════ */
 applyTheme(theme);
+

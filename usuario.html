@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="dark">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Lobo24 — Mi Cuenta</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="css/styles.css"/>
+  <link rel="stylesheet" href="css/usuario.css"/>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div class="topbar" id="elTopbar">
+  <span id="topbarText">🐺 <strong>LOBO24</strong> — Cargando...</span>
+</div>
+
+<!-- NAVBAR -->
+<nav class="navbar">
+  <a href="index.html" class="logo">
+    <img src="imagenes/iconoLobo24.png" alt="Lobo24 Logo" class="logo-img"/>
+    <div class="logo-text">LOBO<span>24</span></div>
+  </a>
+  <div class="search-wrap">
+    <input type="text" id="searchInput" placeholder="Buscá productos, marcas..."/>
+    <button onclick="handleSearch()">🔍</button>
+  </div>
+  <div class="nav-actions">
+    <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" title="Modo oscuro / claro">🌙</button>
+    <div id="userStatusContainer"></div>
+    <button class="nav-btn primary cart-btn" onclick="toggleCart()">
+      <span>🛒</span> Carrito
+      <span class="cart-count" id="cartCount">0</span>
+    </button>
+  </div>
+</nav>
+
+<!-- CATEGORY NAV -->
+<div class="cat-nav">
+  <a href="index.html"><span class="icon">⭐</span> Destacados</a>
+  <a href="bebidas.html"><span class="icon">🥤</span> Bebidas</a>
+  <a href="snacks.html"><span class="icon">🍪</span> Snacks</a>
+  <a href="almacen.html"><span class="icon">🍝</span> Almacén</a>
+  <a href="higiene.html"><span class="icon">🧼</span> Higiene</a>
+  <a href="limpieza.html"><span class="icon">🧴</span> Limpieza</a>
+  <a href="congelados.html"><span class="icon">🧊</span> Congelados</a>
+  <a href="lacteos.html"><span class="icon">🧀</span> Lácteos</a>
+  <a href="panaderia.html"><span class="icon">🍞</span> Panadería</a>
+  <a href="mascotas.html"><span class="icon">🐾</span> Mascotas</a>
+  <a href="ofertas.html"><span class="icon">🔥</span> Ofertas</a>
+</div>
+
+<!-- HERO USUARIO -->
+<div class="user-hero">
+  <div class="user-hero-inner">
+    <div class="user-breadcrumb">
+      <a href="index.html">Inicio</a>
+      <span>/</span>
+      <span>Mi cuenta</span>
+    </div>
+    <h1>MI <em>CUENTA</em></h1>
+    <p>Gestioná tu información personal, revisá tus compras y administrá tus puntos.</p>
+  </div>
+</div>
+
+<!-- CONTENEDOR PRINCIPAL -->
+<div class="user-container">
+  
+  <!-- TABS -->
+  <div class="user-tabs">
+    <button class="user-tab active" data-tab="cuenta">
+      <i class="fas fa-user"></i> Mi cuenta
+    </button>
+    <button class="user-tab" data-tab="compras">
+      <i class="fas fa-shopping-bag"></i> Mis compras
+    </button>
+    <button class="user-tab" data-tab="puntos">
+      <i class="fas fa-star"></i> Mis puntos
+    </button>
+  </div>
+
+  <!-- TAB: MI CUENTA -->
+  <div class="user-tab-content active" id="tabCuenta">
+    <div class="user-card">
+      <div class="user-card-header">
+        <h2><i class="fas fa-user-circle"></i> Información personal</h2>
+        <button class="btn btn-ghost btn-sm" id="editProfileBtn" onclick="enableEditMode()">
+          <i class="fas fa-pencil-alt"></i> Editar
+        </button>
+      </div>
+      <div class="user-card-body">
+        <div class="profile-info" id="profileInfo">
+          <div class="info-row">
+            <span class="info-label"><i class="fas fa-user"></i> Nombre completo:</span>
+            <span class="info-value" id="profileName">Cargando...</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label"><i class="fas fa-envelope"></i> Correo electrónico:</span>
+            <span class="info-value" id="profileEmail">Cargando...</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label"><i class="fas fa-phone"></i> Teléfono:</span>
+            <span class="info-value" id="profilePhone">Cargando...</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label"><i class="fas fa-calendar-alt"></i> Miembro desde:</span>
+            <span class="info-value" id="profileSince">Cargando...</span>
+          </div>
+        </div>
+        <div class="profile-edit" id="profileEdit" style="display:none">
+          <div class="field">
+            <label>Nombre completo</label>
+            <input type="text" id="editName" class="form-input">
+          </div>
+          <div class="field">
+            <label>Teléfono</label>
+            <input type="tel" id="editPhone" class="form-input" placeholder="+54 9 xxx xxx xxxx">
+          </div>
+          <div class="btn-row">
+            <button class="btn btn-primary" onclick="saveProfileChanges()">
+              <i class="fas fa-save"></i> Guardar cambios
+            </button>
+            <button class="btn btn-ghost" onclick="cancelEditMode()">
+              <i class="fas fa-times"></i> Cancelar
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB: MIS COMPRAS -->
+  <div class="user-tab-content" id="tabCompras">
+    <div class="user-card">
+      <div class="user-card-header">
+        <h2><i class="fas fa-shopping-bag"></i> Historial de compras</h2>
+      </div>
+      <div class="user-card-body">
+        <div id="ordersList" class="orders-list">
+          <div class="loading-spinner">Cargando tus compras...</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB: MIS PUNTOS -->
+  <div class="user-tab-content" id="tabPuntos">
+    <div class="user-card">
+      <div class="user-card-header">
+        <h2><i class="fas fa-star"></i> Mis puntos</h2>
+      </div>
+      <div class="user-card-body">
+        <div class="points-summary">
+          <div class="points-card total">
+            <div class="points-icon">⭐</div>
+            <div class="points-info">
+              <span class="points-label">Puntos acumulados</span>
+              <strong class="points-value" id="totalPoints">0</strong>
+            </div>
+          </div>
+          <div class="points-card value">
+            <div class="points-icon">💰</div>
+            <div class="points-info">
+              <span class="points-label">Valor en pesos</span>
+              <strong class="points-value" id="pointsValue">$0</strong>
+            </div>
+          </div>
+          <div class="points-card expiring">
+            <div class="points-icon">⚠️</div>
+            <div class="points-info">
+              <span class="points-label">Puntos a vencer (60 días)</span>
+              <strong class="points-value" id="expiringPoints">0</strong>
+            </div>
+          </div>
+        </div>
+
+        <div class="points-rules">
+          <h3><i class="fas fa-info-circle"></i> ¿Cómo funcionan los puntos?</h3>
+          <ul>
+            <li><strong>💰 Acumulación:</strong> Ganás <strong>1 punto por cada $100</strong> gastados en tus compras.</li>
+            <li><strong>⏰ Vencimiento:</strong> Los puntos caducan a los <strong>60 días</strong> de haber sido obtenidos. ¡Usalos antes de que expiren!</li>
+            <li><strong>🔄 Canje:</strong> Podés canjear tus puntos en tu próxima compra. <strong>Podés usar hasta el 30% del valor total</strong> de tu compra con puntos.</li>
+            <li><strong>💎 Beneficios:</strong> Acumulá más puntos y accedé a beneficios exclusivos.</li>
+            <li><strong>📱 Consulta:</strong> Revisá tus puntos en cualquier momento desde esta sección.</li>
+          </ul>
+          <div class="points-example">
+            <i class="fas fa-lightbulb"></i>
+            <span>Ejemplo: Si tu compra es de $10.000, podés canjear hasta $3.000 usando tus puntos acumulados.</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CART -->
+<div class="drawer-overlay" id="drawerOverlay" onclick="toggleCart()"></div>
+<div class="cart-drawer" id="cartDrawer">
+  <div class="drawer-header"><h2>TU CARRITO 🛒</h2><button class="drawer-close" onclick="toggleCart()">✕</button></div>
+  <div class="drawer-items" id="drawerItems"><div class="drawer-empty"><div class="empty-icon">🛒</div><p>Tu carrito está vacío.<br>¡Agregá algo rico!</p></div></div>
+  <div class="drawer-footer" id="drawerFooter" style="display:none">
+    <div class="total-row"><span>Total</span><strong id="cartTotal">$0</strong></div>
+    <button class="checkout-btn" onclick="checkout()">Finalizar compra →</button>
+  </div>
+</div>
+
+<!-- LOGIN MODAL (similar al index) -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <button class="modal-close-x" onclick="closeModal()">✕</button>
+    <div class="modal-logo">
+      <div style="font-family:var(--font-head);font-size:40px;text-align:center">LOBO<span style="color:var(--accent)">24</span></div>
+      <p>Tu mercado de confianza</p>
+    </div>
+    <div class="modal-tabs">
+      <div class="modal-tab active" id="tabLogin" onclick="switchTab('login')">Iniciar sesión</div>
+      <div class="modal-tab" id="tabReg" onclick="switchTab('reg')">Crear cuenta</div>
+    </div>
+    <div id="formLogin">
+      <div class="form-group"><label>Email</label><input type="email" id="loginEmail" placeholder="tu@email.com"/></div>
+      <div class="form-group"><label>Contraseña</label><input type="password" id="loginPass" placeholder="••••••••"/></div>
+      <button class="modal-submit" onclick="handleLogin()">Ingresar</button>
+      <div style="text-align:center;margin-top:14px"><a href="#" class="forgot-link" onclick="showForgotPassword(event)">¿Olvidaste tu contraseña?</a></div>
+    </div>
+    <div id="formReg" style="display:none">
+      <div class="form-group"><label>Nombre completo</label><input type="text" id="regName" placeholder="Juan Pérez"/></div>
+      <div class="form-group"><label>Email</label><input type="email" id="regEmail" placeholder="tu@email.com"/></div>
+      <div class="form-group"><label>Contraseña</label><input type="password" id="regPass" placeholder="Mínimo 8 caracteres"/></div>
+      <div class="form-group"><label>Teléfono</label><input type="tel" id="regPhone" placeholder="+54 9 xxx xxx xxxx"/></div>
+      <button class="modal-submit" onclick="handleRegister()">Crear cuenta</button>
+    </div>
+  </div>
+</div>
+
+<!-- FORGOT PASSWORD MODAL -->
+<div class="modal-overlay" id="forgotModal">
+  <div class="modal" style="max-width:380px">
+    <button class="modal-close-x" onclick="closeForgotModal()">✕</button>
+    <div class="modal-logo">
+      <div style="font-size:36px;text-align:center">🔑</div>
+      <div style="font-family:var(--font-head);font-size:24px;text-align:center;margin-top:6px">RECUPERAR ACCESO</div>
+      <p style="text-align:center;margin-top:6px">Ingresá tu email y te enviamos un enlace para restablecer tu contraseña.</p>
+    </div>
+    <div class="form-group" style="margin-top:8px"><label>Email de tu cuenta</label><input type="email" id="resetEmail" placeholder="tu@email.com"/></div>
+    <button class="modal-submit" id="resetBtn" onclick="sendResetEmail()">Enviar enlace</button>
+    <p id="resetMessage" style="margin-top:12px;font-size:13px;text-align:center;min-height:20px"></p>
+    <div style="text-align:center;margin-top:14px"><a href="#" style="font-size:13px;color:var(--muted)" onclick="closeForgotModal();openModal();return false;">← Volver al login</a></div>
+  </div>
+</div>
+
+<!-- SYNC INDICATOR -->
+<div class="sync-dot" id="syncDot">EN VIVO</div>
+
+<!-- TOAST -->
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- FIREBASE SDK -->
+<!-- FIREBASE SDK -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
+import { getFirestore, doc, collection, onSnapshot, getDocs, setDoc, getDoc, updateDoc, addDoc, query, where, orderBy }
+  from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
+import {
+  getAuth,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  onAuthStateChanged,
+  signOut,
+  sendPasswordResetEmail
+} from "https://www.gstatic.com/firebasejs/11.0.0/firebase-auth.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyBiN4r47hmNycD7aZjkZa6XakZSzXwbL8Q",
+  authDomain: "lobo24-9e46b.firebaseapp.com",
+  projectId: "lobo24-9e46b",
+  storageBucket: "lobo24-9e46b.firebasestorage.app",
+  messagingSenderId: "922799111894",
+  appId: "1:922799111894:web:bfd10fffc39a63fcd7d377"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const auth = getAuth(app);
+
+// Exponer todo globalmente para usuario.js
+window.db = db;
+window.auth = auth;
+window.doc = doc;
+window.collection = collection;
+window.getDocs = getDocs;
+window.getDoc = getDoc;
+window.setDoc = setDoc;
+window.updateDoc = updateDoc;
+window.query = query;
+window.where = where;
+window.orderBy = orderBy;
+
+// Topbar
+onSnapshot(doc(db, 'config', 'general'), snap => {
+  if (!snap.exists()) return;
+  const d = snap.data();
+  const tb = document.getElementById('topbarText');
+  if (tb && d.topbar) tb.innerHTML = d.topbar;
+});
+
+// Redirigir si no está logueado
+onAuthStateChanged(auth, (user) => {
+  const container = document.getElementById('userStatusContainer');
+  if (!user) {
+    window.location.href = 'index.html';
+  } else {
+    container.innerHTML = `
+      <div class="user-profile-menu">
+        <div class="user-avatar" onclick="toggleUserDropdown()">${user.email.charAt(0).toUpperCase()}</div>
+        <div class="user-dropdown" id="userDropdown">
+          <div class="dropdown-header">Hola, <strong>${user.email.split('@')[0]}</strong></div>
+          <button onclick="handleLogout()" class="logout-btn">Cerrar sesión</button>
+        </div>
+      </div>`;
+  }
+});
+</script>
+
+<script src="js/usuario.js"></script>
+<script src="js/scripts.js"></script>
+</body>
+</html>

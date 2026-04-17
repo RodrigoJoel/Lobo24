@@ -88,7 +88,7 @@ window.CATEGORY_CONFIG = {
   ofertas: { label: "Ofertas", singleLabel: "oferta", title: "GESTIÓN DE <span>OFERTAS</span>", icon: "🔥", emptyIcon: "🔥", pageSub: "Gestión de productos destacados en oferta con el mismo flujo de edición.", subcategories: [["flash","⚡ Oferta flash"],["2x1","🛍️ 2x1"],["combo","🎁 Combo"],["bebidas","🥤 Bebidas"],["snacks","🍪 Snacks"],["hogar","🏠 Hogar"]] }
 };
 window.CATEGORY_COLLECTIONS = Object.keys(window.CATEGORY_CONFIG);
-window.DATA = { carousel: [], promos: [], categories: [], best: [], newProds: [], sections: {} };
+window.DATA = { carousel: [], promos: [], categories: [], best: [], newProds: [],offersStrip: [], sections: {} };
 for (const k of window.CATEGORY_COLLECTIONS) window.DATA[k] = [];
 window.CONF = {};
 window.currentPage = "dashboard";
@@ -175,6 +175,7 @@ function render(page) {
     banner: pageBanner,
     best: () => pageProducts("best"),
     newp: () => pageProducts("new"),
+    offersStrip: pageOffersStrip,
     categories: pageCategories,
     sections: pageSections
   };
@@ -372,6 +373,173 @@ async function deleteCategoryItem(collectionName, docId) {
   if (ok) showToast(`🗑 Producto eliminado de ${window.CATEGORY_CONFIG[collectionName].label}`);
 }
 window.deleteCategoryItem = deleteCategoryItem;
+/* ══════════════════════════════════════════
+   PAGE: OFERTAS DEL DÍA (STRIP)
+══════════════════════════════════════════ */
+function pageOffersStrip() {
+  const offers = window.DATA.offersStrip || [];
+  return `
+    <div class="page-header">
+      <div>
+        <div class="page-title">OFERTAS <span>DEL DÍA</span></div>
+        <div class="page-sub">Gestioná las ofertas que se muestran en la página principal</div>
+      </div>
+      <button class="btn btn-primary" onclick="showAddOffer()">+ Agregar oferta</button>
+    </div>
+
+    ${offers.length === 0 ? `
+      <div class="card">
+        <div class="card-body" style="text-align:center;padding:40px">
+          <div style="font-size:48px;margin-bottom:16px">🏷️</div>
+          <p style="color:var(--muted)">No hay ofertas cargadas. Hacé clic en "+ Agregar oferta" para comenzar.</p>
+        </div>
+      </div>
+    ` : `
+      <div class="offers-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px">
+        ${offers.map((offer, i) => `
+          <div class="offer-admin-card" style="background:var(--bg3);border-radius:12px;padding:20px;border:1px solid var(--border);transition:all .2s">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px">
+              <div style="font-size:48px">${offer.emoji || '🏷️'}</div>
+              <div style="display:flex;gap:6px">
+                <button class="btn btn-ghost btn-xs" onclick="editOffer('${offer.docId}')" style="padding:4px 8px">✏️</button>
+                <button class="btn btn-danger btn-xs" onclick="deleteOffer('${offer.docId}')" style="padding:4px 8px">🗑</button>
+              </div>
+            </div>
+            <div style="font-size:28px;font-weight:bold;color:var(--yellow);margin-bottom:6px">${offer.discount || '0%'}</div>
+            <div style="color:var(--text);font-size:14px">${offer.category || ''}</div>
+            <div style="margin-top:10px;font-size:11px;color:var(--muted)">Orden: ${offer.order ?? i}</div>
+          </div>
+        `).join('')}
+      </div>
+    `}
+
+    <!-- Modal para agregar/editar oferta -->
+    <div class="modal-back hidden" id="offerModal">
+      <div class="modal-box" style="max-width:450px">
+        <button class="modal-close" onclick="closeOfferModal()">✕</button>
+        <div class="modal-title">OFERTA <span style="color:var(--purple-lt)">DEL DÍA</span></div>
+        <input type="hidden" id="offerDocId"/>
+        
+        <div class="field">
+          <label>Emoji</label>
+          <input id="offerEmoji" placeholder="Ej: 🥤, 🍕, 🧴" value="🏷️"/>
+          <div style="font-size:11px;color:var(--muted);margin-top:4px">Podés usar cualquier emoji</div>
+        </div>
+        
+        <div class="field">
+          <label>Descuento / Promoción</label>
+          <input id="offerDiscount" placeholder="Ej: 30%, 2×1, 20% OFF"/>
+          <div style="font-size:11px;color:var(--muted);margin-top:4px">Ejemplos: 30%, 2×1, 15% OFF</div>
+        </div>
+        
+        <div class="field">
+          <label>Categoría</label>
+          <input id="offerCategory" placeholder="Ej: En bebidas, En congelados"/>
+        </div>
+        
+        <div class="field">
+          <label>Orden</label>
+          <input id="offerOrder" type="number" placeholder="Ej: 0, 1, 2" value="0"/>
+          <div style="font-size:11px;color:var(--muted);margin-top:4px">Número más bajo = aparece primero</div>
+        </div>
+        
+        <div class="btn-row" style="margin-top:20px">
+          <button class="btn btn-primary" onclick="saveOffer()">💾 Guardar oferta</button>
+          <button class="btn btn-ghost" onclick="closeOfferModal()">Cancelar</button>
+        </div>
+      </div>
+    </div>
+
+    <style>
+      .offer-admin-card:hover {
+        border-color: var(--purple);
+        transform: translateY(-2px);
+      }
+    </style>
+  `;
+}
+
+// Variables globales para ofertas
+window._editingOfferId = null;
+
+function showAddOffer() {
+  window._editingOfferId = null;
+  document.getElementById('offerDocId').value = '';
+  document.getElementById('offerEmoji').value = '🏷️';
+  document.getElementById('offerDiscount').value = '';
+  document.getElementById('offerCategory').value = '';
+  document.getElementById('offerOrder').value = (window.DATA.offersStrip?.length || 0);
+  
+  const modal = document.getElementById('offerModal');
+  modal.classList.remove('hidden');
+  modal.classList.add('open');
+}
+window.showAddOffer = showAddOffer;
+
+function editOffer(docId) {
+  const offer = (window.DATA.offersStrip || []).find(o => o.docId === docId);
+  if (!offer) return;
+  
+  window._editingOfferId = docId;
+  document.getElementById('offerDocId').value = docId;
+  document.getElementById('offerEmoji').value = offer.emoji || '🏷️';
+  document.getElementById('offerDiscount').value = offer.discount || '';
+  document.getElementById('offerCategory').value = offer.category || '';
+  document.getElementById('offerOrder').value = offer.order ?? 0;
+  
+  const modal = document.getElementById('offerModal');
+  modal.classList.remove('hidden');
+  modal.classList.add('open');
+}
+window.editOffer = editOffer;
+
+function closeOfferModal() {
+  const modal = document.getElementById('offerModal');
+  modal.classList.remove('open');
+  modal.classList.add('hidden');
+  window._editingOfferId = null;
+}
+window.closeOfferModal = closeOfferModal;
+
+async function saveOffer() {
+  const docId = document.getElementById('offerDocId').value;
+  const emoji = document.getElementById('offerEmoji').value.trim() || '🏷️';
+  const discount = document.getElementById('offerDiscount').value.trim();
+  const category = document.getElementById('offerCategory').value.trim();
+  const order = Number(document.getElementById('offerOrder').value) || 0;
+  
+  if (!discount || !category) {
+    showToast('⚠️ Completá descuento y categoría', 'err');
+    return;
+  }
+  
+  const data = { emoji, discount, category, order };
+  
+  let ok;
+  if (docId) {
+    ok = await fbSave('offersStrip', docId, data);
+  } else {
+    const newId = await fbAdd('offersStrip', data);
+    ok = newId !== null;
+  }
+  
+  if (ok) {
+    closeOfferModal();
+    showToast(`✅ Oferta ${docId ? 'actualizada' : 'agregada'} correctamente`);
+    render('offersStrip');
+  }
+}
+window.saveOffer = saveOffer;
+
+async function deleteOffer(docId) {
+  if (!confirm('¿Eliminar esta oferta?')) return;
+  const ok = await fbDelete('offersStrip', docId);
+  if (ok) {
+    showToast('🗑 Oferta eliminada');
+    render('offersStrip');
+  }
+}
+window.deleteOffer = deleteOffer;
 
 function dashboard() {
   const d = window.DATA;
@@ -834,3 +1002,4 @@ function showToast(msg, type = "ok") {
   }, 3500);
 }
 window.showToast = showToast;
+
