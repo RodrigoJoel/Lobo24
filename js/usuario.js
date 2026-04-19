@@ -5,6 +5,20 @@
 let currentUser = null;
 let userData = null;
 
+// Estados de pedido para mostrar al usuario
+const USER_ORDER_STATUS = {
+  pending: { label: '⏳ Pendiente de confirmación', icon: '🕐', color: '#f0c040' },
+  confirmed: { label: '✅ Pago confirmado', icon: '✅', color: '#4ade80' },
+  processing: { label: '📦 En proceso de armado', icon: '📦', color: '#a78bfa' },
+  shipped: { label: '🚚 Despachado', icon: '🚚', color: '#60a5fa' },
+  completed: { label: '🎉 Completado', icon: '🎉', color: '#34d399' }
+};
+
+// Datos de la tienda
+const STORE = {
+  address: 'Sarmiento 322, Resistencia, Chaco'
+};
+
 // ─────────────────────────────────────────────
 // INICIALIZACIÓN
 // ─────────────────────────────────────────────
@@ -45,6 +59,11 @@ async function loadUserData() {
     if (userDoc.exists()) {
       userData = userDoc.data();
       console.log('Usuario encontrado:', userData);
+      // Asegurar que puntos tenga un valor
+      if (userData.points === undefined) {
+        userData.points = 0;
+        await updateDoc(userDocRef, { points: 0 });
+      }
     } else {
       userData = { 
         name: currentUser.email.split('@')[0], 
@@ -56,8 +75,14 @@ async function loadUserData() {
       await setDoc(userDocRef, userData);
       console.log('Usuario creado:', userData);
     }
+    
+    // Actualizar variable global
+    window._userPoints = userData.points || 0;
+    
   } catch (error) {
     console.error('Error al cargar usuario:', error);
+    userData = { points: 0 };
+    window._userPoints = 0;
   }
 }
 
@@ -162,14 +187,14 @@ async function saveProfileChanges() {
 }
 
 // ─────────────────────────────────────────────
-// MIS COMPRAS
+// MIS COMPRAS (ACTUALIZADO CON ESTADOS)
 // ─────────────────────────────────────────────
 async function loadUserOrders() {
   const ordersList = document.getElementById('ordersList');
   if (!ordersList) return;
   
   try {
-    const ordersRef = collection(window.db, 'orders');
+    const ordersRef = collection(window.db, 'pedidos');
     const q = query(ordersRef, where('userId', '==', currentUser.uid), orderBy('createdAt', 'desc'));
     const querySnapshot = await getDocs(q);
     
@@ -201,41 +226,121 @@ function createOrderCard(order) {
   
   let orderDate = order.createdAt?.toDate ? order.createdAt.toDate() : new Date(order.createdAt);
   const formattedDate = orderDate.toLocaleDateString('es-AR', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' });
-  const orderPoints = Math.floor(order.total / 100);
+  const orderPoints = Math.floor((order.subtotal || order.total) / 100);
+  const status = USER_ORDER_STATUS[order.status] || USER_ORDER_STATUS.pending;
   
   card.innerHTML = `
     <div class="order-header">
-      <div class="order-date"><i class="fas fa-calendar-alt"></i> ${formattedDate}</div>
+      <div class="order-date">
+        <i class="fas fa-calendar-alt"></i>
+        <span>${formattedDate}</span>
+      </div>
+      <div class="order-status-badge" style="background:${status.color}20;color:${status.color};border:1px solid ${status.color}40;padding:4px 12px;border-radius:20px;font-size:12px">
+        ${status.icon} ${status.label}
+      </div>
       <div class="order-total">
-        <span class="order-amount">$${order.total.toLocaleString('es-AR')}</span>
+        <span class="order-amount">$${(order.total || 0).toLocaleString('es-AR')}</span>
         <span class="order-points">⭐ +${orderPoints} puntos</span>
-        <span class="order-payment"><i class="fas fa-credit-card"></i> ${order.paymentMethod || 'Efectivo'}</span>
       </div>
     </div>
     <div class="order-products">
       ${order.items?.map(item => `
         <div class="order-product-item">
-          <span class="order-product-name">${item.name}</span>
+          <span class="order-product-name">${escapeHtml(item.name)}</span>
           <span class="order-product-qty">x${item.qty}</span>
           <span class="order-product-price">$${item.price.toLocaleString('es-AR')}</span>
           <span class="order-product-subtotal">$${(item.price * item.qty).toLocaleString('es-AR')}</span>
         </div>
       `).join('')}
     </div>
+    <div class="order-footer" style="padding:12px 16px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">
+      <div class="order-payment-method">
+        <i class="fas fa-credit-card"></i> ${order.payment === 'mp' ? 'Mercado Pago' : order.payment === 'transfer' ? 'Transferencia bancaria' : 'Efectivo en local'}
+      </div>
+      <div class="order-delivery">
+        <i class="fas fa-truck"></i> ${order.delivery === 'local' ? 'Retiro en sucursal' : 'Envío a domicilio'}
+      </div>
+      <button class="btn btn-ghost btn-sm" onclick="toggleOrderDetailsUser('${order.id}')">
+        Ver detalles <i class="fas fa-chevron-down"></i>
+      </button>
+    </div>
+    <div class="order-details-user" id="order-details-${order.id}" style="display:none;padding:16px;border-top:1px solid var(--border);background:var(--bg3)">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div>
+          <strong>📦 Dirección de envío:</strong><br>
+          ${order.delivery === 'local' ? 'Retiro en sucursal - ' + STORE.address : `${escapeHtml(order.contact?.street || '')}, ${escapeHtml(order.contact?.city || '')}, ${escapeHtml(order.contact?.province || '')}`}
+        </div>
+        <div>
+          <strong>💳 Método de pago:</strong><br>
+          ${order.payment === 'mp' ? 'Mercado Pago' : order.payment === 'transfer' ? 'Transferencia bancaria' : 'Efectivo en local'}
+        </div>
+        ${order.pointsUsed > 0 ? `
+        <div>
+          <strong>⭐ Puntos usados:</strong><br>
+          ${order.pointsUsed} puntos ($${order.pointsUsed.toLocaleString('es-AR')})
+        </div>
+        ` : ''}
+        <div>
+          <strong>⭐ Puntos ganados:</strong><br>
+          +${orderPoints} puntos
+        </div>
+        ${order.contact?.notes ? `
+        <div style="grid-column:span 2">
+          <strong>📝 Notas adicionales:</strong><br>
+          ${escapeHtml(order.contact.notes)}
+        </div>
+        ` : ''}
+        ${order.status === 'pending' ? `
+        <div style="grid-column:span 2;background:rgba(240,192,64,0.1);padding:10px;border-radius:8px;text-align:center">
+          <i class="fas fa-clock"></i> Tu pedido está pendiente de confirmación. Te llegará un email cuando sea confirmado.
+        </div>
+        ` : ''}
+        ${order.status === 'shipped' ? `
+        <div style="grid-column:span 2;background:rgba(96,165,250,0.1);padding:10px;border-radius:8px;text-align:center">
+          <i class="fas fa-truck"></i> ¡Tu pedido está en camino! El tiempo estimado de entrega es de 24-48 horas hábiles.
+        </div>
+        ` : ''}
+      </div>
+    </div>
   `;
+  
   return card;
 }
 
+function toggleOrderDetailsUser(orderId) {
+  const details = document.getElementById(`order-details-${orderId}`);
+  if (details) {
+    if (details.style.display === 'none') {
+      details.style.display = 'block';
+    } else {
+      details.style.display = 'none';
+    }
+  }
+}
+
 // ─────────────────────────────────────────────
-// MIS PUNTOS
+// MIS PUNTOS (ACTUALIZADO)
+// ─────────────────────────────────────────────
+// ─────────────────────────────────────────────
+// MIS PUNTOS (CORREGIDO)
 // ─────────────────────────────────────────────
 async function loadUserPoints() {
   try {
-    const ordersRef = collection(window.db, 'orders');
+    // Obtener puntos directamente del usuario (más confiable)
+    if (userData && userData.points !== undefined) {
+      const totalPoints = userData.points;
+      const totalPointsEl = document.getElementById('totalPoints');
+      const pointsValueEl = document.getElementById('pointsValue');
+      
+      if (totalPointsEl) totalPointsEl.textContent = totalPoints;
+      if (pointsValueEl) pointsValueEl.textContent = `$${totalPoints.toLocaleString('es-AR')}`;
+    }
+    
+    // Calcular puntos a vencer desde los pedidos
+    const ordersRef = collection(window.db, 'pedidos');
     const q = query(ordersRef, where('userId', '==', currentUser.uid));
     const querySnapshot = await getDocs(q);
     
-    let totalPoints = 0;
     const now = new Date();
     let expiringPoints = 0;
     const nextWeek = new Date();
@@ -244,34 +349,41 @@ async function loadUserPoints() {
     querySnapshot.forEach(docSnap => {
       const order = docSnap.data();
       let orderDate = order.createdAt?.toDate ? order.createdAt.toDate() : new Date(order.createdAt);
-      const orderPoints = Math.floor(order.total / 100);
+      const orderPoints = Math.floor((order.subtotal || order.total) / 100);
       const expiryDate = new Date(orderDate);
       expiryDate.setDate(expiryDate.getDate() + 60);
       
-      if (expiryDate > now) {
-        totalPoints += orderPoints;
-        if (expiryDate <= nextWeek) expiringPoints += orderPoints;
+      if (expiryDate > now && expiryDate <= nextWeek) {
+        expiringPoints += orderPoints;
       }
     });
     
-    const totalPointsEl = document.getElementById('totalPoints');
-    const pointsValueEl = document.getElementById('pointsValue');
     const expiringPointsEl = document.getElementById('expiringPoints');
-    
-    if (totalPointsEl) totalPointsEl.textContent = totalPoints;
-    if (pointsValueEl) pointsValueEl.textContent = `$${(totalPoints * 100).toLocaleString('es-AR')}`;
     if (expiringPointsEl) expiringPointsEl.textContent = expiringPoints;
     
-    const userDocRef = doc(window.db, 'users', currentUser.uid);
-    await updateDoc(userDocRef, { points: totalPoints });
   } catch (error) {
     console.error('Error al cargar puntos:', error);
+    // Mostrar puntos desde userData aunque falle la consulta
+    if (userData && userData.points !== undefined) {
+      document.getElementById('totalPoints').textContent = userData.points;
+      document.getElementById('pointsValue').textContent = `$${userData.points.toLocaleString('es-AR')}`;
+    }
   }
 }
 
 // ─────────────────────────────────────────────
 // FUNCIONES COMPARTIDAS
 // ─────────────────────────────────────────────
+function escapeHtml(str) {
+  if (!str) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
 function showToast(msg) {
   const t = document.createElement('div');
   t.className = 'toast';
@@ -322,5 +434,6 @@ window.saveProfileChanges = saveProfileChanges;
 window.toggleUserDropdown = toggleUserDropdown;
 window.handleLogout = handleLogout;
 window.showToast = showToast;
+window.toggleOrderDetailsUser = toggleOrderDetailsUser;
 
 console.log('usuario.js cargado correctamente');

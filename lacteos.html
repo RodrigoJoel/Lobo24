@@ -356,7 +356,7 @@ onSnapshot(doc(db, 'config', 'general'), snap => {
   if (d.topbar) document.getElementById('topbarText').innerHTML = d.topbar;
 });
 
-/* Productos de lácteos en tiempo real */
+/* Productos de [CATEGORIA] en tiempo real */
 onSnapshot(collection(db, 'lacteos'), snap => {
   const prods = snap.docs.map(d => ({ docId: d.id, ...d.data() }));
   window._lacteosAll = prods;
@@ -365,21 +365,24 @@ onSnapshot(collection(db, 'lacteos'), snap => {
   applyFilters();
 });
 
-/* Auth state */
+/* ── AUTH STATE CORREGIDO ── */
 onAuthStateChanged(auth, async (user) => {
   const container = document.getElementById('userStatusContainer');
   if (!container) return;
+
   if (user) {
     const userDoc  = await getDoc(doc(db, 'users', user.uid));
     const userData = userDoc.exists() ? userDoc.data() : { name: 'Usuario' };
     const inicial  = userData.name.charAt(0).toUpperCase();
+
     container.innerHTML = `
       <div class="user-profile-menu">
         <div class="user-avatar" onclick="toggleUserDropdown()">${inicial}</div>
         <div class="user-dropdown" id="userDropdown">
           <div class="dropdown-header">Hola, <strong>${userData.name.split(' ')[0]}</strong></div>
-          <a href="#">👤 Mi cuenta</a>
-          <a href="#">🛍️ Mis compras</a>
+          <a href="usuario.html">👤 Mi cuenta</a>
+          <a href="usuario.html?tab=compras">🛍️ Mis compras</a>
+          <a href="usuario.html?tab=puntos">⭐ Mis puntos</a>
           <hr>
           <button onclick="handleLogout()" class="logout-btn">Cerrar sesión</button>
         </div>
@@ -397,6 +400,7 @@ window.fbDescontarStock = async (docId, currentStock) => {
 </script>
 
 <!-- ══ LÓGICA DE LA PÁGINA ══ -->
+<script src="js/app-global.js"></script>
 <script src="js/lacteos.js"></script>
 </body>
 </html>

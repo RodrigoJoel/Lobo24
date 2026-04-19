@@ -60,7 +60,7 @@
     <div class="nav-item" onclick="navigate('mascotas',this)"><span class="nav-icon">🐾</span><span>Mascotas</span></div>
     <div class="nav-item" onclick="navigate('ofertas',this)"><span class="nav-icon">🔥</span><span>Ofertas</span></div>
     <div class="nav-item" onclick="navigate('categories',this)"><span class="nav-icon">🗂️</span><span>Categorías</span></div>
-
+    <div class="nav-divider"></div><div class="sidebar-section">Pedidos</div><div class="nav-item" onclick="navigate('pedidos',this)"><span class="nav-icon">📋</span><span>Gestión de pedidos</span></div>
     <div class="nav-divider"></div>
 
     <div class="sidebar-section">Sitio</div>
@@ -230,6 +230,20 @@ function setupRealtimeListeners() {
       }
     });
   }
+
+  // Listener para pedidos
+  onSnapshot(collection(db, 'pedidos'), (snap) => {
+    window.DATA.pedidos = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    if (window.currentPage === 'pedidos' && typeof window.render === 'function') {
+      window.render('pedidos');
+    }
+    // Actualizar contadores si estamos en la página de pedidos
+    if (typeof updateStatusCounters === 'function') {
+      updateStatusCounters();
+    }
+    });
+  }
+  
   
   // Listener para offersStrip (separado, fuera del bucle)
   onSnapshot(collection(db, 'offersStrip'), (snap) => {
@@ -239,7 +253,7 @@ function setupRealtimeListeners() {
       window.render('offersStrip');
     }
   });
-}
+
 
 onAuthStateChanged(auth, (user) => {
   if (!user) {

@@ -176,6 +176,7 @@ function render(page) {
     best: () => pageProducts("best"),
     newp: () => pageProducts("new"),
     offersStrip: pageOffersStrip,
+    pedidos: pagePedidos,
     categories: pageCategories,
     sections: pageSections
   };
@@ -1003,3 +1004,352 @@ function showToast(msg, type = "ok") {
 }
 window.showToast = showToast;
 
+/* ══════════════════════════════════════════
+   PAGE: PEDIDOS (Gestión de órdenes)
+══════════════════════════════════════════ */
+
+// Estado de pedidos disponibles
+const ORDER_STATUS = {
+  pending: { label: '⏳ Pendiente de confirmación', color: '#f0c040', next: 'confirmed' },
+  confirmed: { label: '✅ Pago confirmado', color: '#4ade80', next: 'processing' },
+  processing: { label: '📦 En proceso de armado', color: '#a78bfa', next: 'shipped' },
+  shipped: { label: '🚚 Despachado', color: '#60a5fa', next: 'completed' },
+  completed: { label: '🎉 Completado', color: '#34d399', next: null }
+};
+
+function pagePedidos() {
+  const orders = window.DATA.pedidos || [];
+  const sortedOrders = [...orders].sort((a, b) => {
+    const dateA = a.createdAt?.toDate ? a.createdAt.toDate() : new Date(a.createdAt);
+    const dateB = b.createdAt?.toDate ? b.createdAt.toDate() : new Date(b.createdAt);
+    return dateB - dateA;
+  });
+
+  return `
+    <div class="page-header">
+      <div>
+        <div class="page-title">GESTIÓN DE <span>PEDIDOS</span></div>
+        <div class="page-sub">Administrá los pedidos de los clientes y actualizá su estado</div>
+      </div>
+    </div>
+
+    <div class="orders-stats" style="display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:24px">
+      ${Object.entries(ORDER_STATUS).map(([key, value]) => `
+        <div class="stat-card" style="text-align:center;padding:12px;cursor:pointer" onclick="filterOrdersByStatus('${key}')">
+          <div style="font-size:24px">${value.label.split(' ')[0]}</div>
+          <div style="font-size:28px;font-weight:bold;color:${value.color}" id="count-${key}">0</div>
+          <div style="font-size:11px;color:var(--muted)">pedidos</div>
+        </div>
+      `).join('')}
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title"><span>📋</span> Listado de pedidos</div>
+        <div class="filters" style="display:flex;gap:10px">
+          <select id="statusFilter" onchange="filterOrdersByStatus(this.value)" class="form-input" style="width:180px;padding:6px 10px">
+            <option value="all">Todos los estados</option>
+            ${Object.entries(ORDER_STATUS).map(([key, value]) => `<option value="${key}">${value.label}</option>`).join('')}
+          </select>
+          <input type="text" id="searchOrder" placeholder="Buscar por #pedido o cliente..." class="form-input" style="width:200px" oninput="filterOrders()">
+        </div>
+      </div>
+      <div class="card-body">
+        <div id="ordersListContainer" class="orders-list-container">
+          <div style="text-align:center;padding:40px;color:var(--muted)">Cargando pedidos...</div>
+        </div>
+      </div>
+    </div>
+
+    <style>
+      .order-card {
+        background: var(--bg3);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        margin-bottom: 16px;
+        overflow: hidden;
+        transition: all 0.2s;
+      }
+      .order-card:hover {
+        border-color: var(--purple);
+      }
+      .order-header {
+        padding: 16px 20px;
+        background: rgba(124,58,237,0.05);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 12px;
+        border-bottom: 1px solid var(--border);
+      }
+      .order-id {
+        font-family: var(--font-mono);
+        font-size: 14px;
+        font-weight: bold;
+        color: var(--purple-lt);
+      }
+      .order-status {
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 500;
+      }
+      .order-customer {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+      .order-customer-name {
+        font-weight: 600;
+      }
+      .order-customer-email {
+        font-size: 12px;
+        color: var(--muted);
+      }
+      .order-total {
+        font-size: 18px;
+        font-weight: bold;
+        color: var(--yellow);
+      }
+      .order-details {
+        padding: 16px 20px;
+        display: none;
+        border-top: 1px solid var(--border);
+        background: var(--bg2);
+      }
+      .order-details.show {
+        display: block;
+      }
+      .order-products-list {
+        margin-bottom: 16px;
+      }
+      .order-product {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 8px 0;
+        border-bottom: 1px solid rgba(61,48,88,0.3);
+      }
+      .order-product-name {
+        flex: 2;
+      }
+      .order-product-qty {
+        width: 60px;
+        text-align: center;
+      }
+      .order-product-price {
+        width: 100px;
+        text-align: right;
+      }
+      .order-info-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+        margin-bottom: 16px;
+        padding: 12px;
+        background: var(--bg3);
+        border-radius: 10px;
+      }
+      .order-info-item {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+      .order-info-label {
+        font-size: 11px;
+        color: var(--muted);
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+      }
+      .order-info-value {
+        font-size: 14px;
+        font-weight: 500;
+      }
+      .status-buttons {
+        display: flex;
+        gap: 10px;
+        margin-top: 16px;
+        justify-content: flex-end;
+      }
+      .btn-xs {
+        padding: 4px 12px;
+        font-size: 11px;
+      }
+    </style>
+  `;
+}
+
+// Variable para filtro actual
+let currentStatusFilter = 'all';
+let currentSearchTerm = '';
+
+function renderOrdersList() {
+  const container = document.getElementById('ordersListContainer');
+  if (!container) return;
+
+  let orders = [...(window.DATA.pedidos || [])];
+
+  // Filtrar por estado
+  if (currentStatusFilter !== 'all') {
+    orders = orders.filter(o => o.status === currentStatusFilter);
+  }
+
+  // Filtrar por búsqueda
+  if (currentSearchTerm) {
+    const term = currentSearchTerm.toLowerCase();
+    orders = orders.filter(o => 
+      o.orderId?.toLowerCase().includes(term) ||
+      o.contact?.name?.toLowerCase().includes(term) ||
+      o.contact?.email?.toLowerCase().includes(term)
+    );
+  }
+
+  // Ordenar por fecha (más reciente primero)
+  orders.sort((a, b) => {
+    const dateA = a.createdAt?.toDate ? a.createdAt.toDate() : new Date(a.createdAt);
+    const dateB = b.createdAt?.toDate ? b.createdAt.toDate() : new Date(b.createdAt);
+    return dateB - dateA;
+  });
+
+  if (orders.length === 0) {
+    container.innerHTML = '<div style="text-align:center;padding:40px;color:var(--muted)">No hay pedidos con los filtros seleccionados.</div>';
+    return;
+  }
+
+  container.innerHTML = orders.map(order => {
+    const status = ORDER_STATUS[order.status] || ORDER_STATUS.pending;
+    const orderDate = order.createdAt?.toDate ? order.createdAt.toDate() : new Date(order.createdAt);
+    const formattedDate = orderDate.toLocaleDateString('es-AR', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+    
+    return `
+      <div class="order-card" data-order-id="${order.orderId || order.id}">
+        <div class="order-header">
+          <div>
+            <span class="order-id">#${(order.orderId || order.id).slice(-8).toUpperCase()}</span>
+            <div style="font-size:12px;color:var(--muted);margin-top:4px">${formattedDate}</div>
+          </div>
+          <div class="order-customer">
+            <div class="order-customer-name">${esc(order.contact?.name || '—')}</div>
+            <div class="order-customer-email">${esc(order.contact?.email || '—')}</div>
+          </div>
+          <div>
+            <span class="order-status" style="background:${status.color}20;color:${status.color};border:1px solid ${status.color}40">
+              ${status.label}
+            </span>
+          </div>
+          <div class="order-total">$${(order.total || 0).toLocaleString('es-AR')}</div>
+          <button class="btn btn-ghost btn-sm" onclick="toggleOrderDetails('${order.id}')">
+            <i class="fas fa-chevron-down"></i> Ver detalles
+          </button>
+        </div>
+        <div class="order-details" id="order-details-${order.id}">
+          <div class="order-info-grid">
+            <div class="order-info-item">
+              <span class="order-info-label">📞 Teléfono</span>
+              <span class="order-info-value">${esc(order.contact?.phone || '—')}</span>
+            </div>
+            <div class="order-info-item">
+              <span class="order-info-label">📍 Dirección</span>
+              <span class="order-info-value">${esc(order.contact?.street || '')}, ${esc(order.contact?.city || '')}, ${esc(order.contact?.province || '')}</span>
+            </div>
+            <div class="order-info-item">
+              <span class="order-info-label">🚚 Envío</span>
+              <span class="order-info-value">${order.delivery === 'local' ? 'Retiro en sucursal' : 'Envío a domicilio'} ${order.deliveryCost > 0 ? '($' + order.deliveryCost.toLocaleString('es-AR') + ')' : ''}</span>
+            </div>
+            <div class="order-info-item">
+              <span class="order-info-label">💳 Pago</span>
+              <span class="order-info-value">${order.payment === 'mp' ? 'Mercado Pago' : order.payment === 'transfer' ? 'Transferencia' : 'Efectivo'}</span>
+            </div>
+            <div class="order-info-item">
+              <span class="order-info-label">⭐ Puntos</span>
+              <span class="order-info-value">Usados: ${order.pointsUsed || 0} | Ganados: ${order.pointsEarned || 0}</span>
+            </div>
+            <div class="order-info-item">
+              <span class="order-info-label">📝 Notas</span>
+              <span class="order-info-value">${esc(order.contact?.notes || '—')}</span>
+            </div>
+          </div>
+
+          <div class="order-products-list">
+            <div style="font-weight:600;margin-bottom:8px">🛍️ Productos:</div>
+            ${(order.items || []).map(item => `
+              <div class="order-product">
+                <span class="order-product-name">${esc(item.name)}</span>
+                <span class="order-product-qty">x${item.qty}</span>
+                <span class="order-product-price">$${(item.price * item.qty).toLocaleString('es-AR')}</span>
+              </div>
+            `).join('')}
+          </div>
+
+          <div class="status-buttons">
+            ${status.next ? `
+              <button class="btn btn-primary btn-xs" onclick="updateOrderStatus('${order.id}', '${status.next}')">
+                → ${ORDER_STATUS[status.next].label}
+              </button>
+            ` : ''}
+            ${order.status !== 'completed' ? `
+              <button class="btn btn-danger btn-xs" onclick="updateOrderStatus('${order.id}', 'completed')">
+                ✓ Marcar como completado
+              </button>
+            ` : ''}
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  // Actualizar contadores
+  updateStatusCounters();
+}
+
+function updateStatusCounters() {
+  const orders = window.DATA.pedidos || [];
+  Object.keys(ORDER_STATUS).forEach(status => {
+    const count = orders.filter(o => o.status === status).length;
+    const el = document.getElementById(`count-${status}`);
+    if (el) el.textContent = count;
+  });
+}
+
+function toggleOrderDetails(orderId) {
+  const details = document.getElementById(`order-details-${orderId}`);
+  if (details) {
+    details.classList.toggle('show');
+  }
+}
+
+function filterOrdersByStatus(status) {
+  currentStatusFilter = status;
+  const select = document.getElementById('statusFilter');
+  if (select) select.value = status;
+  renderOrdersList();
+}
+
+function filterOrders() {
+  const searchInput = document.getElementById('searchOrder');
+  currentSearchTerm = searchInput?.value || '';
+  renderOrdersList();
+}
+
+async function updateOrderStatus(orderId, newStatus) {
+  if (!confirm(`¿Cambiar el estado del pedido a "${ORDER_STATUS[newStatus]?.label}"?`)) return;
+
+  try {
+    const orderRef = window._fbDoc(window._db, 'pedidos', orderId);
+    await window._fbUpdateDoc(orderRef, { status: newStatus });
+    showToast(`✅ Pedido actualizado a ${ORDER_STATUS[newStatus]?.label}`);
+    renderOrdersList();
+  } catch (error) {
+    console.error('Error al actualizar estado:', error);
+    showToast('❌ Error al actualizar el estado', 'error');
+  }
+}
+
+// Exponer funciones globales
+window.pagePedidos = pagePedidos;
+window.renderOrdersList = renderOrdersList;
+window.toggleOrderDetails = toggleOrderDetails;
+window.filterOrdersByStatus = filterOrdersByStatus;
+window.filterOrders = filterOrders;
+window.updateOrderStatus = updateOrderStatus;

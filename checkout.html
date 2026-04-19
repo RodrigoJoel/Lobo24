@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="dark">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Lobo24 — Checkout</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/checkout.css"/>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="checkout-header">
+  <a href="index.html" class="header-logo">
+    <img src="imagenes/iconoLobo24.png" alt="Lobo24" class="header-logo-img"/>
+    <div class="header-logo-text">LOBO<span>24</span></div>
+  </a>
+  <div class="header-secure">
+    🔒 Compra 100% segura
+  </div>
+  <div class="header-back" onclick="history.back()">
+    ← Seguir comprando
+  </div>
+</header>
+
+<!-- STEPS BAR -->
+<div class="steps-bar">
+  <div class="steps-inner">
+    <div class="step active" id="step-tab-1">
+      <div class="step-num">1</div>
+      <div class="step-label">Carrito</div>
+    </div>
+    <div class="step-connector" id="conn-1"></div>
+    <div class="step" id="step-tab-2">
+      <div class="step-num">2</div>
+      <div class="step-label">Datos</div>
+    </div>
+    <div class="step-connector" id="conn-2"></div>
+    <div class="step" id="step-tab-3">
+      <div class="step-num">3</div>
+      <div class="step-label">Envío</div>
+    </div>
+    <div class="step-connector" id="conn-3"></div>
+    <div class="step" id="step-tab-4">
+      <div class="step-num">4</div>
+      <div class="step-label">Pago</div>
+    </div>
+    <div class="step-connector" id="conn-4"></div>
+    <div class="step" id="step-tab-5">
+      <div class="step-num">✓</div>
+      <div class="step-label">Confirmación</div>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN -->
+<main class="checkout-main" id="checkoutMain">
+
+  <!-- COLUMNA IZQUIERDA — contenido del paso activo -->
+  <div id="stepContent"></div>
+
+  <!-- COLUMNA DERECHA — resumen del pedido -->
+  <aside class="order-summary" id="orderSummary">
+    <div class="summary-header">
+      <span>🛒</span>
+      <h3>TU <span style="color:var(--accent)">PEDIDO</span></h3>
+    </div>
+    <div class="summary-items" id="summaryItems">
+      <!-- items se renderizan desde JS -->
+    </div>
+    <div class="summary-totals" id="summaryTotals">
+      <!-- totales se renderizan desde JS -->
+    </div>
+    <div class="secure-badge">
+      🔒 Compra protegida &nbsp;·&nbsp; 5 días para devoluciones
+    </div>
+  </aside>
+</main>
+
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- FIREBASE -->
+<script type="module">
+import { initializeApp }   from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
+import { getFirestore, doc, getDoc, updateDoc, collection, addDoc, serverTimestamp }
+  from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
+import { getAuth, onAuthStateChanged }
+  from "https://www.gstatic.com/firebasejs/11.0.0/firebase-auth.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyBiN4r47hmNycD7aZjkZa6XakZSzXwbL8Q",
+  authDomain: "lobo24-9e46b.firebaseapp.com",
+  projectId: "lobo24-9e46b",
+  storageBucket: "lobo24-9e46b.firebasestorage.app",
+  messagingSenderId: "922799111894",
+  appId: "1:922799111894:web:bfd10fffc39a63fcd7d377"
+};
+
+const fbApp = initializeApp(firebaseConfig);
+const db    = getFirestore(fbApp);
+const auth  = getAuth(fbApp);
+
+window._db   = db;
+window._auth = auth;
+window._fbDoc      = doc;
+window._fbGetDoc   = getDoc;
+window._fbUpdateDoc= updateDoc;
+window._fbCollection = collection;
+window._fbAddDoc   = addDoc;
+window._fbServerTs = serverTimestamp;
+
+onAuthStateChanged(auth, async user => {
+  window._currentUser = user;
+  if (user) {
+    try {
+      const snap = await getDoc(doc(db, 'users', user.uid));
+      if (snap.exists()) {
+        const data = snap.data();
+        window._userPoints  = data.points || 0;
+        window._userName    = data.name   || '';
+        window._userEmail   = data.email  || user.email || '';
+        window._userPhone   = data.phone  || '';
+      }
+    } catch(e) {
+      window._userPoints = 0;
+    }
+  } else {
+    window._userPoints = 0;
+  }
+  // Una vez que sabemos si hay usuario, renderizamos el paso inicial
+  if (typeof initCheckout === 'function') initCheckout();
+});
+</script>
+
+<!-- LÓGICA DEL CHECKOUT -->
+<script src="js/checkout.js"></script>
+</body>
+</html>
