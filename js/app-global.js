@@ -252,12 +252,30 @@ function toggleUserDropdown() {
 }
 
 /* ─────────────────────────────────────
-   CART PERSISTENTE
+   HELPERS DE PRODUCTO / CARRITO
 ───────────────────────────────────── */
-let cart = JSON.parse(localStorage.getItem('lobo24_cart')) || {};
+function normalizeProduct(product) {
+  if (!product || typeof product !== 'object') return null;
 
-function saveCart() {
-  localStorage.setItem('lobo24_cart', JSON.stringify(cart));
+  return {
+    ...product,
+    docId: product.docId || product.id || '',
+    id: product.id || product.docId || '',
+    coleccion: product.coleccion || product.collection || '',
+    name: product.name || '',
+    brand: product.brand || '',
+    img: product.img || product.image || '',
+    price: Number(product.price || 0),
+    old: product.old != null ? Number(product.old) : null,
+    stock: product.stock != null ? Number(product.stock) : null,
+    qty: Number(product.qty || 1)
+  };
+}
+
+function getCartKey(product) {
+  const docId = product?.docId || product?.id || '';
+  const coleccion = product?.coleccion || product?.collection || '';
+  return `${coleccion}::${docId}`;
 }
 
 function getAllAvailableProducts() {
@@ -276,15 +294,67 @@ function getAllAvailableProducts() {
     window._ofertasAll || []
   ];
 
-  return pools.flat();
+  return pools.flat().map(normalizeProduct).filter(Boolean);
+}
+
+/* ─────────────────────────────────────
+   CART PERSISTENTE
+───────────────────────────────────── */
+let cart = {};
+
+function saveCart() {
+  localStorage.setItem('lobo24_cart', JSON.stringify(cart));
+}
+
+function loadCartFromLocalStorage() {
+  try {
+    const raw = localStorage.getItem('lobo24_cart');
+    if (!raw) {
+      cart = {};
+      return;
+    }
+
+    const parsed = JSON.parse(raw);
+    cart = {};
+
+    if (Array.isArray(parsed)) {
+      parsed.forEach(item => {
+        const normalized = normalizeProduct(item);
+        if (!normalized) return;
+        const key = getCartKey(normalized);
+        if (key !== '::') cart[key] = normalized;
+      });
+    } else if (parsed && typeof parsed === 'object') {
+      Object.values(parsed).forEach(item => {
+        const normalized = normalizeProduct(item);
+        if (!normalized) return;
+        const key = getCartKey(normalized);
+        if (key !== '::') cart[key] = normalized;
+      });
+    }
+  } catch (e) {
+    console.error('Error cargando carrito desde localStorage:', e);
+    cart = {};
+  }
 }
 
 function addToCart(id, e) {
   const p = getAllAvailableProducts().find(x => (x.docId || x.id) === id);
-  if (!p) return;
+  if (!p) {
+    showToast('❌ No se encontró el producto');
+    return;
+  }
 
-  const stock = p.stock ?? null;
-  const inCart = cart[id]?.qty || 0;
+  const normalized = normalizeProduct(p);
+  if (!normalized?.docId || !normalized?.coleccion) {
+    console.error('Producto sin docId o coleccion:', normalized);
+    showToast('❌ El producto no tiene referencia válida para descontar stock');
+    return;
+  }
+
+  const key = getCartKey(normalized);
+  const stock = normalized.stock ?? null;
+  const inCart = cart[key]?.qty || 0;
 
   if (stock !== null && stock <= 0) {
     showToast('❌ Este producto no tiene stock disponible');
@@ -296,13 +366,13 @@ function addToCart(id, e) {
     return;
   }
 
-  cart[id] = cart[id]
-    ? { ...cart[id], qty: cart[id].qty + 1 }
-    : { ...p, qty: 1 };
+  cart[key] = cart[key]
+    ? { ...cart[key], qty: cart[key].qty + 1 }
+    : { ...normalized, qty: 1 };
 
   saveCart();
   updateCartUI();
-  showToast(`✅ ${p.name} agregado al carrito`);
+  showToast(`✅ ${normalized.name} agregado al carrito`);
 
   if (e) {
     const b = e.target;
@@ -311,21 +381,26 @@ function addToCart(id, e) {
   }
 }
 
-function changeQty(id, delta) {
-  if (!cart[id]) return;
+function changeQty(key, delta) {
+  if (!cart[key]) return;
 
-  const liveProduct = getAllAvailableProducts().find(x => (x.docId || x.id) === id);
-  const stock = liveProduct?.stock ?? cart[id].stock ?? null;
+  const item = cart[key];
+  const liveProduct = getAllAvailableProducts().find(
+    x => (x.docId === item.docId && x.coleccion === item.coleccion) ||
+         (x.id === item.id && x.coleccion === item.coleccion)
+  );
 
-  if (delta > 0 && stock !== null && cart[id].qty >= stock) {
+  const stock = liveProduct?.stock ?? item.stock ?? null;
+
+  if (delta > 0 && stock !== null && cart[key].qty >= stock) {
     showToast('⚠️ No hay más stock disponible');
     return;
   }
 
-  cart[id].qty += delta;
+  cart[key].qty += delta;
 
-  if (cart[id].qty <= 0) {
-    delete cart[id];
+  if (cart[key].qty <= 0) {
+    delete cart[key];
   }
 
   saveCart();
@@ -341,7 +416,7 @@ function clearCart() {
 function updateCartUI() {
   const countEl = document.getElementById('cartCount');
   if (countEl) {
-    countEl.textContent = Object.values(cart).reduce((s, i) => s + i.qty, 0);
+    countEl.textContent = Object.values(cart).reduce((s, i) => s + Number(i.qty || 0), 0);
   }
   renderCartItems();
 }
@@ -352,7 +427,7 @@ function renderCartItems() {
 
   if (!container || !footer) return;
 
-  const items = Object.values(cart);
+  const items = Object.entries(cart);
 
   if (!items.length) {
     container.innerHTML = `
@@ -364,25 +439,25 @@ function renderCartItems() {
     return;
   }
 
-  container.innerHTML = items.map(i => `
+  container.innerHTML = items.map(([key, i]) => `
     <div class="cart-item">
       <div class="cart-item-img">
         <img src="${i.img || ''}" alt="${i.name || ''}"/>
       </div>
       <div class="cart-item-info">
         <div class="cart-item-name">${i.name || ''}</div>
-        <div class="cart-item-price">$${(Number(i.price || 0) * i.qty).toLocaleString('es-AR')}</div>
+        <div class="cart-item-price">$${(Number(i.price || 0) * Number(i.qty || 0)).toLocaleString('es-AR')}</div>
       </div>
       <div class="qty-ctrl">
-        <button class="qty-btn" onclick="changeQty('${i.docId || i.id}', -1)">−</button>
+        <button class="qty-btn" onclick="changeQty('${key}', -1)">−</button>
         <span class="qty-num">${i.qty}</span>
-        <button class="qty-btn" onclick="changeQty('${i.docId || i.id}', 1)">+</button>
+        <button class="qty-btn" onclick="changeQty('${key}', 1)">+</button>
       </div>
     </div>
   `).join('');
 
   document.getElementById('cartTotal').textContent =
-    `$${items.reduce((s, i) => s + Number(i.price || 0) * i.qty, 0).toLocaleString('es-AR')}`;
+    `$${items.reduce((s, [, i]) => s + Number(i.price || 0) * Number(i.qty || 0), 0).toLocaleString('es-AR')}`;
 
   footer.style.display = 'block';
 }
@@ -390,6 +465,23 @@ function renderCartItems() {
 function toggleCart() {
   document.getElementById('cartDrawer')?.classList.toggle('open');
   document.getElementById('drawerOverlay')?.classList.toggle('open');
+}
+
+function saveCartToLocalStorage() {
+  const items = Object.values(cart).map(item => ({
+    docId: item.docId || item.id || '',
+    id: item.id || item.docId || '',
+    qty: Number(item.qty || 1),
+    price: Number(item.price || 0),
+    old: item.old != null ? Number(item.old) : null,
+    stock: item.stock != null ? Number(item.stock) : null,
+    coleccion: item.coleccion || item.collection || '',
+    name: item.name || '',
+    brand: item.brand || '',
+    img: item.img || ''
+  }));
+
+  localStorage.setItem('lobo24_cart', JSON.stringify(items));
 }
 
 function checkout() {
@@ -409,6 +501,7 @@ function checkout() {
 ───────────────────────────────────── */
 document.addEventListener('DOMContentLoaded', () => {
   applyTheme(theme);
+  loadCartFromLocalStorage();
   updateCartUI();
 
   document.getElementById('modalOverlay')?.addEventListener('click', function(e) {
@@ -451,50 +544,4 @@ window.changeQty = changeQty;
 window.toggleCart = toggleCart;
 window.checkout = checkout;
 window.clearCart = clearCart;
-
-function saveCartToLocalStorage() {
-  const items = Object.values(cart).map(item => ({
-    docId: item.docId || item.id || '',
-    id: item.id || item.docId || '',
-    qty: Number(item.qty || 1),
-    price: Number(item.price || 0),
-    old: item.old != null ? Number(item.old) : null,
-    stock: item.stock != null ? Number(item.stock) : null,
-    coleccion: item.coleccion || item.collection || 'productos',
-    name: item.name || '',
-    brand: item.brand || '',
-    img: item.img || ''
-  }));
-
-  localStorage.setItem('lobo24_cart', JSON.stringify(items));
-}
-
-function loadCartFromLocalStorage() {
-  try {
-    const raw = localStorage.getItem('lobo24_cart');
-    if (!raw) {
-      cart = {};
-      return;
-    }
-
-    const parsed = JSON.parse(raw);
-    cart = {};
-
-    if (Array.isArray(parsed)) {
-      parsed.forEach(item => {
-        const key = item.docId || item.id;
-        if (key) cart[key] = item;
-      });
-    } else if (parsed && typeof parsed === 'object') {
-      cart = parsed;
-    }
-  } catch (e) {
-    console.error('Error cargando carrito desde localStorage:', e);
-    cart = {};
-  }
-}
-
-document.addEventListener('DOMContentLoaded', () => {
-  loadCartFromLocalStorage();
-  updateCartUI();
-});
+window.saveCartToLocalStorage = saveCartToLocalStorage;
