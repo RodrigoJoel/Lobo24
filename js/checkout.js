@@ -24,7 +24,7 @@ const STORE = {
   lng: -58.9878,
   hours: 'Abierto 24hs',
   phone: '3624235455',
-  email: 'admin@lobo24.com'
+  email: 'rodrigoatatat@gmail.com'
 };
 
 const SHIPPING = {
@@ -712,47 +712,86 @@ async function submitStep4() {
       const ordersRef = window._fbCollection(window._db, 'pedidos');
       await window._fbAddDoc(ordersRef, orderData);
     }
-    
-    // 2. ACTUALIZAR STOCK de los productos comprados
-    for (const item of STATE.cart) {
-      if (item.coleccion && item.docId && item.stock !== null && item.stock !== undefined) {
-        try {
-          const productRef = window._fbDoc(window._db, item.coleccion, item.docId);
-          const newStock = Math.max(0, Number(item.stock) - Number(item.qty));
-          await window._fbUpdateDoc(productRef, { stock: newStock });
-          console.log(`✅ Stock actualizado: ${item.name} → ${newStock} unidades`);
-        } catch (err) {
-          console.error(`Error actualizando stock de ${item.name}:`, err);
-        }
-      }
-    }
-    
-    // 3. ACTUALIZAR PUNTOS del usuario (descontar los usados + sumar los ganados)
-    if (window._currentUser) {
-      const userRef = window._fbDoc(window._db, 'users', window._currentUser.uid);
-      const userSnap = await window._fbGetDoc(userRef);
-      if (userSnap.exists()) {
-        const currentPoints = userSnap.data().points || 0;
-        const newPoints = currentPoints - STATE.pointsUsed + pointsEarned;
-        await window._fbUpdateDoc(userRef, { points: Math.max(0, newPoints) });
-        console.log(`✅ Puntos actualizados: ${currentPoints} - ${STATE.pointsUsed} + ${pointsEarned} = ${newPoints}`);
-      }
-    }
-    
-    // 4. Limpiar carrito
-    STATE.cart = [];
-    localStorage.removeItem('lobo24_cart');
+
+    // 2. Guardar items para MP ANTES de limpiar el carrito
+    const cartItemsParaMP = STATE.cart.map(i => ({
+      id:       i.docId,
+      name:     i.name,
+      quantity: i.qty,
+      price:    i.price
+    }));
+
     STATE.orderId = orderId;
-    
-    showToast(`🎉 ¡Pedido #${orderId} realizado con éxito! Ganaste ${pointsEarned} puntos.`, 'success');
-    
+
     // 5. Redirigir a Mercado Pago si corresponde
     if (STATE.payment === 'mp') {
-      // Redirigir a Mercado Pago real para pagar
-      const mpCheckoutUrl = `https://www.mercadopago.com.ar/checkout/v1/redirect?pref_id=${orderId}`;
-      window.open(mpCheckoutUrl, '_blank');
-      setTimeout(() => renderStep(5), 2000);
+      showToast('⏳ Conectando con Mercado Pago...', 'ok');
+
+      const mpRes = await fetch('http://localhost:3000/crear-preferencia', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          items: cartItemsParaMP,
+          customerData: {
+            name:  STATE.contact.name,
+            email: STATE.contact.email,
+            phone: STATE.contact.phone
+          },
+          orderData: {
+            orderNumber: orderId
+          }
+        })
+      });
+
+      if (!mpRes.ok) {
+        const errBody = await mpRes.text();
+        console.error('MP backend error:', errBody);
+        throw new Error('Error al crear la preferencia de Mercado Pago');
+      }
+
+      const mpData = await mpRes.json();
+
+      // sandbox_init_point = modo TEST | init_point = produccion
+      const mpUrl = mpData.sandbox_init_point || mpData.init_point;
+
+      if (!mpUrl) {
+        throw new Error('No se recibio la URL de pago de Mercado Pago');
+      }
+
+      // Limpiar carrito justo antes de redirigir
+      STATE.cart = [];
+      localStorage.removeItem('lobo24_cart');
+      showToast('⏳ Pedido #' + orderId + ' registrado. Estamos esperando la confirmación del pago.', 'ok');
+
+      // Redirigir al checkout de MP
+      window.location.href = mpUrl;
+
     } else {
+      // Transferencia o efectivo: descontar stock y puntos inmediatamente
+      for (const item of cartItemsParaMP) {
+        const cartItem = STATE.cart.find(x => x.docId === item.id);
+        if (cartItem && cartItem.coleccion && cartItem.docId && cartItem.stock !== null && cartItem.stock !== undefined) {
+          try {
+            const productRef = window._fbDoc(window._db, cartItem.coleccion, cartItem.docId);
+            const newStock = Math.max(0, Number(cartItem.stock) - Number(cartItem.qty));
+            await window._fbUpdateDoc(productRef, { stock: newStock });
+          } catch (err) { console.error('Stock err:', err); }
+        }
+      }
+      if (window._currentUser) {
+        try {
+          const userRef = window._fbDoc(window._db, 'users', window._currentUser.uid);
+          const userSnap = await window._fbGetDoc(userRef);
+          if (userSnap.exists()) {
+            const currentPoints = userSnap.data().points || 0;
+            const newPoints = Math.max(0, currentPoints - STATE.pointsUsed + pointsEarned);
+            await window._fbUpdateDoc(userRef, { points: newPoints });
+          }
+        } catch (err) { console.error('Points err:', err); }
+      }
+      STATE.cart = [];
+      localStorage.removeItem('lobo24_cart');
+      showToast('🎉 Pedido #' + orderId + ' realizado con exito! Ganaste ' + pointsEarned + ' puntos.', 'success');
       renderStep(5);
     }
     
@@ -780,6 +819,7 @@ function renderStep5() {
   };
   
   const pointsEarned = Math.floor(getSubtotal() / 100);
+  const puntosConfirmados = STATE.payment !== 'mp';
   const orderNum = STATE.orderId || 'LB' + Date.now().toString(36).toUpperCase().slice(-6);
   const whatsMsg = encodeURIComponent(`Hola Lobo24! Mi número de pedido es #${orderNum}. ${STATE.payment === 'transfer' ? 'Adjunto el comprobante de transferencia.' : 'Quiero confirmar mi pedido.'}`);
   
@@ -796,7 +836,15 @@ function renderStep5() {
           ${STATE.delivery !== 'local' ? `<div class="cd-row"><span class="cd-label">Dirección</span><span class="cd-value">${esc(STATE.contact.street || '')}, ${esc(STATE.contact.city || '')}</span></div>` : `<div class="cd-row"><span class="cd-label">Dirección</span><span class="cd-value">${STORE.address}</span></div>`}
           <div class="cd-row"><span class="cd-label">Pago</span><span class="cd-value">${paymentLabels[STATE.payment] || STATE.payment || '—'}</span></div>
           <div class="cd-row"><span class="cd-label">Total abonado</span><span class="cd-value" style="color:var(--accent)">$${getTotal().toLocaleString('es-AR')}</span></div>
-          <div class="cd-row"><span class="cd-label">⭐ Puntos ganados</span><span class="cd-value" style="color:var(--green)">+${pointsEarned} puntos</span></div>
+          ${puntosConfirmados
+            ? `<div class="cd-row"><span class="cd-label">⭐ Puntos ganados</span><span class="cd-value" style="color:var(--green)">+${pointsEarned} puntos</span></div>`
+            : `<div class="cd-row"><span class="cd-label">⭐ Puntos</span><span class="cd-value" style="color:var(--accent)">Pendientes hasta aprobación del pago</span></div>`
+          }
+          ${STATE.pointsUsed > 0
+            ? (puntosConfirmados
+                ? `<div class="cd-row"><span class="cd-label">⭐ Puntos usados</span><span class="cd-value" style="color:var(--accent2)">-${STATE.pointsUsed} puntos</span></div>`
+                : `<div class="cd-row"><span class="cd-label">⭐ Puntos usados</span><span class="cd-value" style="color:var(--accent2)">-${STATE.pointsUsed} (pendiente)</span></div>`)
+            : ''}
           ${STATE.pointsUsed > 0 ? `<div class="cd-row"><span class="cd-label">⭐ Puntos usados</span><span class="cd-value" style="color:var(--accent2)">-${STATE.pointsUsed} puntos</span></div>` : ''}
         </div>
         ${STATE.payment === 'transfer' ? `
