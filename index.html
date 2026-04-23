@@ -412,18 +412,39 @@ onSnapshot(doc(db, 'config', 'sections'), snap => {
 });
 
 /* ── CATEGORÍAS (datos de la colección, para nombre/emoji/orden) ── */
-onSnapshot(collection(db, 'categories'), snap => {
-  const cats = snap.docs
-    .map(d => ({ id: d.id, ...d.data() }))
-    .sort((a,b) => (a.order||0) - (b.order||0));
-  if (cats.length && typeof buildCategories === 'function') buildCategories(cats);
-});
-
-/* ── BEST SELLERS ── */
 onSnapshot(collection(db, 'bestSellers'), snap => {
-  const prods = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  const prods = snap.docs.map(d => {
+    const data = d.data();
+    return {
+      ...data,
+
+      // id del documento de la colección visual
+      id: d.id,
+
+      // referencia REAL del producto para stock
+      docId: data.docId || data.productId || d.id,
+      coleccion: data.coleccion || data.collection || data.sourceCollection || data.section || 'bestSellers'
+    };
+  });
+
   window._bestProds = prods;
   if (typeof renderProducts === 'function') renderProducts(prods, 'productsGrid');
+});
+
+onSnapshot(collection(db, 'newProducts'), snap => {
+  const prods = snap.docs.map(d => {
+    const data = d.data();
+    return {
+      ...data,
+
+      id: d.id,
+      docId: data.docId || data.productId || d.id,
+      coleccion: data.coleccion || data.collection || data.sourceCollection || data.section || 'newProducts'
+    };
+  });
+
+  window._newProds = prods;
+  if (typeof renderProducts === 'function') renderProducts(prods, 'newProductsGrid');
 });
 
 /* ── NOVEDADES ── */

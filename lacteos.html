@@ -323,12 +323,24 @@
 
 <!-- ══ FIREBASE ══ -->
 <script type="module">
-import { initializeApp }   from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
-import { getFirestore, doc, collection, onSnapshot, setDoc, getDoc, updateDoc }
-  from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword,
-         onAuthStateChanged, signOut, sendPasswordResetEmail }
-  from "https://www.gstatic.com/firebasejs/11.0.0/firebase-auth.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
+import {
+  getFirestore,
+  doc,
+  collection,
+  onSnapshot,
+  setDoc,
+  getDoc,
+  updateDoc
+} from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
+import {
+  getAuth,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  onAuthStateChanged,
+  signOut,
+  sendPasswordResetEmail
+} from "https://www.gstatic.com/firebasejs/11.0.0/firebase-auth.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyBiN4r47hmNycD7aZjkZa6XakZSzXwbL8Q",
@@ -339,47 +351,60 @@ const firebaseConfig = {
   appId: "1:922799111894:web:bfd10fffc39a63fcd7d377"
 };
 
-const app  = initializeApp(firebaseConfig);
-const db   = getFirestore(app);
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
 const auth = getAuth(app);
 
-/* Exponer a scripts globales */
-window.fbAuth = { auth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, db, doc, setDoc, getDoc };
-window.fbSendPasswordReset = (email) => sendPasswordResetEmail(auth, email);
-window.fbUpdateDoc = (ref, data) => updateDoc(ref, data);
-window.fbDoc = (path, id) => doc(db, path, id);
+window.fbAuth = {
+  auth,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  signOut,
+  db,
+  doc,
+  setDoc,
+  getDoc
+};
 
-/* Topbar */
+window.fbSendPasswordReset = (email) => sendPasswordResetEmail(auth, email);
+window.fbUpdateDoc = updateDoc;
+window.fbDoc = (...args) => doc(db, ...args);
+
 onSnapshot(doc(db, 'config', 'general'), snap => {
   if (!snap.exists()) return;
   const d = snap.data();
-  if (d.topbar) document.getElementById('topbarText').innerHTML = d.topbar;
+  const topbar = document.getElementById('topbarText');
+  if (topbar && d.topbar) topbar.innerHTML = d.topbar;
 });
 
-/* Productos de [CATEGORIA] en tiempo real */
 onSnapshot(collection(db, 'lacteos'), snap => {
-  const prods = snap.docs.map(d => ({ docId: d.id, ...d.data() }));
+  const prods = snap.docs.map(d => ({
+    docId: d.id,
+    coleccion: 'lacteos',
+    ...d.data()
+  }));
+
   window._lacteosAll = prods;
-  updateHeroStats(prods);
-  updateSubcatCounts(prods);
-  applyFilters();
+
+  if (typeof updateHeroStats === 'function') updateHeroStats(prods);
+  if (typeof updateSubcatCounts === 'function') updateSubcatCounts(prods);
+  if (typeof applyFilters === 'function') applyFilters();
 });
 
-/* ── AUTH STATE CORREGIDO ── */
 onAuthStateChanged(auth, async (user) => {
   const container = document.getElementById('userStatusContainer');
   if (!container) return;
 
   if (user) {
-    const userDoc  = await getDoc(doc(db, 'users', user.uid));
+    const userDoc = await getDoc(doc(db, 'users', user.uid));
     const userData = userDoc.exists() ? userDoc.data() : { name: 'Usuario' };
-    const inicial  = userData.name.charAt(0).toUpperCase();
+    const inicial = (userData.name || 'U').charAt(0).toUpperCase();
 
     container.innerHTML = `
       <div class="user-profile-menu">
         <div class="user-avatar" onclick="toggleUserDropdown()">${inicial}</div>
         <div class="user-dropdown" id="userDropdown">
-          <div class="dropdown-header">Hola, <strong>${userData.name.split(' ')[0]}</strong></div>
+          <div class="dropdown-header">Hola, <strong>${(userData.name || 'Usuario').split(' ')[0]}</strong></div>
           <a href="usuario.html">👤 Mi cuenta</a>
           <a href="usuario.html?tab=compras">🛍️ Mis compras</a>
           <a href="usuario.html?tab=puntos">⭐ Mis puntos</a>
@@ -391,12 +416,6 @@ onAuthStateChanged(auth, async (user) => {
     container.innerHTML = `<button class="nav-btn" onclick="openModal()"><span>👤</span> Ingresar</button>`;
   }
 });
-
-/* Exponer función para descontar stock al comprar */
-window.fbDescontarStock = async (docId, currentStock) => {
-  const ref = doc(db, 'lacteos', docId);
-  await updateDoc(ref, { stock: currentStock - 1 });
-};
 </script>
 
 <!-- ══ LÓGICA DE LA PÁGINA ══ -->

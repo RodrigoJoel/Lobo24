@@ -366,7 +366,13 @@ onSnapshot(doc(db, 'config', 'general'), snap => {
 
 /* Productos de [CATEGORIA] en tiempo real */
 onSnapshot(collection(db, 'snacks'), snap => {
-  const prods = snap.docs.map(d => ({ docId: d.id, ...d.data() }));
+  const prods = snap.docs.map(d => ({
+    ...d.data(),
+    id: d.id,
+    docId: d.id,
+    coleccion: 'snacks'
+  }));
+
   window._snacksAll = prods;
   updateHeroStats(prods);
   updateSubcatCounts(prods);
