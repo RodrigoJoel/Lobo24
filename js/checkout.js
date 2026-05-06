@@ -14,6 +14,7 @@ const STATE = {
   payment: null,
   pointsUsed: 0,
   orderId: null,
+  lastOrder: null,
 };
 
 /* ── Datos de la tienda ── */
@@ -706,6 +707,17 @@ async function submitStep4() {
       status: STATE.payment === 'mp' ? 'pending_payment' : 'confirmed',
       createdAt: new Date()
     };
+    STATE.lastOrder = {
+      orderId,
+      contact: { ...STATE.contact },
+      delivery: STATE.delivery,
+      deliveryCost: STATE.deliveryCost,
+      payment: STATE.payment,
+      subtotal: getSubtotal(),
+      total: totalAmount,
+      pointsUsed: STATE.pointsUsed,
+      pointsEarned: pointsEarned
+    };
     
     // 1. Guardar en Firestore
     if (window._fbAddDoc && window._db) {
@@ -838,33 +850,75 @@ function renderStep5() {
     domicilio_lejos: 'Envío a domicilio',
     domicilio_prov: 'Envío a otra provincia'
   };
-  
-  const pointsEarned = Math.floor(getSubtotal() / 100);
-  const orderNum = STATE.orderId || 'LB' + Date.now().toString(36).toUpperCase().slice(-6);
-  const whatsMsg = encodeURIComponent(`Hola Lobo24! Mi número de pedido es #${orderNum}. ${STATE.payment === 'transfer' ? 'Adjunto el comprobante de transferencia.' : 'Quiero confirmar mi pedido.'}`);
-  
+
+  const order = STATE.lastOrder || {};
+  const contact = order.contact || STATE.contact || {};
+
+  const totalFinal = Number(order.total || 0);
+  const pointsEarned = Number(order.pointsEarned || 0);
+  const pointsUsed = Number(order.pointsUsed || 0);
+  const orderNum = order.orderId || STATE.orderId || 'LB' + Date.now().toString(36).toUpperCase().slice(-6);
+  const payment = order.payment || STATE.payment;
+  const delivery = order.delivery || STATE.delivery;
+
+  const whatsMsg = encodeURIComponent(
+    `Hola Lobo24! Mi número de pedido es #${orderNum}. ${payment === 'transfer' ? 'Adjunto el comprobante de transferencia.' : 'Quiero confirmar mi pedido.'}`
+  );
+
   return `
     <div class="panel step-content" style="grid-column:1/-1;max-width:680px;margin:0 auto;width:100%">
       <div class="confirmation">
         <div class="confirmation-icon">✅</div>
         <h2>¡PEDIDO REALIZADO!</h2>
-        <p>Tu pedido fue registrado con éxito. Recibirás confirmación en <strong>${esc(STATE.contact.email || 'tu correo')}</strong>.</p>
+        <p>Tu pedido fue registrado con éxito. Recibirás confirmación en <strong>${esc(contact.email || 'tu correo')}</strong>.</p>
+
         <div class="order-number">📋 Pedido #${orderNum}</div>
+
         <div class="confirmation-detail">
-          <div class="cd-row"><span class="cd-label">Cliente</span><span class="cd-value">${esc(STATE.contact.name || '—')}</span></div>
-          <div class="cd-row"><span class="cd-label">Entrega</span><span class="cd-value">${deliveryLabels[STATE.delivery] || STATE.delivery || '—'}</span></div>
-          ${STATE.delivery !== 'local' ? `<div class="cd-row"><span class="cd-label">Dirección</span><span class="cd-value">${esc(STATE.contact.street || '')}, ${esc(STATE.contact.city || '')}</span></div>` : `<div class="cd-row"><span class="cd-label">Dirección</span><span class="cd-value">${STORE.address}</span></div>`}
-          <div class="cd-row"><span class="cd-label">Pago</span><span class="cd-value">${paymentLabels[STATE.payment] || STATE.payment || '—'}</span></div>
-          <div class="cd-row"><span class="cd-label">Total abonado</span><span class="cd-value" style="color:var(--accent)">$${getTotal().toLocaleString('es-AR')}</span></div>
-          <div class="cd-row"><span class="cd-label">⭐ Puntos ganados</span><span class="cd-value" style="color:var(--green)">+${pointsEarned} puntos</span></div>
-          ${STATE.pointsUsed > 0 ? `<div class="cd-row"><span class="cd-label">⭐ Puntos usados</span><span class="cd-value" style="color:var(--accent2)">-${STATE.pointsUsed} puntos</span></div>` : ''}
+          <div class="cd-row">
+            <span class="cd-label">Cliente</span>
+            <span class="cd-value">${esc(contact.name || '—')}</span>
+          </div>
+
+          <div class="cd-row">
+            <span class="cd-label">Entrega</span>
+            <span class="cd-value">${deliveryLabels[delivery] || delivery || '—'}</span>
+          </div>
+
+          ${delivery !== 'local'
+            ? `<div class="cd-row"><span class="cd-label">Dirección</span><span class="cd-value">${esc(contact.street || '')}, ${esc(contact.city || '')}, ${esc(contact.province || '')}</span></div>`
+            : `<div class="cd-row"><span class="cd-label">Dirección</span><span class="cd-value">${STORE.address}</span></div>`
+          }
+
+          <div class="cd-row">
+            <span class="cd-label">Pago</span>
+            <span class="cd-value">${paymentLabels[payment] || payment || '—'}</span>
+          </div>
+
+          <div class="cd-row">
+            <span class="cd-label">Total abonado</span>
+            <span class="cd-value" style="color:var(--accent)">$${totalFinal.toLocaleString('es-AR')}</span>
+          </div>
+
+          <div class="cd-row">
+            <span class="cd-label">⭐ Puntos ganados</span>
+            <span class="cd-value" style="color:var(--green)">+${pointsEarned} puntos</span>
+          </div>
+
+          ${pointsUsed > 0
+            ? `<div class="cd-row"><span class="cd-label">⭐ Puntos usados</span><span class="cd-value" style="color:var(--accent2)">-${pointsUsed} puntos</span></div>`
+            : ''
+          }
         </div>
-        ${STATE.payment === 'transfer' ? `
-        <div style="background:rgba(240,192,64,.08);border:1px solid rgba(240,192,64,.2);border-radius:12px;padding:16px 20px;margin-bottom:20px;font-size:13px;color:var(--muted);text-align:left">
-          <strong style="color:var(--accent)">📌 Próximo paso:</strong><br>
-          Realizá la transferencia por <strong>$${getTotal().toLocaleString('es-AR')}</strong> al alias <strong>LOBO24.PAGO</strong>
-          y enviá el comprobante por WhatsApp mencionando el pedido #${orderNum}.
-        </div>` : ''}
+
+        ${payment === 'transfer' ? `
+          <div style="background:rgba(240,192,64,.08);border:1px solid rgba(240,192,64,.2);border-radius:12px;padding:16px 20px;margin-bottom:20px;font-size:13px;color:var(--muted);text-align:left">
+            <strong style="color:var(--accent)">📌 Próximo paso:</strong><br>
+            Realizá la transferencia por <strong>$${totalFinal.toLocaleString('es-AR')}</strong> al alias <strong>LOBO24.PAGO</strong>
+            y enviá el comprobante por WhatsApp mencionando el pedido #${orderNum}.
+          </div>
+        ` : ''}
+
         <div style="display:flex;flex-wrap:wrap;gap:12px;justify-content:center">
           <a href="https://wa.me/54${STORE.phone}?text=${whatsMsg}" target="_blank" class="whatsapp-btn">💬 Contactar por WhatsApp</a>
           <a href="index.html" class="btn btn-ghost">🛍️ Seguir comprando</a>
