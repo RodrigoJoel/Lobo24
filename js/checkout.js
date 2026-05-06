@@ -727,7 +727,7 @@ async function submitStep4() {
     if (STATE.payment === 'mp') {
       showToast('⏳ Conectando con Mercado Pago...', 'ok');
 
-      const mpRes = await fetch('http://localhost:3000/crear-preferencia', {
+      const mpRes = await fetch('https://lobo24-backend.onrender.com/crear-preferencia', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -738,7 +738,9 @@ async function submitStep4() {
             phone: STATE.contact.phone
           },
           orderData: {
-            orderNumber: orderId
+            orderId:      orderId,
+            orderNumber:  orderId,
+            total:        totalAmount
           }
         })
       });
@@ -751,8 +753,8 @@ async function submitStep4() {
 
       const mpData = await mpRes.json();
 
-      // sandbox_init_point = modo TEST | init_point = produccion
-      const mpUrl = mpData.sandbox_init_point || mpData.init_point;
+      // Produccion: usar init_point. Para volver a TEST cambiar a sandbox_init_point
+      const mpUrl = mpData.init_point || mpData.sandbox_init_point;
 
       if (!mpUrl) {
         throw new Error('No se recibio la URL de pago de Mercado Pago');
@@ -761,39 +763,58 @@ async function submitStep4() {
       // Limpiar carrito justo antes de redirigir
       STATE.cart = [];
       localStorage.removeItem('lobo24_cart');
-      showToast('⏳ Pedido #' + orderId + ' registrado. Estamos esperando la confirmación del pago.', 'ok');
+      showToast('🎉 Pedido #' + orderId + ' registrado! Ganaste ' + pointsEarned + ' puntos.', 'success');
 
       // Redirigir al checkout de MP
       window.location.href = mpUrl;
 
-    } else {
-      // Transferencia o efectivo: descontar stock y puntos inmediatamente
-      for (const item of cartItemsParaMP) {
-        const cartItem = STATE.cart.find(x => x.docId === item.id);
-        if (cartItem && cartItem.coleccion && cartItem.docId && cartItem.stock !== null && cartItem.stock !== undefined) {
-          try {
-            const productRef = window._fbDoc(window._db, cartItem.coleccion, cartItem.docId);
-            const newStock = Math.max(0, Number(cartItem.stock) - Number(cartItem.qty));
-            await window._fbUpdateDoc(productRef, { stock: newStock });
-          } catch (err) { console.error('Stock err:', err); }
-        }
-      }
-      if (window._currentUser) {
-        try {
-          const userRef = window._fbDoc(window._db, 'users', window._currentUser.uid);
-          const userSnap = await window._fbGetDoc(userRef);
-          if (userSnap.exists()) {
-            const currentPoints = userSnap.data().points || 0;
-            const newPoints = Math.max(0, currentPoints - STATE.pointsUsed + pointsEarned);
-            await window._fbUpdateDoc(userRef, { points: newPoints });
+    // ══════════════════════════════════════════════════════════════
+// REEMPLAZAR el bloque "else" dentro de submitStep4()
+// (el bloque que maneja transfer/efectivo, después del if de MP)
+// Buscar: "// Transferencia o efectivo: descontar stock y puntos inmediatamente"
+// ══════════════════════════════════════════════════════════════
+
+      } else {
+        // Transferencia o efectivo: descontar stock y puntos inmediatamente
+        for (const item of cartItemsParaMP) {
+          const cartItem = STATE.cart.find(x => x.docId === item.id);
+          if (cartItem && cartItem.coleccion && cartItem.docId && cartItem.stock !== null && cartItem.stock !== undefined) {
+            try {
+              const productRef = window._fbDoc(window._db, cartItem.coleccion, cartItem.docId);
+              const newStock = Math.max(0, Number(cartItem.stock) - Number(cartItem.qty));
+              await window._fbUpdateDoc(productRef, { stock: newStock });
+            } catch (err) { console.error('Stock err:', err); }
           }
-        } catch (err) { console.error('Points err:', err); }
+        }
+
+        if (window._currentUser) {
+          try {
+            const userRef = window._fbDoc(window._db, 'users', window._currentUser.uid);
+            const userSnap = await window._fbGetDoc(userRef);
+            if (userSnap.exists()) {
+              const currentPoints = userSnap.data().points || 0;
+              const newPoints = Math.max(0, currentPoints - STATE.pointsUsed + pointsEarned);
+              await window._fbUpdateDoc(userRef, { points: newPoints });
+            }
+          } catch (err) { console.error('Points err:', err); }
+        }
+
+        // ── NUEVO: enviar emails de confirmación vía backend ──
+        try {
+          await fetch('https://lobo24-backend.onrender.com/enviar-email-pedido', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(orderData)
+          });
+        } catch (emailErr) {
+          console.warn('⚠️ No se pudo enviar email de confirmación:', emailErr);
+        }
+
+        STATE.cart = [];
+        localStorage.removeItem('lobo24_cart');
+        showToast('🎉 Pedido #' + orderId + ' realizado con éxito! Ganaste ' + pointsEarned + ' puntos.', 'success');
+        renderStep(5);
       }
-      STATE.cart = [];
-      localStorage.removeItem('lobo24_cart');
-      showToast('🎉 Pedido #' + orderId + ' realizado con exito! Ganaste ' + pointsEarned + ' puntos.', 'success');
-      renderStep(5);
-    }
     
   } catch (err) {
     console.error('Error al procesar el pedido:', err);
@@ -819,7 +840,6 @@ function renderStep5() {
   };
   
   const pointsEarned = Math.floor(getSubtotal() / 100);
-  const puntosConfirmados = STATE.payment !== 'mp';
   const orderNum = STATE.orderId || 'LB' + Date.now().toString(36).toUpperCase().slice(-6);
   const whatsMsg = encodeURIComponent(`Hola Lobo24! Mi número de pedido es #${orderNum}. ${STATE.payment === 'transfer' ? 'Adjunto el comprobante de transferencia.' : 'Quiero confirmar mi pedido.'}`);
   
@@ -836,15 +856,7 @@ function renderStep5() {
           ${STATE.delivery !== 'local' ? `<div class="cd-row"><span class="cd-label">Dirección</span><span class="cd-value">${esc(STATE.contact.street || '')}, ${esc(STATE.contact.city || '')}</span></div>` : `<div class="cd-row"><span class="cd-label">Dirección</span><span class="cd-value">${STORE.address}</span></div>`}
           <div class="cd-row"><span class="cd-label">Pago</span><span class="cd-value">${paymentLabels[STATE.payment] || STATE.payment || '—'}</span></div>
           <div class="cd-row"><span class="cd-label">Total abonado</span><span class="cd-value" style="color:var(--accent)">$${getTotal().toLocaleString('es-AR')}</span></div>
-          ${puntosConfirmados
-            ? `<div class="cd-row"><span class="cd-label">⭐ Puntos ganados</span><span class="cd-value" style="color:var(--green)">+${pointsEarned} puntos</span></div>`
-            : `<div class="cd-row"><span class="cd-label">⭐ Puntos</span><span class="cd-value" style="color:var(--accent)">Pendientes hasta aprobación del pago</span></div>`
-          }
-          ${STATE.pointsUsed > 0
-            ? (puntosConfirmados
-                ? `<div class="cd-row"><span class="cd-label">⭐ Puntos usados</span><span class="cd-value" style="color:var(--accent2)">-${STATE.pointsUsed} puntos</span></div>`
-                : `<div class="cd-row"><span class="cd-label">⭐ Puntos usados</span><span class="cd-value" style="color:var(--accent2)">-${STATE.pointsUsed} (pendiente)</span></div>`)
-            : ''}
+          <div class="cd-row"><span class="cd-label">⭐ Puntos ganados</span><span class="cd-value" style="color:var(--green)">+${pointsEarned} puntos</span></div>
           ${STATE.pointsUsed > 0 ? `<div class="cd-row"><span class="cd-label">⭐ Puntos usados</span><span class="cd-value" style="color:var(--accent2)">-${STATE.pointsUsed} puntos</span></div>` : ''}
         </div>
         ${STATE.payment === 'transfer' ? `

@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link rel="stylesheet" href="css/styles.css"/>
+  <link rel="stylesheet" href="css/styles.css?v=2">
 </head>
 <body>
 
@@ -175,7 +175,7 @@
   <div class="footer-top">
     <div class="footer-brand">
       <div style="font-family:var(--font-head);font-size:32px">LOBO<span style="color:var(--accent)">24</span></div>
-      <p>El minimarket que nunca cierra. Todo lo que necesitás, cuando lo necesitás, en tu puerta en minutos.</p>
+      <p>El minimarket que nunca cierra. Todo lo que necesitás, cuando lo necesitás.</p>
       <div class="social-links">
         <a href="https://www.instagram.com/minimarket_lobo24/" target="_blank" class="social-btn instagram">
           <i class="fab fa-instagram"></i>
@@ -190,8 +190,8 @@
         </a>
       </div>
     </div>
-    <div class="footer-col"><h4>Empresa</h4><ul><li><a href="#">Sobre Lobo24</a></li><li><a href="#">Trabajá con nosotros</a></li><li><a href="#">Prensa</a></li><li><a href="#">Blog</a></li></ul></div>
-    <div class="footer-col"><h4>Ayuda</h4><ul><li><a href="#">Centro de ayuda</a></li><li><a href="#">Seguí tu pedido</a></li><li><a href="#">Devoluciones</a></li><li><a href="#">Contacto</a></li></ul></div>
+    <div class="footer-col"><h4>Empresa</h4><ul><li><a href="#">Sobre Lobo24</a></li><li><a href="#">Blog</a></li></ul></div>
+    <div class="footer-col"><h4>Ayuda</h4><ul><li><a href="#">Centro de ayuda</a></li><li><a href="#">Contacto</a></li></ul></div>
     <div class="footer-col"><h4>Legal</h4><ul><li><a href="#">Términos de uso</a></li><li><a href="#">Privacidad</a></li><li><a href="#">Cookies</a></li></ul></div>
   </div>
 
@@ -354,89 +354,115 @@ const auth = getAuth(app);
 
 /* ── Exponer helpers a scripts.js ── */
 window.fbAuth = {
-  auth, createUserWithEmailAndPassword, signInWithEmailAndPassword,
-  signOut, db, doc, setDoc, getDoc
+  auth,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  signOut,
+  db,
+  doc,
+  setDoc,
+  getDoc
 };
+
 window.fbSendPasswordReset = (email) => sendPasswordResetEmail(auth, email);
 
 /* ── CAROUSEL ── */
 onSnapshot(collection(db, 'carousel'), snap => {
   const slides = snap.docs
     .map(d => ({ id: d.id, ...d.data() }))
-    .sort((a,b) => (a.order||0) - (b.order||0));
-  if (slides.length && typeof buildCarousel === 'function') buildCarousel(slides);
+    .sort((a, b) => (a.order || 0) - (b.order || 0));
+
+  if (slides.length && typeof buildCarousel === 'function') {
+    buildCarousel(slides);
+  }
 });
 
 /* ── PROMOS ── */
 onSnapshot(collection(db, 'promos'), snap => {
   const promos = snap.docs
     .map(d => ({ id: d.id, ...d.data() }))
-    .sort((a,b) => (a.order||0) - (b.order||0));
+    .sort((a, b) => (a.order || 0) - (b.order || 0));
+
   promos.forEach((p, i) => {
     const n = i + 1;
     const bg  = document.getElementById(`promoBg${n}`);
     const lbl = document.getElementById(`promoLabel${n}`);
     const ttl = document.getElementById(`promoTitle${n}`);
-    if (bg)  bg.src          = p.img   || '';
+
+    if (bg)  bg.src = p.img || '';
     if (lbl) lbl.textContent = p.label || '';
-    if (ttl) ttl.innerHTML   = (p.title || '').replace(/\n/g, '<br>');
+    if (ttl) ttl.innerHTML = (p.title || '').replace(/\n/g, '<br>');
   });
 });
 
 /* ── CONFIG GENERAL ── */
 onSnapshot(doc(db, 'config', 'general'), snap => {
   if (!snap.exists()) return;
+
   const data = snap.data();
   const tb = document.getElementById('topbarText');
   const bd = document.getElementById('bannerDesc');
-  if (tb && data.topbar)     tb.innerHTML       = data.topbar;
-  if (bd && data.bannerDesc) bd.textContent     = data.bannerDesc;
+
+  if (tb && data.topbar) tb.innerHTML = data.topbar;
+  if (bd && data.bannerDesc) bd.textContent = data.bannerDesc;
 });
 
 /* ── SECCIONES ── */
 onSnapshot(doc(db, 'config', 'sections'), snap => {
   if (!snap.exists()) return;
+
   const s = snap.data();
   const map = {
-    topbar:     document.getElementById('elTopbar'),
-    stats:      document.getElementById('elStats'),
+    topbar: document.getElementById('elTopbar'),
+    stats: document.getElementById('elStats'),
     categories: document.getElementById('elCategories'),
-    offers:     document.getElementById('elOffers'),
-    best:       document.getElementById('elBest'),
-    banner:     document.getElementById('elBanner'),
-    newProds:   document.getElementById('elNew'),
+    offers: document.getElementById('elOffers'),
+    best: document.getElementById('elBest'),
+    banner: document.getElementById('elBanner'),
+    newProds: document.getElementById('elNew'),
   };
+
   Object.entries(s).forEach(([k, v]) => {
     if (map[k]) map[k].style.display = v ? '' : 'none';
   });
 });
 
-/* ── CATEGORÍAS (datos de la colección, para nombre/emoji/orden) ── */
+/* ── CATEGORÍAS ── */
+onSnapshot(collection(db, 'categories'), snap => {
+  const cats = snap.docs
+    .map(d => ({ id: d.id, ...d.data() }))
+    .sort((a, b) => (a.order || 0) - (b.order || 0));
+
+  if (typeof buildCategories === 'function') {
+    buildCategories(cats);
+  }
+});
+
+/* ── BEST SELLERS ── */
 onSnapshot(collection(db, 'bestSellers'), snap => {
   const prods = snap.docs.map(d => {
     const data = d.data();
     return {
       ...data,
-
-      // id del documento de la colección visual
       id: d.id,
-
-      // referencia REAL del producto para stock
       docId: data.docId || data.productId || d.id,
       coleccion: data.coleccion || data.collection || data.sourceCollection || data.section || 'bestSellers'
     };
   });
 
   window._bestProds = prods;
-  if (typeof renderProducts === 'function') renderProducts(prods, 'productsGrid');
+
+  if (typeof renderProducts === 'function') {
+    renderProducts(prods, 'productsGrid');
+  }
 });
 
+/* ── NOVEDADES ── */
 onSnapshot(collection(db, 'newProducts'), snap => {
   const prods = snap.docs.map(d => {
     const data = d.data();
     return {
       ...data,
-
       id: d.id,
       docId: data.docId || data.productId || d.id,
       coleccion: data.coleccion || data.collection || data.sourceCollection || data.section || 'newProducts'
@@ -444,14 +470,10 @@ onSnapshot(collection(db, 'newProducts'), snap => {
   });
 
   window._newProds = prods;
-  if (typeof renderProducts === 'function') renderProducts(prods, 'newProductsGrid');
-});
 
-/* ── NOVEDADES ── */
-onSnapshot(collection(db, 'newProducts'), snap => {
-  const prods = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-  window._newProds = prods;
-  if (typeof renderProducts === 'function') renderProducts(prods, 'newProductsGrid');
+  if (typeof renderProducts === 'function') {
+    renderProducts(prods, 'newProductsGrid');
+  }
 });
 
 /* ── OCULTAR LOADING ── */
@@ -466,14 +488,6 @@ const unsubLoad = onSnapshot(doc(db, 'config', 'general'), () => {
 
 /* ──────────────────────────────────────────────────────────────
    CONTADORES REALES DE CATEGORÍAS
-   
-   Por cada colección de categoría, escuchamos en tiempo real
-   cuántos documentos tiene. Cuando cambia (porque el admin
-   agregó o eliminó un producto), actualizamos el contador
-   en el DOM automáticamente.
-   
-   Si una colección no existe todavía en Firestore, simplemente
-   devuelve 0 sin tirar error.
 ────────────────────────────────────────────────────────────── */
 const CATEGORY_SLUGS = [
   'bebidas',
@@ -488,30 +502,28 @@ const CATEGORY_SLUGS = [
   'ofertas'
 ];
 
-// Inicializar caché vacía
 window._catCounts = {};
 
 CATEGORY_SLUGS.forEach(slug => {
   onSnapshot(collection(db, slug), snap => {
-    const count = snap.size; // número de documentos en la colección
+    const count = snap.size;
 
-    // Guardar en caché y actualizar el DOM
-    // (updateCategoryCount está definida en scripts.js)
     if (typeof updateCategoryCount === 'function') {
       updateCategoryCount(slug, count);
     } else {
-      // scripts.js aún no cargó, guardar en caché igual
       window._catCounts[slug] = count;
     }
   });
 });
-/* ─── OFERTAS DEL DÍA (tiempo real) ─── */
+
+/* ─── OFERTAS DEL DÍA ─── */
 onSnapshot(collection(db, 'offersStrip'), snap => {
   const offers = snap.docs
     .map(d => ({ id: d.id, ...d.data() }))
-    .sort((a,b) => (a.order||0) - (b.order||0));
-  
+    .sort((a, b) => (a.order || 0) - (b.order || 0));
+
   const container = document.getElementById('offersStrip');
+
   if (container) {
     if (offers.length === 0) {
       container.innerHTML = `
@@ -541,9 +553,9 @@ onAuthStateChanged(auth, async (user) => {
   if (!container) return;
 
   if (user) {
-    const userDoc  = await getDoc(doc(db, 'users', user.uid));
+    const userDoc = await getDoc(doc(db, 'users', user.uid));
     const userData = userDoc.exists() ? userDoc.data() : { name: 'Usuario' };
-    const inicial  = userData.name.charAt(0).toUpperCase();
+    const inicial = userData.name.charAt(0).toUpperCase();
 
     container.innerHTML = `
       <div class="user-profile-menu">

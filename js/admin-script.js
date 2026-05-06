@@ -1010,6 +1010,7 @@ window.showToast = showToast;
 
 // Estado de pedidos disponibles
 const ORDER_STATUS = {
+  pending_payment: { label: '💳 Pendiente de pago', color: '#f59e0b', next: 'confirmed' },
   pending: { label: '⏳ Pendiente de confirmación', color: '#f0c040', next: 'confirmed' },
   confirmed: { label: '✅ Pago confirmado', color: '#4ade80', next: 'processing' },
   processing: { label: '📦 En proceso de armado', color: '#a78bfa', next: 'shipped' },
@@ -1336,13 +1337,15 @@ async function updateOrderStatus(orderId, newStatus) {
   if (!confirm(`¿Cambiar el estado del pedido a "${ORDER_STATUS[newStatus]?.label}"?`)) return;
 
   try {
-    const orderRef = window._fbDoc(window._db, 'pedidos', orderId);
-    await window._fbUpdateDoc(orderRef, { status: newStatus });
+    const orderRef = window.fsDoc(window.db, 'pedidos', orderId);
+    await window.fsUpdateDoc(orderRef, {
+      status: newStatus
+    });
+
     showToast(`✅ Pedido actualizado a ${ORDER_STATUS[newStatus]?.label}`);
-    renderOrdersList();
   } catch (error) {
     console.error('Error al actualizar estado:', error);
-    showToast('❌ Error al actualizar el estado', 'error');
+    showToast('❌ Error al actualizar el estado', 'err');
   }
 }
 
