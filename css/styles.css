@@ -461,3 +461,28 @@
 .social-btn:active {
   transform: scale(0.95);
 }
+
+.hidden-subcat {
+  display: none !important;
+}
+
+.see-more-subcats {
+  width: 100%;
+  margin-top: 8px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--bg3);
+  color: var(--accent);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  cursor: pointer;
+  transition: .2s ease;
+}
+
+.see-more-subcats:hover {
+  background: var(--bg4);
+  color: var(--text);
+}

@@ -10,7 +10,7 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 window.CATEGORY_CONFIG = {
-  bebidas: { label: "Bebidas", singleLabel: "bebida", title: "GESTIÓN DE <span>BEBIDAS</span>", icon: "🥤", emptyIcon: "🥤", pageSub: "Productos con stock y subcategoría. Los cambios se sincronizan en tiempo real.", subcategories: [["agua","💧 Agua"],["gaseosas","🥤 Gaseosas"],["jugos","🍊 Jugos y néctares"],["energizantes","⚡ Energizantes"],["cervezas","🍺 Cervezas"],["vinos","🍷 Vinos"],["espirituosas","🥃 Espirituosas"],["sin-alcohol","🌿 Sin alcohol"],["isotonicos","🏃 Isotónicos"],["te-cafe","☕ Té y café"]] },
+  bebidas: { label: "Bebidas", singleLabel: "bebida", title: "GESTIÓN DE <span>BEBIDAS</span>", icon: "🥤", emptyIcon: "🥤", pageSub: "Productos con stock y subcategoría. Los cambios se sincronizan en tiempo real.", subcategories: [["agua","💧 Agua"],["gaseosas","🥤 Gaseosas"],["jugos","🍊 Jugos y néctares"],["energizantes","⚡ Energizantes"],["cervezas","🍺 Cervezas"],["vinos","🍷 Vinos"],["blancas","🥃 Bebidas blancas"],["aperitivos","🌿 Fernet y aperitivos"],["isotonicos","🏃 Isotónicos"]/*:["te-cafe","☕ Té y café"]*/] },
   snacks: { label: "Snacks", singleLabel: "snack", title: "GESTIÓN DE <span>SNACKS</span>", icon: "🍪", emptyIcon: "🍪", pageSub: "Gestión completa de snacks con stock, badge y subcategoría.", subcategories: [["papas-fritas","🥔 Papas fritas"],["galletitas","🍪 Galletitas"],["chocolates","🍫 Chocolates"],["gomitas","🍬 Gomitas"],["salados","🥨 Salados"],["frutos-secos","🥜 Frutos secos"],["barritas","🍯 Barritas"],["alfajores","🍫 Alfajores"]] },
   almacen: { 
   label: "Almacén", 
@@ -20,10 +20,10 @@ window.CATEGORY_CONFIG = {
   emptyIcon: "🥫", 
   pageSub: "Gestión de alimentos no perecederos, conservas, pastas, arroces, legumbres y más.", 
   subcategories: [
-    ["arroz", "🍚 Arroces"],["fideos", "🍝 Fideos y pastas secas"],["legumbres", "🫘 Legumbres"],["harinas", "🌾 Harinas y premezclas"],["aceites", "🫒 Aceites"],
+    ["arroz", "🍚 Arroces"],["fideos", "🍝 Fideos y pastas secas"],["tabaco", "🚬 Tabaco"],["harinas", "🌾 Harinas y premezclas"],["aceites", "🫒 Aceites"],
     ["vinagres", "🍷 Vinagres y aceto"],["conservas", "🥫 Conservas"],["salsas", "🍅 Salsas"],["caldos", "🍜 Caldos y sopas"],["aderezos", "🥗 Aderezos"],["encurtidos", "🥒 Encurtidos"],
     ["dulces", "🍯 Dulces y mermeladas"],["azucar", "🍬 Azúcar y edulcorantes"],["sal", "🧂 Sal y especias"],["yerba", "🧉 Yerba mate"],["cafe", "☕ Café"],
-    ["galletitas", "🍪 Galletitas de agua"],["pan-rallado", "🍞 Pan rallado"],["leche-polvo", "🥛 Leche en polvo"],["premezclas", "🥞 Premezclas"],["frutos-secos", "🥜 Frutos secos"],
+    ["galletitas", "🍪 Galletitas"],["pan-rallado", "🍞 Pan rallado"],["leche-polvo", "🥛 Leche en polvo"],["premezclas", "🥞 Premezclas"],["frutos-secos", "🥜 Frutos secos"],
     ["alimentos-bebe", "🍼 Alimentos bebé"],["aceitunas", "🫒 Aceitunas"],["saborizadores", "💧 Saborizadores"],["reposteria", "🎂 Repostería"],["enlatados", "🥫 Enlatados (atún, paté)"],
     ["jugos-polvo", "🧃 Jugos en polvo"],["postres", "🍮 Postres (flan, gelatina)"],["infusiones", "🍵 Infusiones (té, manzanilla)"]] 
 },
@@ -192,6 +192,25 @@ function getSubcatOptions(collectionName, selected) {
 function pageCategoryManager(collectionName) {
   const conf = window.CATEGORY_CONFIG[collectionName];
   const list = window.DATA[collectionName] || [];
+
+  const searchTerm = window.adminProductSearch?.[collectionName] || "";
+  const selectedSubcat = window.adminProductSubcat?.[collectionName] || "all";
+
+  const filteredList = list.filter((p) => {
+    const term = searchTerm.toLowerCase().trim();
+
+    const matchesSearch =
+      !term ||
+      (p.name || "").toLowerCase().includes(term) ||
+      (p.brand || "").toLowerCase().includes(term) ||
+      (p.subcat || "").toLowerCase().includes(term);
+
+    const matchesSubcat =
+      selectedSubcat === "all" || p.subcat === selectedSubcat;
+
+    return matchesSearch && matchesSubcat;
+  });
+
   return `
     <div class="page-header">
       <div>
@@ -202,49 +221,106 @@ function pageCategoryManager(collectionName) {
 
     <div class="card">
       <div class="card-header">
-        <div class="card-title"><span>${conf.icon}</span> Productos en ${conf.label} (${list.length})</div>
+        <div class="card-title">
+          <span>${conf.icon}</span>
+          Productos en ${conf.label} (${filteredList.length}/${list.length})
+        </div>
       </div>
+
       <div class="card-body">
+
+        <div style="display:grid;grid-template-columns:1fr 240px;gap:12px;margin-bottom:16px">
+          <div class="field" style="margin:0">
+            <label>Buscar productos</label>
+            <input
+              id="${collectionName}AdminSearch"
+              placeholder="Buscar por nombre, marca o subcategoría..."
+              value="${esc(searchTerm)}"
+              oninput="filterAdminProducts('${collectionName}')"
+            />
+          </div>
+
+          <div class="field" style="margin:0">
+            <label>Filtrar por subcategoría</label>
+            <select
+              id="${collectionName}AdminSubcatFilter"
+              onchange="filterAdminProducts('${collectionName}')"
+            >
+              <option value="all">Todas</option>
+              ${conf.subcategories.map(([value, label]) => `
+                <option value="${value}" ${selectedSubcat === value ? "selected" : ""}>
+                  ${label}
+                </option>
+              `).join("")}
+            </select>
+          </div>
+        </div>
+
         <div class="prod-list">
-          ${list.length === 0 ? `<p style="color:var(--muted);text-align:center;padding:20px">Sin productos cargados aún.</p>` : list.map((p) => `
+          ${filteredList.length === 0 ? `
+            <p style="color:var(--muted);text-align:center;padding:20px">
+              No hay productos que coincidan con la búsqueda o filtro seleccionado.
+            </p>
+          ` : filteredList.map((p) => `
             <div class="prod-item">
-              <div class="prod-thumb">${p.img ? `<img src="${p.img}" alt="${p.name || ""}"/>` : `<div style="display:flex;align-items:center;justify-content:center;height:100%;font-size:22px">${conf.emptyIcon}</div>`}</div>
+              <div class="prod-thumb">
+                ${
+                  p.img
+                    ? `<img src="${p.img}" alt="${p.name || ""}"/>`
+                    : `<div style="display:flex;align-items:center;justify-content:center;height:100%;font-size:22px">${conf.emptyIcon}</div>`
+                }
+              </div>
+
               <div class="prod-meta">
                 <strong>${p.name || ""}</strong>
                 <div class="meta-row">
                   <span class="meta-price">$${Number(p.price || 0).toLocaleString("es-AR")}</span>
                   <span class="meta-brand">${p.brand || ""}</span>
-                  ${p.badge ? `<span class="badge-pill badge-${p.badge}">${p.badge === "offer" ? "OFERTA" : p.badge === "new" ? "NUEVO" : "HOT"}</span>` : ""}
+                  ${
+                    p.badge
+                      ? `<span class="badge-pill badge-${p.badge}">${p.badge === "offer" ? "OFERTA" : p.badge === "new" ? "NUEVO" : "HOT"}</span>`
+                      : ""
+                  }
                   ${stockHtml(p.stock)}
                   <span style="font-size:11px;color:var(--muted)">${p.subcat || "sin cat."}</span>
                 </div>
               </div>
+
               <div class="prod-actions">
                 <button class="btn btn-ghost btn-sm" onclick="editCategoryItem('${collectionName}','${p.docId}')">✏️ Editar</button>
                 <button class="btn btn-danger btn-sm" onclick="deleteCategoryItem('${collectionName}','${p.docId}')">🗑 Eliminar</button>
               </div>
-            </div>`).join("")}
+            </div>
+          `).join("")}
         </div>
       </div>
     </div>
 
     <div class="add-panel">
       <div class="add-panel-title">➕ AGREGAR ${conf.singleLabel.toUpperCase()}</div>
+
       <div class="field-row">
         ${field("Nombre", `<input id="${collectionName}Name" placeholder="Ej: Producto"/>`)}
         ${field("Marca", `<input id="${collectionName}Brand" placeholder="Ej: Marca"/>`)}
       </div>
+
       <div class="field-row">
         ${field("Subcategoría", `<select id="${collectionName}Subcat">${getSubcatOptions(collectionName, conf.subcategories[0][0])}</select>`)}
         ${field("Badge", `<select id="${collectionName}Badge"><option value="">Ninguno</option><option value="new">NUEVO</option><option value="offer">OFERTA</option><option value="hot">HOT</option></select>`)}
       </div>
+
       <div class="field-row3">
         ${field("Precio ($)", `<input id="${collectionName}Price" type="number" placeholder="2200"/>`)}
         ${field("Precio tachado ($)", `<input id="${collectionName}Old" type="number" placeholder="0 = sin tachado"/>`)}
         ${field("Stock (unidades)", `<input id="${collectionName}Stock" type="number" placeholder="Vacío = ilimitado" min="0"/>`)}
       </div>
+
       ${field("URL imagen", `<input id="${collectionName}Img" placeholder="https://..." oninput="previewImg('${collectionName}Img','${collectionName}ImgPrev')"/>`)}
-      <div class="img-preview-wrap"><div class="img-preview" id="${collectionName}ImgPrev"><span>Vista previa</span></div></div>
+
+      <div class="img-preview-wrap">
+        <div class="img-preview" id="${collectionName}ImgPrev"><span>Vista previa</span></div>
+      </div>
+
       <div class="btn-row" style="margin-top:14px">
         <button class="btn btn-primary" onclick="addCategoryItem('${collectionName}')">✅ Agregar ${conf.singleLabel}</button>
       </div>
@@ -254,22 +330,31 @@ function pageCategoryManager(collectionName) {
       <div class="modal-box" style="max-width:520px">
         <button class="modal-close" onclick="closeCategoryModal('${collectionName}')">✕</button>
         <div class="modal-title">EDITAR <span style="color:var(--purple-lt)">${conf.label.toUpperCase()}</span></div>
+
         <input type="hidden" id="${collectionName}DocId"/>
+
         <div class="field-row">
           ${field("Nombre", `<input id="${collectionName}EditName"/>`)}
           ${field("Marca", `<input id="${collectionName}EditBrand"/>`)}
         </div>
+
         <div class="field-row">
           ${field("Subcategoría", `<select id="${collectionName}EditSubcat">${getSubcatOptions(collectionName)}</select>`)}
           ${field("Badge", `<select id="${collectionName}EditBadge"><option value="">Ninguno</option><option value="new">NUEVO</option><option value="offer">OFERTA</option><option value="hot">HOT</option></select>`)}
         </div>
+
         <div class="field-row3">
           ${field("Precio ($)", `<input id="${collectionName}EditPrice" type="number"/>`)}
           ${field("Precio tachado ($)", `<input id="${collectionName}EditOld" type="number" placeholder="0 = sin tachado"/>`)}
           ${field("Stock (unidades)", `<input id="${collectionName}EditStock" type="number" placeholder="Vacío = ilimitado" min="0"/>`)}
         </div>
+
         ${field("URL imagen", `<input id="${collectionName}EditImg" oninput="previewImg('${collectionName}EditImg','${collectionName}EditImgPrev')"/>`)}
-        <div class="img-preview-wrap"><div class="img-preview" id="${collectionName}EditImgPrev"><span>Vista previa</span></div></div>
+
+        <div class="img-preview-wrap">
+          <div class="img-preview" id="${collectionName}EditImgPrev"><span>Vista previa</span></div>
+        </div>
+
         <div class="btn-row" style="margin-top:14px">
           <button class="btn btn-primary" onclick="saveCategoryItem('${collectionName}')">💾 Guardar cambios</button>
           <button class="btn btn-ghost" onclick="closeCategoryModal('${collectionName}')">Cancelar</button>
@@ -277,6 +362,21 @@ function pageCategoryManager(collectionName) {
       </div>
     </div>`;
 }
+
+window.adminProductSearch = window.adminProductSearch || {};
+window.adminProductSubcat = window.adminProductSubcat || {};
+
+function filterAdminProducts(collectionName) {
+  const searchInput = document.getElementById(`${collectionName}AdminSearch`);
+  const subcatSelect = document.getElementById(`${collectionName}AdminSubcatFilter`);
+
+  window.adminProductSearch[collectionName] = searchInput ? searchInput.value : "";
+  window.adminProductSubcat[collectionName] = subcatSelect ? subcatSelect.value : "all";
+
+  render(collectionName);
+}
+
+window.filterAdminProducts = filterAdminProducts;
 
 function editCategoryItem(collectionName, docId) {
   const item = (window.DATA[collectionName] || []).find((x) => x.docId === docId);

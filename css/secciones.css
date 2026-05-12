@@ -505,4 +505,37 @@
     .cat-sort-select { width: 100%; }
   }
 
-  
+  .load-more-wrap {
+  display: flex;
+  justify-content: center;
+  margin: 28px 0 10px;
+}
+
+.load-more-btn {
+  min-width: 220px;
+  padding: 13px 20px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--bg3);
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  cursor: pointer;
+  transition: .2s ease;
+}
+
+.load-more-btn span {
+  display: block;
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 11px;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.load-more-btn:hover {
+  background: var(--bg4);
+  color: var(--accent);
+}

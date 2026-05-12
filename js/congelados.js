@@ -12,6 +12,13 @@ const filters = {
 };
 
 /* ─────────────────────────────────────
+   PAGINACIÓN / MOSTRAR MÁS
+───────────────────────────────────── */
+const PRODUCTS_PER_PAGE = 12;
+let visibleProductsLimit = PRODUCTS_PER_PAGE;
+let lastFilteredProducts = [];
+
+/* ─────────────────────────────────────
    FILTROS
 ───────────────────────────────────── */
 function selectSubcat(el) {
@@ -53,8 +60,10 @@ function clearFilter(type) {
   if (type === 'price') {
     filters.priceMin = 0;
     filters.priceMax = Infinity;
+
     const priceMin = document.getElementById('priceMin');
     const priceMax = document.getElementById('priceMax');
+
     if (priceMin) priceMin.value = '';
     if (priceMax) priceMax.value = '';
   }
@@ -102,6 +111,7 @@ function applyFilters() {
 
   const pMin = parseFloat(priceMin?.value) || 0;
   const pMax = parseFloat(priceMax?.value) || Infinity;
+
   filters.priceMin = pMin;
   filters.priceMax = pMax;
 
@@ -114,6 +124,7 @@ function applyFilters() {
     }
 
     const price = Number(p.price || 0);
+
     if (price < filters.priceMin) return false;
     if (filters.priceMax !== Infinity && price > filters.priceMax) return false;
 
@@ -126,8 +137,12 @@ function applyFilters() {
 
   result = sortProducts(result, filters.sort);
 
+  visibleProductsLimit = PRODUCTS_PER_PAGE;
+  lastFilteredProducts = result;
+
   renderProducts(result);
   renderActiveFilterTags();
+  renderLoadMoreButton(result.length);
 
   const countNum = document.getElementById('countNum');
   if (countNum) countNum.textContent = result.length;
@@ -136,9 +151,9 @@ function applyFilters() {
 function sortProducts(list, sort) {
   const arr = [...list];
 
-  if (sort === 'price-asc')  return arr.sort((a, b) => (a.price || 0) - (b.price || 0));
+  if (sort === 'price-asc') return arr.sort((a, b) => (a.price || 0) - (b.price || 0));
   if (sort === 'price-desc') return arr.sort((a, b) => (b.price || 0) - (a.price || 0));
-  if (sort === 'name-asc')   return arr.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+  if (sort === 'name-asc') return arr.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
   if (sort === 'stock-desc') return arr.sort((a, b) => (b.stock || 0) - (a.stock || 0));
 
   return arr.sort((a, b) => {
@@ -162,10 +177,14 @@ function renderProducts(list) {
         <p>No encontramos productos de congelados con esos filtros.</p>
         <button onclick="resetAllFilters()">Limpiar filtros</button>
       </div>`;
+
+    renderLoadMoreButton(0);
     return;
   }
 
-  grid.innerHTML = list.map(p => {
+  const visibleList = list.slice(0, visibleProductsLimit);
+
+  grid.innerHTML = visibleList.map(p => {
     const stock = p.stock ?? null;
     const sinStock = stock !== null && stock <= 0;
     const stockBajo = stock !== null && stock > 0 && stock <= 5;
@@ -190,19 +209,23 @@ function renderProducts(list) {
       <div class="product-card${sinStock ? ' out-of-stock' : ''}">
         ${p.badge ? `<span class="product-badge badge-${p.badge}">${p.badge === 'offer' ? 'OFERTA' : p.badge === 'new' ? 'NUEVO' : '🔥 HOT'}</span>` : ''}
         ${stockBadgeHtml}
+
         <div class="product-img">
           <img src="${p.img || ''}" alt="${p.name || ''}" loading="lazy" onerror="this.onerror=null;this.src='imagenes/sin-imagen.png'"/>
           <div class="out-overlay">SIN STOCK</div>
         </div>
+
         <div class="product-body">
           <div class="product-name">${p.name || ''}</div>
           <div class="product-brand">${p.brand || ''}</div>
+
           <div class="product-footer">
             <div class="product-price">
               ${p.old ? `<span class="price-old">$${Number(p.old).toLocaleString('es-AR')}</span>` : ''}
               <span class="price-new"><span class="curr">$</span>${Number(p.price || 0).toLocaleString('es-AR')}</span>
               ${stockInfoHtml}
             </div>
+
             <button
               class="add-btn"
               ${sinStock ? 'disabled' : ''}
@@ -215,6 +238,45 @@ function renderProducts(list) {
         </div>
       </div>`;
   }).join('');
+}
+
+/* ─────────────────────────────────────
+   BOTÓN MOSTRAR MÁS
+───────────────────────────────────── */
+function renderLoadMoreButton(totalProducts) {
+  let wrap = document.getElementById('loadMoreWrap');
+
+  if (!wrap) {
+    wrap = document.createElement('div');
+    wrap.id = 'loadMoreWrap';
+    wrap.className = 'load-more-wrap';
+
+    const grid = document.getElementById('productsGrid');
+    if (grid) grid.insertAdjacentElement('afterend', wrap);
+  }
+
+  if (!wrap) return;
+
+  if (totalProducts <= visibleProductsLimit) {
+    wrap.innerHTML = '';
+    return;
+  }
+
+  const remaining = totalProducts - visibleProductsLimit;
+
+  wrap.innerHTML = `
+    <button class="load-more-btn" onclick="loadMoreProducts()">
+      Mostrar más productos
+      <span>Quedan ${remaining}</span>
+    </button>
+  `;
+}
+
+function loadMoreProducts() {
+  visibleProductsLimit += PRODUCTS_PER_PAGE;
+
+  renderProducts(lastFilteredProducts);
+  renderLoadMoreButton(lastFilteredProducts.length);
 }
 
 /* ─────────────────────────────────────
@@ -343,6 +405,7 @@ window.clearFilter = clearFilter;
 window.resetAllFilters = resetAllFilters;
 window.applyFilters = applyFilters;
 window.removeFilterTag = removeFilterTag;
+window.loadMoreProducts = loadMoreProducts;
 
 /* ─────────────────────────────────────
    INIT
