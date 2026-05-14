@@ -617,11 +617,11 @@ function renderStep4() {
           </div>
           <div class="payment-detail">
             <div class="bank-data">
-              <div class="bank-row"><span class="bk-label">Banco</span><span class="bk-value">Banco Nación Argentina</span></div>
-              <div class="bank-row"><span class="bk-label">Titular</span><span class="bk-value">LOBO24 S.A.S.</span></div>
-              <div class="bank-row"><span class="bk-label">CBU</span><span class="bk-value">0110599920000012345678<button class="copy-btn" onclick="copyText('0110599920000012345678', 'CBU copiado')">Copiar</button></span></div>
-              <div class="bank-row"><span class="bk-label">Alias</span><span class="bk-value">LOBO24.PAGO<button class="copy-btn" onclick="copyText('LOBO24.PAGO', 'Alias copiado')">Copiar</button></span></div>
-              <div class="bank-row"><span class="bk-label">CUIT</span><span class="bk-value">20-12345678-9</span></div>
+              <div class="bank-row"><span class="bk-label">Banco</span><span class="bk-value">Mercado Pago</span></div>
+              <div class="bank-row"><span class="bk-label">Titular</span><span class="bk-value">Rodrigo Joel Nuñez</span></div>
+              <div class="bank-row"><span class="bk-label">CBU</span><span class="bk-value">0000003100090462950726<button class="copy-btn" onclick="copyText('0000003100090462950726', 'CBU copiado')">Copiar</button></span></div>
+              <div class="bank-row"><span class="bk-label">Alias</span><span class="bk-value">LOBO24HS<button class="copy-btn" onclick="copyText('LOBO24HS', 'Alias copiado')">Copiar</button></span></div>
+              <div class="bank-row"><span class="bk-label">CUIT</span><span class="bk-value">23-37707364-9</span></div>
             </div>
           </div>
         </div>
@@ -781,7 +781,6 @@ async function submitStep4() {
       window.location.href = mpUrl;
 
     // ══════════════════════════════════════════════════════════════
-// REEMPLAZAR el bloque "else" dentro de submitStep4()
 // (el bloque que maneja transfer/efectivo, después del if de MP)
 // Buscar: "// Transferencia o efectivo: descontar stock y puntos inmediatamente"
 // ══════════════════════════════════════════════════════════════
