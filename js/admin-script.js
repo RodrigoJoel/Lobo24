@@ -88,7 +88,16 @@ window.CATEGORY_CONFIG = {
   ofertas: { label: "Ofertas", singleLabel: "oferta", title: "GESTIÓN DE <span>OFERTAS</span>", icon: "🔥", emptyIcon: "🔥", pageSub: "Gestión de productos destacados en oferta con el mismo flujo de edición.", subcategories: [["flash","⚡ Oferta flash"],["2x1","🛍️ 2x1"],["combo","🎁 Combo"],["bebidas","🥤 Bebidas"],["snacks","🍪 Snacks"],["hogar","🏠 Hogar"]] }
 };
 window.CATEGORY_COLLECTIONS = Object.keys(window.CATEGORY_CONFIG);
-window.DATA = { carousel: [], promos: [], categories: [], best: [], newProds: [],offersStrip: [], sections: {} };
+window.DATA = {
+  carousel: [],
+  promos: [],
+  categories: [],
+  best: [],
+  newProds: [],
+  offersStrip: [],
+  users: [],
+  sections: {}
+};
 for (const k of window.CATEGORY_COLLECTIONS) window.DATA[k] = [];
 window.CONF = {};
 window.currentPage = "dashboard";
@@ -177,6 +186,7 @@ function render(page) {
     newp: () => pageProducts("new"),
     offersStrip: pageOffersStrip,
     pedidos: pagePedidos,
+    usuarios: pageUsuarios,
     categories: pageCategories,
     sections: pageSections
   };
@@ -675,6 +685,7 @@ function dashboard() {
           <button class="btn btn-ghost" onclick="navigate('panaderia',null)" style="justify-content:flex-start">🍞 Panadería</button>
           <button class="btn btn-ghost" onclick="navigate('mascotas',null)" style="justify-content:flex-start">🐾 Mascotas</button>
           <button class="btn btn-ghost" onclick="navigate('ofertas',null)" style="justify-content:flex-start">🔥 Ofertas</button>
+          <button class="btn btn-ghost" onclick="navigate('usuarios',null)" style="justify-content:flex-start">👥 Usuarios / Puntos</button>
           <button class="btn btn-ghost" onclick="navigate('categories',null)" style="justify-content:flex-start">🗂️ Categorías</button>
           <button class="btn btn-ghost" onclick="navigate('sections',null)" style="justify-content:flex-start">👁️ Secciones</button>
           <button class="btn btn-ghost" onclick="navigate('topbar',null)" style="justify-content:flex-start">📢 Anuncio</button>
@@ -1052,6 +1063,197 @@ const SECTION_META = {
   banner: { label: "Banner app", icon: "📱" },
   newProds: { label: "Novedades", icon: "✨" }
 };
+
+/* ══════════════════════════════════════════
+   PAGE: USUARIOS / PUNTOS
+══════════════════════════════════════════ */
+
+window.adminUsersSearch = window.adminUsersSearch || "";
+
+function pageUsuarios() {
+  const users = window.DATA.users || [];
+  const term = (window.adminUsersSearch || "").toLowerCase().trim();
+
+  const filteredUsers = users.filter((u) => {
+    if (!term) return true;
+
+    return (
+      (u.name || "").toLowerCase().includes(term) ||
+      (u.email || "").toLowerCase().includes(term) ||
+      (u.phone || "").toLowerCase().includes(term)
+    );
+  });
+
+  return `
+    <div class="page-header">
+      <div>
+        <div class="page-title">USUARIOS <span>/ PUNTOS</span></div>
+        <div class="page-sub">Sumá, restá o fijá puntos manualmente a clientes registrados.</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">
+          <span>👥</span> Usuarios registrados (${filteredUsers.length}/${users.length})
+        </div>
+      </div>
+
+      <div class="card-body">
+        <div class="field" style="margin-bottom:16px">
+          <label>Buscar usuario</label>
+          <input
+            id="adminUsersSearch"
+            placeholder="Buscar por nombre, email o teléfono..."
+            value="${esc(window.adminUsersSearch || "")}"
+            oninput="filterAdminUsers()"
+          />
+        </div>
+
+        <div class="prod-list">
+          ${
+            filteredUsers.length === 0
+              ? `<p style="color:var(--muted);text-align:center;padding:24px">No hay usuarios que coincidan con la búsqueda.</p>`
+              : filteredUsers.map((u) => {
+                  const points = Number(u.points || 0);
+                  const name = u.name || "Usuario sin nombre";
+                  const email = u.email || "Sin email";
+                  const phone = u.phone || "";
+
+                  return `
+                    <div class="prod-item">
+                      <div class="prod-thumb">
+                        <div style="display:flex;align-items:center;justify-content:center;height:100%;font-size:24px">
+                          👤
+                        </div>
+                      </div>
+
+                      <div class="prod-meta">
+                        <strong>${name}</strong>
+                        <div class="meta-row">
+                          <span class="meta-brand">${email}</span>
+                          ${phone ? `<span class="meta-brand">📞 ${phone}</span>` : ""}
+                          <span style="font-family:var(--font-mono);font-size:12px;color:var(--yellow)">
+                            ⭐ ${points.toLocaleString("es-AR")} puntos
+                          </span>
+                        </div>
+
+                        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">
+                          <input
+                            id="pointsAmount-${u.docId}"
+                            type="number"
+                            min="0"
+                            placeholder="Cantidad"
+                            style="max-width:130px"
+                          />
+
+                          <input
+                            id="pointsReason-${u.docId}"
+                            placeholder="Motivo, opcional"
+                            style="max-width:220px"
+                          />
+
+                          <button class="btn btn-success btn-sm" onclick="changeUserPoints('${u.docId}', 'add')">
+                            ➕ Sumar
+                          </button>
+
+                          <button class="btn btn-danger btn-sm" onclick="changeUserPoints('${u.docId}', 'subtract')">
+                            ➖ Restar
+                          </button>
+
+                          <button class="btn btn-ghost btn-sm" onclick="changeUserPoints('${u.docId}', 'set')">
+                            🎯 Fijar
+                          </button>
+                        </div>
+                      </div>
+                    </div>`;
+                }).join("")
+          }
+        </div>
+      </div>
+    </div>`;
+}
+
+function filterAdminUsers() {
+  const input = document.getElementById("adminUsersSearch");
+  window.adminUsersSearch = input ? input.value : "";
+  render("usuarios");
+}
+
+window.filterAdminUsers = filterAdminUsers;
+
+async function changeUserPoints(userId, mode) {
+  const user = (window.DATA.users || []).find((u) => u.docId === userId);
+  if (!user) {
+    showToast("⚠️ Usuario no encontrado", "err");
+    return;
+  }
+
+  const amountInput = document.getElementById(`pointsAmount-${userId}`);
+  const reasonInput = document.getElementById(`pointsReason-${userId}`);
+
+  const amount = Number(amountInput?.value || 0);
+  const reason = reasonInput?.value.trim() || "";
+
+  if (!amount || amount < 0) {
+    showToast("⚠️ Ingresá una cantidad válida", "err");
+    return;
+  }
+
+  const currentPoints = Number(user.points || 0);
+  let newPoints = currentPoints;
+
+  if (mode === "add") {
+    newPoints = currentPoints + amount;
+  }
+
+  if (mode === "subtract") {
+    newPoints = Math.max(0, currentPoints - amount);
+  }
+
+  if (mode === "set") {
+    newPoints = amount;
+  }
+
+  const actionLabel =
+    mode === "add" ? "sumar" :
+    mode === "subtract" ? "restar" :
+    "fijar";
+
+  const okConfirm = confirm(
+    `¿Confirmás ${actionLabel} puntos a ${user.name || user.email || "este usuario"}?\n\nPuntos actuales: ${currentPoints}\nNuevo saldo: ${newPoints}`
+  );
+
+  if (!okConfirm) return;
+
+  const ok = await fbSave("users", userId, {
+    points: newPoints,
+    pointsUpdatedAt: new Date()
+  });
+
+  if (!ok) return;
+
+  await fbAdd("pointMovements", {
+    userId,
+    userName: user.name || "",
+    userEmail: user.email || "",
+    previousPoints: currentPoints,
+    newPoints,
+    amount,
+    mode,
+    reason,
+    createdAt: new Date()
+  });
+
+  showToast(`✅ Puntos actualizados: ${newPoints.toLocaleString("es-AR")}`);
+
+  if (amountInput) amountInput.value = "";
+  if (reasonInput) reasonInput.value = "";
+
+  render("usuarios");
+}
+
+window.changeUserPoints = changeUserPoints;
 
 function pageSections() {
   const s = window.DATA.sections || {};

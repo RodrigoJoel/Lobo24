@@ -60,7 +60,21 @@
     <div class="nav-item" onclick="navigate('mascotas',this)"><span class="nav-icon">🐾</span><span>Mascotas</span></div>
     <div class="nav-item" onclick="navigate('ofertas',this)"><span class="nav-icon">🔥</span><span>Ofertas</span></div>
     <div class="nav-item" onclick="navigate('categories',this)"><span class="nav-icon">🗂️</span><span>Categorías</span></div>
-    <div class="nav-divider"></div><div class="sidebar-section">Pedidos</div><div class="nav-item" onclick="navigate('pedidos',this)"><span class="nav-icon">📋</span><span>Gestión de pedidos</span></div>
+    <div class="nav-divider"></div>
+
+    <div class="sidebar-section">Clientes</div>
+    <div class="nav-item" onclick="navigate('usuarios',this)">
+      <span class="nav-icon">👥</span>
+      <span>Usuarios / Puntos</span>
+    </div>
+
+    <div class="nav-divider"></div>
+
+    <div class="sidebar-section">Pedidos</div>
+    <div class="nav-item" onclick="navigate('pedidos',this)">
+      <span class="nav-icon">📋</span>
+      <span>Gestión de pedidos</span>
+    </div>
     <div class="nav-divider"></div>
 
     <div class="sidebar-section">Sitio</div>
@@ -199,6 +213,8 @@ async function loadAll() {
   // Cargar offersStrip
   const offersStripSnap = await getDocs(collection(db, "offersStrip"));
   window.DATA.offersStrip = offersStripSnap.docs.map(d => ({ docId: d.id, ...d.data() })).sort((a, b) => (a.order || 0) - (b.order || 0));
+  const usersSnap = await getDocs(collection(db, "users"));
+  window.DATA.users = usersSnap.docs.map(d => ({ docId: d.id, ...d.data() }));
   
   const secSnap = await getDocs(collection(db, "config"));
   secSnap.forEach((d) => {
@@ -230,6 +246,14 @@ function setupRealtimeListeners() {
       }
     });
   }
+
+  onSnapshot(collection(db, "users"), (snap) => {
+  window.DATA.users = snap.docs.map(d => ({ docId: d.id, ...d.data() }));
+
+  if (window.currentPage === "usuarios" && typeof window.render === "function") {
+    window.render("usuarios");
+  }
+});
 
   // Listener para pedidos
   onSnapshot(collection(db, 'pedidos'), (snap) => {
@@ -264,6 +288,6 @@ onAuthStateChanged(auth, (user) => {
 });
 </script>
 
-<script src="js/admin-script.js"></script>
+<script src="js/admin-script.js?v=6"></script>
 </body>
 </html>
