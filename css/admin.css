@@ -224,3 +224,314 @@ img{display:block}
   display: block;
 }
 
+/* ══════════════════════════════════════
+   RESPONSIVE ADMIN PANEL COMPLETO
+══════════════════════════════════════ */
+
+/* Tablets y notebooks chicas */
+@media (max-width: 1024px) {
+  body {
+    overflow: hidden;
+  }
+
+  .topbar {
+    padding: 0 16px;
+  }
+
+  .main {
+    padding: 22px 20px;
+  }
+
+  .stats-row {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .slides-grid {
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  }
+
+  .card-header {
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .prod-item {
+    align-items: flex-start;
+  }
+
+  .prod-actions {
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+}
+
+/* Celulares grandes */
+@media (max-width: 768px) {
+  .topbar {
+    height: auto;
+    min-height: 60px;
+    padding: 10px 12px;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .topbar-right {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .back-btn {
+    padding: 7px 10px;
+    font-size: 12px;
+  }
+
+  .admin-user span {
+    display: none;
+  }
+
+  .layout {
+    flex-direction: row;
+  }
+
+  .sidebar {
+    width: 64px;
+  }
+
+  .sidebar-section,
+  .nav-item span:not(.nav-icon),
+  .logo-badge,
+  .logo-name,
+  .sidebar-footer p {
+    display: none;
+  }
+
+  .nav-item {
+    justify-content: center;
+    padding: 12px 8px;
+    margin: 2px 6px;
+  }
+
+  .nav-item .nav-icon {
+    font-size: 18px;
+    width: auto;
+  }
+
+  .main {
+    padding: 18px 14px;
+    gap: 18px;
+  }
+
+  .page-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .page-title {
+    font-size: 28px;
+  }
+
+  .page-sub {
+    font-size: 12px;
+  }
+
+  .card-body {
+    padding: 14px;
+  }
+
+  .field-row,
+  .field-row3 {
+    grid-template-columns: 1fr;
+  }
+
+  .stats-row {
+    grid-template-columns: 1fr;
+  }
+
+  .prod-item {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .prod-thumb {
+    width: 100%;
+    height: 120px;
+  }
+
+  .prod-meta strong {
+    white-space: normal;
+  }
+
+  .meta-row {
+    gap: 6px;
+  }
+
+  .prod-actions {
+    width: 100%;
+    justify-content: stretch;
+  }
+
+  .prod-actions .btn {
+    flex: 1;
+    justify-content: center;
+  }
+
+  .slides-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .modal-box {
+    max-width: calc(100% - 24px);
+    padding: 22px 18px;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+
+  .toast-wrap {
+    left: 12px;
+    right: 12px;
+    bottom: 12px;
+  }
+
+  .toast {
+    min-width: 0;
+    width: 100%;
+  }
+}
+
+/* Celulares chicos */
+@media (max-width: 480px) {
+  body {
+    font-size: 13px;
+  }
+
+  .topbar {
+    align-items: flex-start;
+  }
+
+  .logo-mark {
+    width: 32px;
+    height: 32px;
+    font-size: 16px;
+  }
+
+  .topbar-right {
+    gap: 8px;
+  }
+
+  #savingBadge {
+    font-size: 10px;
+    padding: 4px 8px;
+  }
+
+  .sidebar {
+    width: 56px;
+  }
+
+  .main {
+    padding: 14px 10px;
+  }
+
+  .page-title {
+    font-size: 24px;
+  }
+
+  .card {
+    border-radius: 10px;
+  }
+
+  .card-header {
+    padding: 13px 14px;
+  }
+
+  .card-title {
+    font-size: 10px;
+  }
+
+  .card-body {
+    padding: 12px;
+  }
+
+  .btn-row {
+    flex-direction: column;
+  }
+
+  .btn-row .btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .prod-thumb {
+    height: 100px;
+  }
+
+  .cat-table-container {
+    max-height: 60vh;
+  }
+
+  .cat-table {
+    min-width: 620px;
+  }
+
+  .admin-dropdown {
+    right: -6px;
+    min-width: 145px;
+  }
+
+  .img-preview {
+    height: 86px;
+  }
+}
+
+/* Pantallas muy chicas */
+@media (max-width: 360px) {
+  .sidebar {
+    width: 50px;
+  }
+
+  .nav-item {
+    margin: 2px 4px;
+    padding: 10px 6px;
+  }
+
+  .main {
+    padding: 12px 8px;
+  }
+
+  .page-title {
+    font-size: 22px;
+  }
+
+  .prod-thumb {
+    height: 88px;
+  }
+}
+
+/* Modo horizontal en celulares */
+@media (max-height: 520px) and (orientation: landscape) {
+  .topbar {
+    min-height: 50px;
+  }
+
+  .sidebar {
+    width: 58px;
+  }
+
+  .main {
+    padding: 12px;
+  }
+
+  .modal-box {
+    max-height: 88vh;
+    overflow-y: auto;
+  }
+
+  .cat-table-container {
+    max-height: 50vh;
+  }
+}

@@ -30,9 +30,8 @@ const STORE = {
 
 const SHIPPING = {
   LOCAL_MIN: 85000,
-  CERCA: 3800,
-  LEJOS: 7500,
-  OTRA_PROV: 27800,
+  COSTO_FIJO: 4500,
+  RADIO_KM: 18,
 };
 
 /* ══════════════════════════════════════════════════════════
@@ -359,26 +358,21 @@ function submitStep2() {
 function renderStep3() {
   const subtotal = getSubtotal();
   const province = (STATE.contact.province || '').toLowerCase();
+  const city = (STATE.contact.city || '').toLowerCase();
+
   const isChaco = province.includes('chaco');
-  
-  let costCerca = SHIPPING.CERCA;
-  let costLejos = SHIPPING.LEJOS;
-  let costOtraProv = SHIPPING.OTRA_PROV;
-  
-  if (subtotal >= SHIPPING.LOCAL_MIN && isChaco) {
-    costCerca = 0;
-    costLejos = 0;
-  }
-  
+  const shippingCost = subtotal >= SHIPPING.LOCAL_MIN ? 0 : SHIPPING.COSTO_FIJO;
+
   return `
     <div class="panel step-content">
       <div class="panel-header">
         <div class="panel-icon">🚚</div>
         <div>
           <div class="panel-title">MÉTODO DE <span>ENTREGA</span></div>
-          <div class="panel-sub">Elegí cómo querés recibir tu pedido</div>
+          <div class="panel-sub">Envíos hasta ${SHIPPING.RADIO_KM} km desde ${STORE.address}</div>
         </div>
       </div>
+
       <div class="panel-body">
         <div class="delivery-option${STATE.delivery === 'local' ? ' selected' : ''}" id="del-local" onclick="selectDelivery('local', 0)">
           <div class="delivery-option-header">
@@ -392,6 +386,7 @@ function renderStep3() {
             </div>
             <div class="delivery-price free">GRATIS</div>
           </div>
+
           <div class="delivery-details">
             📍 ${STORE.address}<br>
             🕐 ${STORE.hours}<br>
@@ -399,72 +394,52 @@ function renderStep3() {
           </div>
         </div>
 
-        <div class="delivery-option${STATE.delivery && STATE.delivery.startsWith('domicilio') ? ' selected' : ''}" id="del-dom"
-          onclick="selectDeliveryDomicilio(${costCerca}, ${costLejos}, ${costOtraProv}, ${isChaco ? 1 : 0})">
+        <div
+          class="delivery-option${!isChaco ? ' disabled' : ''}${STATE.delivery === 'domicilio' ? ' selected' : ''}"
+          id="del-dom"
+          onclick="${isChaco ? `selectDeliveryDomicilio()` : `showToast('No realizamos envíos a otras provincias', 'warn')`}"
+        >
           <div class="delivery-option-header">
             <div class="delivery-option-left">
               <div class="delivery-radio"></div>
               <div class="delivery-icon">🛵</div>
               <div>
                 <div class="delivery-name">Envío a domicilio</div>
-                <div class="delivery-sub" style="font-size:12px;color:var(--muted)">Lo llevamos a tu puerta</div>
+                <div class="delivery-sub" style="font-size:12px;color:var(--muted)">
+                  Solo hasta ${SHIPPING.RADIO_KM} km desde Av. Sarmiento 322, Resistencia
+                </div>
               </div>
             </div>
-            <div class="delivery-price paid">
-              ${isChaco
-                ? (subtotal >= SHIPPING.LOCAL_MIN
-                  ? '<span style="color:var(--green)">GRATIS</span>'
-                  : `Desde $${costCerca.toLocaleString('es-AR')}`)
-                : `$${costOtraProv.toLocaleString('es-AR')}`}
+
+            <div class="delivery-price ${shippingCost === 0 ? 'free' : 'paid'}">
+              ${shippingCost === 0
+                ? '<span style="color:var(--green)">GRATIS</span>'
+                : `$${shippingCost.toLocaleString('es-AR')}`}
             </div>
           </div>
+
           <div class="delivery-details">
             ${isChaco ? `
-              ≤ 10 cuadras del local: <strong style="color:var(--accent)">$${costCerca.toLocaleString('es-AR')}</strong><br>
-              > 10 cuadras: <strong style="color:var(--accent)">$${costLejos.toLocaleString('es-AR')}</strong><br>
-              ${subtotal >= SHIPPING.LOCAL_MIN ? `<span class="delivery-badge">🎉 ¡Envío gratis!</span>` : ''}
+              Radio máximo de entrega: <strong style="color:var(--accent)">${SHIPPING.RADIO_KM} km</strong><br>
+              Costo fijo: <strong style="color:var(--accent)">$${SHIPPING.COSTO_FIJO.toLocaleString('es-AR')}</strong><br>
+              ${subtotal >= SHIPPING.LOCAL_MIN
+                ? `<span class="delivery-badge">🎉 ¡Envío gratis superando $${SHIPPING.LOCAL_MIN.toLocaleString('es-AR')}!</span>`
+                : `<span class="delivery-badge">🚚 Envío gratis desde $${SHIPPING.LOCAL_MIN.toLocaleString('es-AR')}</span>`
+              }
             ` : `
-              Otra provincia: <strong style="color:var(--accent2)">$${costOtraProv.toLocaleString('es-AR')}</strong><br>
-              Entrega estimada: 3-7 días hábiles
+              <strong style="color:var(--red)">No realizamos envíos a otras provincias, pero próximamente estaremos expandiendo nuestros servicios.</strong><br>
+              Podés elegir retiro en sucursal.
             `}
-          </div>
-        </div>
-
-        <div id="distanceSelector" style="display:${STATE.delivery && STATE.delivery.startsWith('domicilio') && isChaco ? 'block' : 'none'};margin-top:8px;">
-          <div style="padding:16px;background:var(--bg3);border-radius:12px;border:1px solid var(--border)">
-            <div style="font-size:13px;color:var(--muted);margin-bottom:12px;font-family:var(--font-mono);text-transform:uppercase;letter-spacing:.06em;font-size:11px">
-              ¿A cuántas cuadras estás del local (${STORE.address})?
-            </div>
-            <div style="display:flex;flex-direction:column;gap:8px">
-              <label style="display:flex;align-items:center;gap:10px;cursor:pointer;padding:10px 14px;border-radius:8px;border:1px solid var(--border);background:var(--bg2);">
-                <input type="radio" name="distancia" value="cerca" ${STATE.deliveryDistance === 'cerca' ? 'checked' : ''}
-                  onchange="selectDeliveryExact('domicilio_cerca', ${costCerca})"
-                  style="accent-color:var(--accent);width:16px;height:16px"/>
-                <div>
-                  <div style="font-size:13px;font-weight:500">≤ 10 cuadras del local</div>
-                  <div style="font-size:12px;color:var(--muted)">
-                    ${subtotal >= SHIPPING.LOCAL_MIN ? `<span style="color:var(--green)">GRATIS</span>` : '$' + costCerca.toLocaleString('es-AR')}
-                  </div>
-                </div>
-              </label>
-              <label style="display:flex;align-items:center;gap:10px;cursor:pointer;padding:10px 14px;border-radius:8px;border:1px solid var(--border);background:var(--bg2);">
-                <input type="radio" name="distancia" value="lejos" ${STATE.deliveryDistance === 'lejos' ? 'checked' : ''}
-                  onchange="selectDeliveryExact('domicilio_lejos', ${costLejos})"
-                  style="accent-color:var(--accent);width:16px;height:16px"/>
-                <div>
-                  <div style="font-size:13px;font-weight:500">> 10 cuadras del local</div>
-                  <div style="font-size:12px;color:var(--muted)">
-                    ${subtotal >= SHIPPING.LOCAL_MIN ? `<span style="color:var(--green)">GRATIS</span>` : '$' + costLejos.toLocaleString('es-AR')}
-                  </div>
-                </div>
-              </label>
-            </div>
           </div>
         </div>
 
         <div class="delivery-info-box">
           <strong>📦 Tu dirección registrada:</strong><br>
           ${esc(STATE.contact.street || '')}, ${esc(STATE.contact.city || '')}, ${esc(STATE.contact.province || '')}
+          <br><br>
+          <span style="color:var(--muted)">
+            * El envío queda sujeto a validación del radio máximo de ${SHIPPING.RADIO_KM} km desde el local.
+          </span>
         </div>
 
         <div class="btn-row">
@@ -485,24 +460,24 @@ function selectDelivery(type, cost) {
   if (ds) ds.style.display = 'none';
 }
 
-function selectDeliveryDomicilio(costCerca, costLejos, costProv, isSameCity) {
-  document.querySelectorAll('.delivery-option').forEach(el => el.classList.remove('selected'));
-  document.getElementById('del-dom')?.classList.add('selected');
-  
-  if (!isSameCity) {
-    STATE.delivery = 'domicilio_prov';
-    STATE.deliveryCost = costProv;
-    STATE.deliveryDistance = null;
-    renderSummary();
+function selectDeliveryDomicilio() {
+  const subtotal = getSubtotal();
+  const province = (STATE.contact.province || '').toLowerCase();
+
+  if (!province.includes('chaco')) {
+    showToast('No realizamos envíos a otras provincias', 'warn');
     return;
   }
-  
+
+  const cost = subtotal >= SHIPPING.LOCAL_MIN ? 0 : SHIPPING.COSTO_FIJO;
+
   STATE.delivery = 'domicilio';
-  STATE.deliveryCost = costCerca;
-  STATE.deliveryDistance = 'cerca';
-  
-  const ds = document.getElementById('distanceSelector');
-  if (ds) ds.style.display = 'block';
+  STATE.deliveryCost = cost;
+  STATE.deliveryDistance = 'radio_18km';
+
+  document.querySelectorAll('.delivery-option').forEach(el => el.classList.remove('selected'));
+  document.getElementById('del-dom')?.classList.add('selected');
+
   renderSummary();
 }
 
@@ -518,9 +493,18 @@ function submitStep3() {
     showToast('⚠️ Seleccioná un método de entrega', 'warn');
     return;
   }
+
+  if (STATE.delivery === 'domicilio') {
+    const province = (STATE.contact.province || '').toLowerCase();
+
+    if (!province.includes('chaco')) {
+      showToast('⚠️ No realizamos envíos a otras provincias', 'warn');
+      return;
+    }
+  }
+
   renderStep(4);
 }
-
 /* ══════════════════════════════════════════════════════════
    PASO 4 — PAGO (CON SISTEMA DE PUNTOS)
 ══════════════════════════════════════════════════════════ */
@@ -772,10 +756,9 @@ async function submitStep4() {
         throw new Error('No se recibio la URL de pago de Mercado Pago');
       }
 
-      // Limpiar carrito justo antes de redirigir
-      STATE.cart = [];
-      localStorage.removeItem('lobo24_cart');
-      showToast('🎉 Pedido #' + orderId + ' registrado! Ganaste ' + pointsEarned + ' puntos.', 'success');
+      // NO limpiar el carrito todavía.
+      // Se limpia recién cuando el pago se confirma o cuando el usuario finaliza por transferencia/efectivo.
+      showToast('🎉 Pedido #' + orderId + ' registrado. Te redirigimos a Mercado Pago.', 'success');
 
       // Redirigir al checkout de MP
       window.location.href = mpUrl;
@@ -844,11 +827,9 @@ async function submitStep4() {
 function renderStep5() {
   const paymentLabels = { mp: 'Mercado Pago', transfer: 'Transferencia bancaria', efectivo: 'Efectivo en local' };
   const deliveryLabels = {
-    local: 'Retiro en sucursal',
-    domicilio_cerca: 'Envío a domicilio',
-    domicilio_lejos: 'Envío a domicilio',
-    domicilio_prov: 'Envío a otra provincia'
-  };
+  local: 'Retiro en sucursal',
+  domicilio: 'Envío a domicilio hasta 18 km'
+};
 
   const order = STATE.lastOrder || {};
   const contact = order.contact || STATE.contact || {};

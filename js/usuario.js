@@ -436,4 +436,57 @@ window.handleLogout = handleLogout;
 window.showToast = showToast;
 window.toggleOrderDetailsUser = toggleOrderDetailsUser;
 
+/* ══════════════════════════════════════════════
+   AUTO LOGOUT POR INACTIVIDAD
+══════════════════════════════════════════════ */
+
+let inactivityTimer;
+
+// 30 minutos
+const INACTIVITY_LIMIT = 30 * 60 * 1000;
+
+function resetInactivityTimer() {
+  clearTimeout(inactivityTimer);
+
+  inactivityTimer = setTimeout(async () => {
+    try {
+      showToast('⏳ Sesión cerrada por inactividad');
+
+      await window.auth.signOut();
+
+      setTimeout(() => {
+        window.location.href = 'index.html';
+      }, 1500);
+
+    } catch (err) {
+      console.error('Error cerrando sesión automática:', err);
+    }
+  }, INACTIVITY_LIMIT);
+}
+
+function initAutoLogout() {
+
+  // Eventos que cuentan como actividad
+  const events = [
+    'mousemove',
+    'mousedown',
+    'click',
+    'scroll',
+    'keypress',
+    'touchstart'
+  ];
+
+  events.forEach(event => {
+    document.addEventListener(event, resetInactivityTimer, true);
+  });
+
+  // Iniciar contador
+  resetInactivityTimer();
+}
+
+// Inicializar cuando el usuario esté autenticado
+document.addEventListener('DOMContentLoaded', () => {
+  initAutoLogout();
+});
+
 console.log('usuario.js cargado correctamente');
