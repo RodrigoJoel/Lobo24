@@ -11,10 +11,15 @@ app.use(cors({
   origin: [
     'http://127.0.0.1:5500',
     'http://localhost:5500',
+
     'https://lobo24-9e46b.web.app',
-    'https://lobo24-9e46b.firebaseapp.com'
+    'https://lobo24-9e46b.firebaseapp.com',
+
+    'https://marketlobo24.com.ar',
+    'https://www.marketlobo24.com.ar'
   ],
-  methods: ['GET', 'POST'],
+
+  methods: ['GET', 'POST', 'OPTIONS'],
   allowedHeaders: ['Content-Type']
 }));
 
