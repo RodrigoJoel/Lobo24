@@ -7,20 +7,36 @@ const PORT = process.env.PORT || 3000;
 
 // ===================== CONFIGURACIÓN =====================
 
+const ALLOWED_ORIGINS = [
+  'http://127.0.0.1:5500',
+  'http://localhost:5500',
+
+  'https://lobo24-9e46b.web.app',
+  'https://lobo24-9e46b.firebaseapp.com',
+
+  'https://marketlobo24.com.ar',
+  'https://www.marketlobo24.com.ar'
+];
+
 app.use(cors({
-  origin: [
-    'http://127.0.0.1:5500',
-    'http://localhost:5500',
+  origin: function (origin, callback) {
 
-    'https://lobo24-9e46b.web.app',
-    'https://lobo24-9e46b.firebaseapp.com',
+    // Permitir requests sin origin (MercadoPago/webhooks)
+    if (!origin) {
+      return callback(null, true);
+    }
 
-    'https://marketlobo24.com.ar',
-    'https://www.marketlobo24.com.ar'
-  ],
+    if (ALLOWED_ORIGINS.includes(origin)) {
+      return callback(null, true);
+    }
+
+    console.log('❌ CORS bloqueado:', origin);
+
+    return callback(new Error('No permitido por CORS'));
+  },
 
   methods: ['GET', 'POST', 'OPTIONS'],
-  allowedHeaders: ['Content-Type']
+  allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
 app.use(express.json());
