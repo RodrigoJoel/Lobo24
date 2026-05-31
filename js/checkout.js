@@ -894,7 +894,7 @@ function renderStep5() {
         ${payment === 'transfer' ? `
           <div style="background:rgba(240,192,64,.08);border:1px solid rgba(240,192,64,.2);border-radius:12px;padding:16px 20px;margin-bottom:20px;font-size:13px;color:var(--muted);text-align:left">
             <strong style="color:var(--accent)">📌 Próximo paso:</strong><br>
-            Realizá la transferencia por <strong>$${totalFinal.toLocaleString('es-AR')}</strong> al alias <strong>LOBO24.PAGO</strong>
+            Realizá la transferencia por <strong>$${totalFinal.toLocaleString('es-AR')}</strong> al alias <strong>LOBO24HS</strong>
             y enviá el comprobante por WhatsApp mencionando el pedido #${orderNum}.
           </div>
         ` : ''}
