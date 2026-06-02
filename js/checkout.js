@@ -31,7 +31,7 @@ const STORE = {
 const SHIPPING = {
   LOCAL_MIN: 85000,
   COSTO_FIJO: 4500,
-  RADIO_KM: 18,
+  RADIO_KM: 4,
 };
 
 /* ══════════════════════════════════════════════════════════
@@ -828,7 +828,7 @@ function renderStep5() {
   const paymentLabels = { mp: 'Mercado Pago', transfer: 'Transferencia bancaria', efectivo: 'Efectivo en local' };
   const deliveryLabels = {
   local: 'Retiro en sucursal',
-  domicilio: 'Envío a domicilio hasta 18 km'
+  domicilio: 'Envío a domicilio hasta 4 km'
 };
 
   const order = STATE.lastOrder || {};
