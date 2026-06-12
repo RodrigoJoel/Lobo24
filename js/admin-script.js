@@ -380,10 +380,24 @@ function filterAdminProducts(collectionName) {
   const searchInput = document.getElementById(`${collectionName}AdminSearch`);
   const subcatSelect = document.getElementById(`${collectionName}AdminSubcatFilter`);
 
-  window.adminProductSearch[collectionName] = searchInput ? searchInput.value : "";
-  window.adminProductSubcat[collectionName] = subcatSelect ? subcatSelect.value : "all";
+  const cursorPos = searchInput.selectionStart;
+
+  window.adminProductSearch[collectionName] =
+    searchInput ? searchInput.value : "";
+
+  window.adminProductSubcat[collectionName] =
+    subcatSelect ? subcatSelect.value : "all";
 
   render(collectionName);
+
+  setTimeout(() => {
+    const newInput = document.getElementById(`${collectionName}AdminSearch`);
+
+    if (newInput) {
+      newInput.focus();
+      newInput.setSelectionRange(cursorPos, cursorPos);
+    }
+  }, 0);
 }
 
 window.filterAdminProducts = filterAdminProducts;
