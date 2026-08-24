@@ -1,0 +1,126 @@
+rules_version = '2';
+
+// ════════════════════════════════════════════════════════════════
+// Lobo24 — Firestore Security Rules
+//
+// Reemplaza la regla actual ("allow read, write: if true"), que deja
+// toda la base de datos abierta a cualquier persona en internet.
+//
+// ⚠️ IMPORTANTE ANTES DE DESPLEGAR ESTO:
+//   admin.html y pedidos-live.js NO inician sesión con Firebase Auth
+//   (solo revisan una bandera en localStorage, que no sirve como
+//   identidad real para las reglas). Con estas reglas activas, esas
+//   dos pantallas van a dejar de poder leer/escribir "pedidos" y de
+//   guardar productos, porque request.auth va a llegar vacío.
+//   Hace falta agregar signInWithEmailAndPassword / onAuthStateChanged
+//   real en esas páginas (como ya existe en admin-login.js) para que
+//   vuelvan a funcionar. Avisame cuando quieras que lo resolvamos.
+// ════════════════════════════════════════════════════════════════
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ─── Helpers ───────────────────────────────────────────────
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    // Lista blanca de administradores (mismo criterio que admin-login.js).
+    // El email viene del token de Firebase Auth, firmado por Google:
+    // el cliente no puede falsificarlo.
+    function isAdmin() {
+      return isSignedIn() &&
+             request.auth.token.email in ['rodrigoatatat@gmail.com'];
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    // Permite que un usuario NO autenticado descuente stock al comprar
+    // (transferencia/efectivo), pero solo eso: no puede tocar precio,
+    // nombre, ni subir el stock. Es un parche temporal — lo ideal es
+    // que este descuento lo haga el backend con la Admin SDK.
+    function isValidStockDecrement() {
+      let before = resource.data;
+      let after  = request.resource.data;
+      return after.diff(before).affectedKeys().hasOnly(['stock']) &&
+             after.stock is number && before.stock is number &&
+             after.stock >= 0 &&
+             after.stock <= before.stock;
+    }
+
+    // ─── Catálogo de productos por categoría ──────────────────
+    // bebidas, snacks, almacen, higiene, limpieza, congelados,
+    // lacteos, panaderia, mascotas, ofertas
+    match /{coleccion}/{docId} {
+      allow read: if coleccion in [
+        'bebidas', 'snacks', 'almacen', 'higiene', 'limpieza',
+        'congelados', 'lacteos', 'panaderia', 'mascotas', 'ofertas'
+      ];
+      allow create, delete: if coleccion in [
+        'bebidas', 'snacks', 'almacen', 'higiene', 'limpieza',
+        'congelados', 'lacteos', 'panaderia', 'mascotas', 'ofertas'
+      ] && isAdmin();
+      allow update: if coleccion in [
+        'bebidas', 'snacks', 'almacen', 'higiene', 'limpieza',
+        'congelados', 'lacteos', 'panaderia', 'mascotas', 'ofertas'
+      ] && (isAdmin() || isValidStockDecrement());
+    }
+
+    // ─── Contenido de la home / admin ─────────────────────────
+    // carousel, promos, categories, best, newProds, offersStrip, sections
+    match /{coleccion}/{docId} {
+      allow read: if coleccion in [
+        'carousel', 'promos', 'categories', 'best', 'newProds',
+        'offersStrip', 'sections'
+      ];
+      allow write: if coleccion in [
+        'carousel', 'promos', 'categories', 'best', 'newProds',
+        'offersStrip', 'sections'
+      ] && isAdmin();
+    }
+
+    // ─── Usuarios ──────────────────────────────────────────────
+    match /users/{userId} {
+      allow read: if isOwner(userId) || isAdmin();
+
+      // Alta al registrarse (handleRegister en app-global.js)
+      allow create: if isOwner(userId) &&
+                     request.resource.data.points == 0;
+
+      // El dueño puede editar su propio perfil y sus puntos.
+      // TODO: mover el cálculo de puntos ganados/usados al backend
+      // para que el cliente no pueda escribir cualquier valor.
+      allow update: if isAdmin() ||
+                     (isOwner(userId) &&
+                      request.resource.data.diff(resource.data)
+                        .affectedKeys()
+                        .hasOnly(['name', 'phone', 'email', 'points']));
+
+      allow delete: if isAdmin();
+    }
+
+    // ─── Pedidos ───────────────────────────────────────────────
+    match /pedidos/{pedidoId} {
+      // Se permite crear sin login (compra como invitado), pero con
+      // una validación mínima de forma. La verdad de precios/total
+      // debería validarse en el backend antes de cobrar (ver
+      // webVentas-backend/server.js: /crear-preferencia confía en
+      // el total que manda el cliente).
+      allow create: if request.resource.data.keys().hasAll(
+                      ['orderId', 'contact', 'items', 'total', 'payment', 'status', 'createdAt']
+                    ) &&
+                    request.resource.data.total is number &&
+                    request.resource.data.total > 0;
+
+      // Protege datos personales de los clientes (nombre, email,
+      // teléfono, dirección): solo el admin puede leer/listar pedidos.
+      allow read, update, delete: if isAdmin();
+    }
+
+    // Cualquier otra colección no listada arriba queda denegada
+    // por defecto (Firestore deniega si ninguna regla permite).
+  }
+}
