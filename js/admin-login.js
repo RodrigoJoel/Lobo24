@@ -132,6 +132,14 @@ const secureStorage = new SecureStorage();
 // FUNCIONES DE SESIÓN
 // ─────────────────────────────────────────────
 
+// Adónde volver después de loguearse. Whitelist cerrada para evitar
+// un open-redirect vía ?redirect=https://sitio-malicioso.com
+function getRedirectTarget() {
+    const allowed = ['admin.html', 'pedidos-live.html'];
+    const requested = new URLSearchParams(window.location.search).get('redirect');
+    return allowed.includes(requested) ? requested : 'admin.html';
+}
+
 function loadSessionState() {
     // Verificar si hay una sesión activa
     const sessionToken = localStorage.getItem('admin_session_token');
@@ -143,7 +151,7 @@ function loadSessionState() {
         const expectedHash = secureStorage.hashEmail(sessionToken + SECURITY_CONFIG.sessionDuration);
         if (sessionHash === expectedHash) {
             // Sesión válida, redirigir
-            window.location.href = 'admin.html';
+            window.location.href = getRedirectTarget();
         } else {
             // Token comprometido, limpiar
             clearSession();
@@ -380,7 +388,7 @@ function handleSuccessfulLogin(user, rememberMe) {
     logSecurityEvent('login_success', user.email);
     
     showSuccess('✓ Acceso concedido. Redirigiendo...');
-    setTimeout(() => { window.location.href = 'admin.html'; }, 1500);
+    setTimeout(() => { window.location.href = getRedirectTarget(); }, 1500);
 }
 
 async function handleLogin(e) {

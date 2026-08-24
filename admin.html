@@ -283,8 +283,10 @@ function setupRealtimeListeners() {
   });
 
 
+const ADMIN_EMAILS = ["rodrigoatatat@gmail.com"];
+
 onAuthStateChanged(auth, (user) => {
-  if (!user) {
+  if (!user || !ADMIN_EMAILS.includes(user.email)) {
     window.location.href = "admin-login.html";
   } else {
     loadAll();

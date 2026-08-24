@@ -7,14 +7,16 @@ rules_version = '2';
 // toda la base de datos abierta a cualquier persona en internet.
 //
 // ⚠️ IMPORTANTE ANTES DE DESPLEGAR ESTO:
-//   admin.html y pedidos-live.js NO inician sesión con Firebase Auth
-//   (solo revisan una bandera en localStorage, que no sirve como
-//   identidad real para las reglas). Con estas reglas activas, esas
-//   dos pantallas van a dejar de poder leer/escribir "pedidos" y de
-//   guardar productos, porque request.auth va a llegar vacío.
-//   Hace falta agregar signInWithEmailAndPassword / onAuthStateChanged
-//   real en esas páginas (como ya existe en admin-login.js) para que
-//   vuelvan a funcionar. Avisame cuando quieras que lo resolvamos.
+//   admin.html SÍ inicia sesión real con Firebase Auth (getAuth +
+//   onAuthStateChanged, líneas ~130-292), así que sus lecturas y
+//   escrituras van a seguir funcionando.
+//
+//   pedidos-live.js, en cambio, NO inicia sesión: solo abre Firestore
+//   y escucha "pedidos" sin autenticarse. Con estas reglas activas,
+//   esa pantalla va a dejar de ver pedidos y de poder cambiar su
+//   estado ("En preparación" / "Entregado") hasta que se le agregue
+//   un login real (mismo patrón que admin-login.js). Avisame cuando
+//   quieras que lo resolvamos.
 // ════════════════════════════════════════════════════════════════
 
 service cloud.firestore {
@@ -69,17 +71,28 @@ service cloud.firestore {
       ] && (isAdmin() || isValidStockDecrement());
     }
 
-    // ─── Contenido de la home / admin ─────────────────────────
-    // carousel, promos, categories, best, newProds, offersStrip, sections
+    // ─── Contenido de la home / admin (nombres reales de colección,
+    // confirmados en index.html y admin.html — OJO que no coinciden
+    // con los nombres de variables JS: bestSellers ≠ "best", etc.) ──
+    // carousel, promos, categories, bestSellers, newProducts,
+    // offersStrip, ofertasIndex
     match /{coleccion}/{docId} {
       allow read: if coleccion in [
-        'carousel', 'promos', 'categories', 'best', 'newProds',
-        'offersStrip', 'sections'
+        'carousel', 'promos', 'categories', 'bestSellers',
+        'newProducts', 'offersStrip', 'ofertasIndex'
       ];
       allow write: if coleccion in [
-        'carousel', 'promos', 'categories', 'best', 'newProds',
-        'offersStrip', 'sections'
+        'carousel', 'promos', 'categories', 'bestSellers',
+        'newProducts', 'offersStrip', 'ofertasIndex'
       ] && isAdmin();
+    }
+
+    // ─── Configuración del sitio ───────────────────────────────
+    // config/general, config/sections — leídos sin login en todas
+    // las páginas públicas (topbar, banner, secciones visibles, etc.)
+    match /config/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
     }
 
     // ─── Usuarios ──────────────────────────────────────────────
@@ -115,9 +128,15 @@ service cloud.firestore {
                     request.resource.data.total is number &&
                     request.resource.data.total > 0;
 
-      // Protege datos personales de los clientes (nombre, email,
-      // teléfono, dirección): solo el admin puede leer/listar pedidos.
-      allow read, update, delete: if isAdmin();
+      // Un cliente logueado puede ver SU historial de compras
+      // (usuario.js filtra por where userId == auth.uid); el admin
+      // puede ver y gestionar todos los pedidos. El resto de los
+      // datos del cliente (nombre, email, teléfono, dirección)
+      // queda protegido.
+      allow read: if isAdmin() ||
+                   (isSignedIn() && resource.data.userId == request.auth.uid);
+
+      allow update, delete: if isAdmin();
     }
 
     // Cualquier otra colección no listada arriba queda denegada

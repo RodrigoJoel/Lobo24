@@ -8,6 +8,10 @@ import {
   doc,
   updateDoc
 } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
+import {
+  getAuth,
+  onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/11.0.0/firebase-auth.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyBiN4r47hmNycD7aZjkZa6XakZSzXwbL8Q",
@@ -20,6 +24,12 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
+const auth = getAuth(app);
+
+// Mismo criterio que admin-login.js / firestore.rules: sin esto,
+// las reglas de Firestore rechazan la lectura de "pedidos" porque
+// esta pantalla nunca se autenticaba de verdad.
+const ADMIN_EMAILS = ["rodrigoatatat@gmail.com"];
 
 const pedidosContainer = document.getElementById("pedidosContainer");
 const emptyState = document.getElementById("emptyState");
@@ -45,8 +55,14 @@ const STATUS_CLASS = {
   cancelled: "pendiente"
 };
 
-initNotifications();
-listenOrders();
+onAuthStateChanged(auth, (user) => {
+  if (!user || !ADMIN_EMAILS.includes(user.email)) {
+    window.location.href = "admin-login.html?redirect=pedidos-live.html";
+    return;
+  }
+  initNotifications();
+  listenOrders();
+});
 
 function listenOrders() {
   const q = query(collection(db, "pedidos"), orderBy("createdAt", "desc"));
