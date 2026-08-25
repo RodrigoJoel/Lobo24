@@ -84,7 +84,7 @@
 <!-- FIREBASE -->
 <script type="module">
 import { initializeApp }   from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
-import { getFirestore, doc, getDoc, updateDoc, collection, addDoc, serverTimestamp }
+import { getFirestore, doc, getDoc, updateDoc, collection, addDoc, serverTimestamp, query, where, getDocs }
   from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
 import { getAuth, onAuthStateChanged }
   from "https://www.gstatic.com/firebasejs/11.0.0/firebase-auth.js";
@@ -110,6 +110,9 @@ window._fbUpdateDoc= updateDoc;
 window._fbCollection = collection;
 window._fbAddDoc   = addDoc;
 window._fbServerTs = serverTimestamp;
+window._fbQuery    = query;
+window._fbWhere    = where;
+window._fbGetDocs  = getDocs;
 
 onAuthStateChanged(auth, async user => {
   window._currentUser = user;
