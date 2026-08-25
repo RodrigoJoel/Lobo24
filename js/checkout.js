@@ -28,11 +28,34 @@ const STORE = {
   email: 'rodrigoatatat@gmail.com'
 };
 
-const SHIPPING = {
+// Valores por defecto: se usan hasta que se cargue (o si no existe)
+// config/shipping en Firestore — mismo doc que lee server.js, para que
+// el costo de envío se edite en un solo lugar en vez de dos constantes
+// que había que mantener sincronizadas a mano.
+const DEFAULT_SHIPPING = {
   LOCAL_MIN: 85000,
   COSTO_FIJO: 4500,
   RADIO_KM: 4,
 };
+let SHIPPING = { ...DEFAULT_SHIPPING };
+
+async function loadShippingConfig() {
+  try {
+    if (!window._db || !window._fbDoc || !window._fbGetDoc) return;
+    const ref = window._fbDoc(window._db, 'config', 'shipping');
+    const snap = await window._fbGetDoc(ref);
+    if (snap.exists()) {
+      const data = snap.data();
+      SHIPPING = {
+        LOCAL_MIN: Number(data.localMin ?? DEFAULT_SHIPPING.LOCAL_MIN),
+        COSTO_FIJO: Number(data.costoFijo ?? DEFAULT_SHIPPING.COSTO_FIJO),
+        RADIO_KM: Number(data.radioKm ?? DEFAULT_SHIPPING.RADIO_KM),
+      };
+    }
+  } catch (e) {
+    console.error('No se pudo leer config/shipping, se usan los valores por defecto:', e);
+  }
+}
 
 /* ══════════════════════════════════════════════════════════
    INICIALIZACIÓN
@@ -41,6 +64,7 @@ const SHIPPING = {
 function initCheckout() {
   loadCartFromStorage();
   loadUserData();
+  loadShippingConfig();
   if (handleMpReturn()) return;
   renderStep(1);
   renderSummary();
