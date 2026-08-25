@@ -162,6 +162,25 @@ async function sendResetEmail() {
 /* ─────────────────────────────────────
    AUTH
 ───────────────────────────────────── */
+
+// Proveedores de email aceptados al registrarse. Evita altas con
+// direcciones inventadas/typos (ej: "asd@asd.com").
+const ALLOWED_EMAIL_DOMAINS = [
+  'gmail.com',
+  'hotmail.com', 'hotmail.com.ar', 'hotmail.es',
+  'outlook.com', 'outlook.com.ar', 'outlook.es',
+  'live.com', 'live.com.ar',
+  'yahoo.com', 'yahoo.com.ar', 'yahoo.es',
+  'icloud.com', 'me.com',
+  'msn.com',
+  'proton.me', 'protonmail.com'
+];
+
+function isAllowedEmailDomain(email) {
+  const domain = (email.split('@')[1] || '').trim().toLowerCase();
+  return ALLOWED_EMAIL_DOMAINS.includes(domain);
+}
+
 async function handleLogin() {
   const email =
     document.getElementById('loginEmail')?.value.trim() ||
@@ -211,6 +230,11 @@ async function handleRegister() {
 
   if (!name || !email || !pass || pass.length < 6) {
     showToast('⚠️ Completá todos los datos (mínimo 6 caracteres de contraseña)');
+    return;
+  }
+
+  if (!isAllowedEmailDomain(email)) {
+    showToast('⚠️ Usá un email real de Gmail, Hotmail, Outlook, Yahoo, iCloud, etc.');
     return;
   }
 
