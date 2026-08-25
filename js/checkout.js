@@ -41,8 +41,79 @@ const SHIPPING = {
 function initCheckout() {
   loadCartFromStorage();
   loadUserData();
+  if (handleMpReturn()) return;
   renderStep(1);
   renderSummary();
+}
+
+/* ══════════════════════════════════════════════════════════
+   VUELTA DESDE MERCADO PAGO
+   MP redirige a checkout.html?mp_status=success|pending|failure&order=...
+   (ver back_urls en server.js). Antes de esto, nadie leía esos
+   parámetros y el checkout siempre mostraba el paso 1 (carrito).
+══════════════════════════════════════════════════════════ */
+
+let mpReturnProcessed = false;
+
+function handleMpReturn() {
+  if (mpReturnProcessed) return true;
+
+  const params = new URLSearchParams(window.location.search);
+  const mpStatus = params.get('mp_status');
+  if (!mpStatus) return false;
+
+  mpReturnProcessed = true;
+  const orderId = params.get('order');
+  window.history.replaceState({}, '', 'checkout.html');
+
+  if (mpStatus === 'failure') {
+    showToast('❌ El pago no pudo procesarse. Podés intentar de nuevo.', 'error');
+    mpReturnProcessed = false;
+    return false;
+  }
+
+  showMpReturnConfirmation(orderId, mpStatus);
+  return true;
+}
+
+async function showMpReturnConfirmation(orderId, mpStatus) {
+  let pedido = null;
+  try {
+    if (orderId && window._db && window._fbQuery) {
+      const q = window._fbQuery(
+        window._fbCollection(window._db, 'pedidos'),
+        window._fbWhere('orderId', '==', orderId)
+      );
+      const snap = await window._fbGetDocs(q);
+      if (!snap.empty) pedido = snap.docs[0].data();
+    }
+  } catch (e) {
+    console.error('Error buscando pedido tras volver de Mercado Pago:', e);
+  }
+
+  STATE.lastOrder = {
+    orderId: (pedido && pedido.orderId) || orderId || '—',
+    contact: (pedido && pedido.contact) || STATE.contact,
+    delivery: (pedido && pedido.delivery) || STATE.delivery,
+    deliveryCost: (pedido && pedido.deliveryCost) || 0,
+    payment: 'mp',
+    subtotal: (pedido && pedido.subtotal) || 0,
+    total: (pedido && pedido.total) || 0,
+    pointsUsed: (pedido && pedido.pointsUsed) || 0,
+    pointsEarned: (pedido && pedido.pointsEarned) || 0,
+    mpPending: mpStatus === 'pending'
+  };
+  STATE.orderId = STATE.lastOrder.orderId;
+  STATE.payment = 'mp';
+
+  STATE.cart = [];
+  localStorage.removeItem('lobo24_cart');
+
+  if (mpStatus === 'pending') {
+    showToast('⏳ Tu pago está pendiente de aprobación por Mercado Pago.', 'warn');
+  }
+
+  renderStep(5);
 }
 
 async function loadUserData() {
@@ -905,6 +976,15 @@ function renderStep5() {
             <strong style="color:var(--accent)">📌 Próximo paso:</strong><br>
             Realizá la transferencia por <strong>$${totalFinal.toLocaleString('es-AR')}</strong> al alias <strong>LOBO24HS</strong>
             y enviá el comprobante por WhatsApp mencionando el pedido #${orderNum}.
+          </div>
+        ` : ''}
+
+        ${payment === 'mp' ? `
+          <div style="background:rgba(240,192,64,.08);border:1px solid rgba(240,192,64,.2);border-radius:12px;padding:16px 20px;margin-bottom:20px;font-size:13px;color:var(--muted);text-align:left">
+            <strong style="color:var(--accent)">📌 Sobre tu pago:</strong><br>
+            ${order.mpPending
+              ? 'Mercado Pago todavía está procesando tu pago. Te vamos a avisar por email en cuanto se confirme.'
+              : 'Mercado Pago está validando la acreditación del pago. En unos minutos vas a recibir la confirmación por email.'}
           </div>
         ` : ''}
 
