@@ -710,11 +710,15 @@ async function submitStep4() {
     }
 
     // 2. Guardar items para MP ANTES de limpiar el carrito
+    // coleccion es necesaria para que el backend pueda buscar el precio
+    // real del producto en Firestore y no confiar en el precio que
+    // manda el navegador.
     const cartItemsParaMP = STATE.cart.map(i => ({
-      id:       i.docId,
-      name:     i.name,
-      quantity: i.qty,
-      price:    i.price
+      id:        i.docId,
+      coleccion: i.coleccion,
+      name:      i.name,
+      quantity:  i.qty,
+      price:     i.price
     }));
 
     STATE.orderId = orderId;
@@ -736,6 +740,11 @@ async function submitStep4() {
           orderData: {
             orderId:      orderId,
             orderNumber:  orderId,
+            delivery:     STATE.delivery,
+            pointsUsed:   STATE.pointsUsed,
+            userId:       window._currentUser?.uid || null,
+            // El backend recalcula el total real desde Firestore y lo usa
+            // para cobrar en Mercado Pago; esto solo viaja a modo informativo.
             total:        totalAmount
           }
         })
