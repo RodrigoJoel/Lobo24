@@ -41,6 +41,7 @@ let firstLoad = true;
 
 const STATUS_LABELS = {
   pending_payment: "Pendiente de pago",
+  payment_confirmed: "Pago confirmado",
   confirmed: "Confirmado",
   processing: "En preparación",
   completed: "Entregado",
@@ -49,6 +50,7 @@ const STATUS_LABELS = {
 
 const STATUS_CLASS = {
   pending_payment: "pendiente",
+  payment_confirmed: "preparacion",
   confirmed: "pendiente",
   processing: "preparacion",
   completed: "entregado",
@@ -130,6 +132,16 @@ function initNotifications() {
   }
 }
 
+function formatFecha(createdAt) {
+  if (!createdAt) return "—";
+  const date = typeof createdAt.toDate === "function" ? createdAt.toDate() : new Date(createdAt);
+  if (isNaN(date.getTime())) return "—";
+  return date.toLocaleString("es-AR", {
+    day: "2-digit", month: "2-digit", year: "numeric",
+    hour: "2-digit", minute: "2-digit"
+  });
+}
+
 function renderOrders(pedidos) {
   pedidoCount.textContent = `${pedidos.length} pedido${pedidos.length !== 1 ? "s" : ""}`;
 
@@ -158,13 +170,26 @@ function renderOrders(pedidos) {
       : `${pedido.contact?.street || ""}, ${pedido.contact?.city || ""}, ${pedido.contact?.province || ""}`;
 
     const pago = getPaymentLabel(pedido.payment);
-    const entrega = pedido.delivery === "local" ? "Retiro en sucursal" : "Envío a domicilio";
+    const esRetiro = pedido.delivery === "local";
+    const entrega = esRetiro ? "Retiro en sucursal" : "Envío a domicilio";
+    const fecha = formatFecha(pedido.createdAt);
+
+    const mpValidado = pedido.status === "payment_confirmed";
+    const mpNote = pedido.payment === "mp" ? `
+      <div class="mp-note ${mpValidado ? "mp-ok" : "mp-wait"}">
+        ${mpValidado
+          ? "✅ Pago acreditado por Mercado Pago"
+          : "⏳ Esperar validación: confirmar que el dinero ingresó a la cuenta antes de entregar/preparar"}
+      </div>` : "";
 
     return `
       <div class="pedido-card">
         <div class="status ${statusClass}">${statusLabel}</div>
 
         <h2>#${pedido.orderId || pedido.firebaseId}</h2>
+        <div class="info fecha"><strong>Fecha:</strong> ${escapeHtml(fecha)}</div>
+
+        ${esRetiro ? `<div class="pickup-badge">🏪 RETIRO EN SUCURSAL</div>` : ""}
 
         <div class="info"><strong>Cliente:</strong> ${escapeHtml(cliente)}</div>
         ${telefono ? `<div class="info"><strong>Tel:</strong> ${escapeHtml(telefono)}</div>` : ""}
@@ -173,6 +198,7 @@ function renderOrders(pedidos) {
         <div class="info"><strong>Entrega:</strong> ${escapeHtml(entrega)}</div>
         <div class="info"><strong>Dirección:</strong> ${escapeHtml(direccion)}</div>
         <div class="info"><strong>Pago:</strong> ${escapeHtml(pago)}</div>
+        ${mpNote}
 
         <div class="total">$${total.toLocaleString("es-AR")}</div>
 
