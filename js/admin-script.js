@@ -315,6 +315,11 @@ function pageCategoryManager(collectionName) {
       </div>
 
       <div class="field-row">
+        ${field("Código de barras", `<input id="${collectionName}CodigoBarras" placeholder="Ej: 7790895000782"/>`)}
+        ${field("Código de barras alternativo", `<input id="${collectionName}CodigoBarrasAlt" placeholder="Por si el producto cambió de código"/>`)}
+      </div>
+
+      <div class="field-row">
         ${field("Subcategoría", `<select id="${collectionName}Subcat">${getSubcatOptions(collectionName, conf.subcategories[0][0])}</select>`)}
         ${field("Badge", `<select id="${collectionName}Badge"><option value="">Ninguno</option><option value="new">NUEVO</option><option value="offer">OFERTA</option><option value="hot">HOT</option></select>`)}
       </div>
@@ -346,6 +351,11 @@ function pageCategoryManager(collectionName) {
         <div class="field-row">
           ${field("Nombre", `<input id="${collectionName}EditName"/>`)}
           ${field("Marca", `<input id="${collectionName}EditBrand"/>`)}
+        </div>
+
+        <div class="field-row">
+          ${field("Código de barras", `<input id="${collectionName}EditCodigoBarras"/>`)}
+          ${field("Código de barras alternativo", `<input id="${collectionName}EditCodigoBarrasAlt" placeholder="Por si el producto cambió de código"/>`)}
         </div>
 
         <div class="field-row">
@@ -408,6 +418,8 @@ function editCategoryItem(collectionName, docId) {
   document.getElementById(`${collectionName}DocId`).value = docId;
   document.getElementById(`${collectionName}EditName`).value = item.name || "";
   document.getElementById(`${collectionName}EditBrand`).value = item.brand || "";
+  document.getElementById(`${collectionName}EditCodigoBarras`).value = item.codigoBarras || "";
+  document.getElementById(`${collectionName}EditCodigoBarrasAlt`).value = item.codigoBarrasAlternativo || "";
   document.getElementById(`${collectionName}EditSubcat`).value = item.subcat || window.CATEGORY_CONFIG[collectionName].subcategories[0][0];
   document.getElementById(`${collectionName}EditBadge`).value = item.badge || "";
   document.getElementById(`${collectionName}EditPrice`).value = item.price || "";
@@ -442,6 +454,8 @@ async function saveCategoryItem(collectionName) {
   const data = {
     name: document.getElementById(`${collectionName}EditName`).value.trim(),
     brand: document.getElementById(`${collectionName}EditBrand`).value.trim(),
+    codigoBarras: document.getElementById(`${collectionName}EditCodigoBarras`).value.trim() || null,
+    codigoBarrasAlternativo: document.getElementById(`${collectionName}EditCodigoBarrasAlt`).value.trim() || null,
     subcat: document.getElementById(`${collectionName}EditSubcat`).value,
     badge: document.getElementById(`${collectionName}EditBadge`).value || null,
     price: Number(document.getElementById(`${collectionName}EditPrice`).value) || 0,
@@ -469,6 +483,8 @@ async function addCategoryItem(collectionName) {
   const data = {
     name,
     brand: document.getElementById(`${collectionName}Brand`).value.trim(),
+    codigoBarras: document.getElementById(`${collectionName}CodigoBarras`).value.trim() || null,
+    codigoBarrasAlternativo: document.getElementById(`${collectionName}CodigoBarrasAlt`).value.trim() || null,
     subcat: document.getElementById(`${collectionName}Subcat`).value,
     badge: document.getElementById(`${collectionName}Badge`).value || null,
     price,
@@ -481,6 +497,8 @@ async function addCategoryItem(collectionName) {
     showToast(`✅ ${conf.label} agregado - ya visible en el sitio`);
     document.getElementById(`${collectionName}Name`).value = "";
     document.getElementById(`${collectionName}Brand`).value = "";
+    document.getElementById(`${collectionName}CodigoBarras`).value = "";
+    document.getElementById(`${collectionName}CodigoBarrasAlt`).value = "";
     document.getElementById(`${collectionName}Subcat`).value = conf.subcategories[0][0];
     document.getElementById(`${collectionName}Badge`).value = "";
     document.getElementById(`${collectionName}Price`).value = "";
