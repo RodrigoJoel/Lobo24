@@ -290,6 +290,7 @@ function normalizeProduct(product) {
     brand: product.brand || '',
     img: product.img || product.image || '',
     price: Number(product.price || 0),
+    priceEfectivo: product.priceEfectivo != null ? Number(product.priceEfectivo) : null,
     old: product.old != null ? Number(product.old) : null,
     stock: product.stock != null ? Number(product.stock) : null,
     qty: Number(product.qty || 1)

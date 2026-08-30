@@ -172,6 +172,7 @@ function normalizeCartItem(item) {
     id: item.id || item.docId || '',
     qty: Number(item.qty || 1),
     price: Number(item.price || 0),
+    priceEfectivo: item.priceEfectivo != null ? Number(item.priceEfectivo) : null,
     old: item.old != null ? Number(item.old) : null,
     stock: item.stock != null ? Number(item.stock) : null,
     coleccion: item.coleccion || item.collection || 'productos',
@@ -179,6 +180,17 @@ function normalizeCartItem(item) {
     brand: item.brand || '',
     img: item.img || ''
   };
+}
+
+// Precio efectivo/transferencia (con descuento) para retiro en sucursal o
+// transferencia bancaria; para cualquier otro medio (Mercado Pago), el
+// precio de tarjeta de siempre. Si el producto todavía no tiene
+// priceEfectivo cargado (la mayoría, hasta que se sincronice o se cargue a
+// mano), cae al precio de tarjeta — así ningún producto queda roto.
+function precioSegunPago(item) {
+  const esDescuento = STATE.payment === 'transfer' || STATE.payment === 'efectivo';
+  if (esDescuento && item.priceEfectivo != null) return item.priceEfectivo;
+  return item.price;
 }
 
 function loadCartFromStorage() {
@@ -231,7 +243,7 @@ function renderStep1() {
   }
 
   const itemsHtml = cartItems.map(item => {
-    const total = Number(item.price) * item.qty;
+    const total = Number(precioSegunPago(item)) * item.qty;
     const stock = item.stock ?? null;
     const maxQty = stock !== null ? stock : 999999;
     const atMax = item.qty >= maxQty;
@@ -244,7 +256,7 @@ function renderStep1() {
         <div class="cart-item-meta">
           <div class="cart-item-name">${esc(item.name || '')}</div>
           <div class="cart-item-brand">${esc(item.brand || '')}</div>
-          <div class="cart-item-unit">$${Number(item.price).toLocaleString('es-AR')} c/u</div>
+          <div class="cart-item-unit">$${Number(precioSegunPago(item)).toLocaleString('es-AR')} c/u</div>
           ${atMax && stock !== null ? `<div class="stock-warning">⚠️ Stock máximo alcanzado</div>` : ''}
         </div>
         <div class="qty-row">
@@ -771,9 +783,9 @@ async function submitStep4() {
         coleccion: i.coleccion,
         name: i.name,
         brand: i.brand,
-        price: i.price,
+        price: precioSegunPago(i),
         qty: i.qty,
-        subtotal: i.price * i.qty,
+        subtotal: precioSegunPago(i) * i.qty,
         stockOriginal: i.stock
       })),
       subtotal: getSubtotal(),
@@ -1039,7 +1051,7 @@ function renderSummary() {
     <div class="summary-item">
       <div class="summary-item-img"><img src="${item.img || ''}" alt="${esc(item.name)}"/><span class="summary-item-qty">${item.qty}</span></div>
       <div class="summary-item-info"><div class="summary-item-name">${esc(item.name)}</div><div class="summary-item-brand">${esc(item.brand)}</div></div>
-      <div class="summary-item-price">$${(item.price * item.qty).toLocaleString('es-AR')}</div>
+      <div class="summary-item-price">$${(precioSegunPago(item) * item.qty).toLocaleString('es-AR')}</div>
     </div>
   `).join('');
   
@@ -1057,7 +1069,7 @@ function renderSummary() {
 }
 
 function getSubtotal() {
-  return STATE.cart.reduce((s, i) => s + (i.price * i.qty), 0);
+  return STATE.cart.reduce((s, i) => s + (precioSegunPago(i) * i.qty), 0);
 }
 
 function getTotal() {

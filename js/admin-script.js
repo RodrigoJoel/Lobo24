@@ -330,6 +330,8 @@ function pageCategoryManager(collectionName) {
         ${field("Stock (unidades)", `<input id="${collectionName}Stock" type="number" placeholder="Vacío = ilimitado" min="0"/>`)}
       </div>
 
+      ${field("Precio efectivo/transferencia ($)", `<input id="${collectionName}PriceEfectivo" type="number" placeholder="Vacío = mismo precio que tarjeta"/>`)}
+
       ${field("URL imagen", `<input id="${collectionName}Img" placeholder="https://..." oninput="previewImg('${collectionName}Img','${collectionName}ImgPrev')"/>`)}
 
       <div class="img-preview-wrap">
@@ -368,6 +370,8 @@ function pageCategoryManager(collectionName) {
           ${field("Precio tachado ($)", `<input id="${collectionName}EditOld" type="number" placeholder="0 = sin tachado"/>`)}
           ${field("Stock (unidades)", `<input id="${collectionName}EditStock" type="number" placeholder="Vacío = ilimitado" min="0"/>`)}
         </div>
+
+        ${field("Precio efectivo/transferencia ($)", `<input id="${collectionName}EditPriceEfectivo" type="number" placeholder="Vacío = mismo precio que tarjeta"/>`)}
 
         ${field("URL imagen", `<input id="${collectionName}EditImg" oninput="previewImg('${collectionName}EditImg','${collectionName}EditImgPrev')"/>`)}
 
@@ -423,6 +427,7 @@ function editCategoryItem(collectionName, docId) {
   document.getElementById(`${collectionName}EditSubcat`).value = item.subcat || window.CATEGORY_CONFIG[collectionName].subcategories[0][0];
   document.getElementById(`${collectionName}EditBadge`).value = item.badge || "";
   document.getElementById(`${collectionName}EditPrice`).value = item.price || "";
+  document.getElementById(`${collectionName}EditPriceEfectivo`).value = item.priceEfectivo || "";
   document.getElementById(`${collectionName}EditOld`).value = item.old || "";
   document.getElementById(`${collectionName}EditStock`).value = item.stock !== null && item.stock !== undefined ? item.stock : "";
   document.getElementById(`${collectionName}EditImg`).value = item.img || "";
@@ -459,6 +464,7 @@ async function saveCategoryItem(collectionName) {
     subcat: document.getElementById(`${collectionName}EditSubcat`).value,
     badge: document.getElementById(`${collectionName}EditBadge`).value || null,
     price: Number(document.getElementById(`${collectionName}EditPrice`).value) || 0,
+    priceEfectivo: Number(document.getElementById(`${collectionName}EditPriceEfectivo`).value) || null,
     old: Number(document.getElementById(`${collectionName}EditOld`).value) || null,
     stock: stockRaw === "" ? null : Number(stockRaw),
     img: document.getElementById(`${collectionName}EditImg`).value.trim()
@@ -488,6 +494,7 @@ async function addCategoryItem(collectionName) {
     subcat: document.getElementById(`${collectionName}Subcat`).value,
     badge: document.getElementById(`${collectionName}Badge`).value || null,
     price,
+    priceEfectivo: Number(document.getElementById(`${collectionName}PriceEfectivo`).value) || null,
     old: Number(document.getElementById(`${collectionName}Old`).value) || null,
     stock: stockRaw === "" ? null : Number(stockRaw),
     img: document.getElementById(`${collectionName}Img`).value.trim()
@@ -502,6 +509,7 @@ async function addCategoryItem(collectionName) {
     document.getElementById(`${collectionName}Subcat`).value = conf.subcategories[0][0];
     document.getElementById(`${collectionName}Badge`).value = "";
     document.getElementById(`${collectionName}Price`).value = "";
+    document.getElementById(`${collectionName}PriceEfectivo`).value = "";
     document.getElementById(`${collectionName}Old`).value = "";
     document.getElementById(`${collectionName}Stock`).value = "";
     document.getElementById(`${collectionName}Img`).value = "";
