@@ -58,7 +58,6 @@
     <div class="nav-item" onclick="navigate('lacteos',this)"><span class="nav-icon">🧀</span><span>Lácteos</span></div>
     <div class="nav-item" onclick="navigate('panaderia',this)"><span class="nav-icon">🍞</span><span>Panadería</span></div>
     <div class="nav-item" onclick="navigate('mascotas',this)"><span class="nav-icon">🐾</span><span>Mascotas</span></div>
-    <div class="nav-item" onclick="navigate('ofertas',this)"><span class="nav-icon">🔥</span><span>Ofertas</span></div>
     <div class="nav-item" onclick="navigate('categories',this)"><span class="nav-icon">🗂️</span><span>Categorías</span></div>
     <div class="nav-divider"></div>
 
@@ -179,17 +178,18 @@ window.logoutAdmin = async function () {
 };
 
 // Definir las colecciones de categorías (incluyendo almacén)
+// "ofertas" ya no es una colección propia: para que un producto aparezca
+// en Ofertas alcanza con ponerle el badge OFERTA en su categoría real.
 window.CATEGORY_COLLECTIONS = [
-  'bebidas', 
-  'snacks', 
-  'almacen', 
-  'higiene', 
-  'limpieza', 
-  'congelados', 
-  'lacteos', 
-  'panaderia', 
-  'mascotas', 
-  'ofertas'
+  'bebidas',
+  'snacks',
+  'almacen',
+  'higiene',
+  'limpieza',
+  'congelados',
+  'lacteos',
+  'panaderia',
+  'mascotas'
 ];
 
 async function loadAll() {

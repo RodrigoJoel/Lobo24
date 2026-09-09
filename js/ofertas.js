@@ -2,13 +2,24 @@
    ESTADO DE FILTROS
 ───────────────────────────────────── */
 const filters = {
-  subcat: 'all',
+  category: 'all',
   search: '',
   priceMin: 0,
   priceMax: Infinity,
-  badges: new Set(),
   stock: 'all',
   sort: 'default',
+};
+
+const CATEGORY_LABELS = {
+  bebidas: '🥤 Bebidas',
+  snacks: '🍪 Snacks',
+  almacen: '🍝 Almacén',
+  higiene: '🧼 Higiene',
+  limpieza: '🧴 Limpieza',
+  congelados: '🧊 Congelados',
+  lacteos: '🧀 Lácteos',
+  panaderia: '🍞 Panadería',
+  mascotas: '🐾 Mascotas',
 };
 
 /* ─────────────────────────────────────
@@ -21,10 +32,10 @@ let lastFilteredProducts = [];
 /* ─────────────────────────────────────
    FILTROS
 ───────────────────────────────────── */
-function selectSubcat(el) {
-  document.querySelectorAll('#subcatFilters .filter-chip').forEach(c => c.classList.remove('active'));
+function selectCategory(el) {
+  document.querySelectorAll('#categoryFilters .filter-chip').forEach(c => c.classList.remove('active'));
   el.classList.add('active');
-  filters.subcat = el.dataset.subcat;
+  filters.category = el.dataset.category;
   applyFilters();
 }
 
@@ -35,26 +46,11 @@ function selectStock(el) {
   applyFilters();
 }
 
-function toggleBadge(b) {
-  const btn = document.getElementById('badge' + b.charAt(0).toUpperCase() + b.slice(1));
-  if (!btn) return;
-
-  if (filters.badges.has(b)) {
-    filters.badges.delete(b);
-    btn.classList.remove('active');
-  } else {
-    filters.badges.add(b);
-    btn.classList.add('active');
-  }
-
-  applyFilters();
-}
-
 function clearFilter(type) {
-  if (type === 'subcat') {
-    filters.subcat = 'all';
-    document.querySelectorAll('#subcatFilters .filter-chip').forEach(c => c.classList.remove('active'));
-    document.querySelector('[data-subcat="all"]')?.classList.add('active');
+  if (type === 'category') {
+    filters.category = 'all';
+    document.querySelectorAll('#categoryFilters .filter-chip').forEach(c => c.classList.remove('active'));
+    document.querySelector('[data-category="all"]')?.classList.add('active');
   }
 
   if (type === 'price') {
@@ -68,18 +64,12 @@ function clearFilter(type) {
     if (priceMax) priceMax.value = '';
   }
 
-  if (type === 'badge') {
-    filters.badges.clear();
-    document.querySelectorAll('.filter-badge-btn').forEach(b => b.classList.remove('active'));
-  }
-
   applyFilters();
 }
 
 function resetAllFilters() {
-  clearFilter('subcat');
+  clearFilter('category');
   clearFilter('price');
-  clearFilter('badge');
 
   filters.stock = 'all';
   filters.search = '';
@@ -110,7 +100,7 @@ function applyFilters() {
   filters.priceMax = pMax;
 
   let result = all.filter(p => {
-    if (filters.subcat !== 'all' && p.subcat !== filters.subcat) return false;
+    if (filters.category !== 'all' && p.coleccion !== filters.category) return false;
 
     if (filters.search) {
       const haystack = `${p.name || ''} ${p.brand || ''} ${p.subcat || ''}`.toLowerCase();
@@ -121,8 +111,6 @@ function applyFilters() {
 
     if (price < filters.priceMin) return false;
     if (filters.priceMax !== Infinity && price > filters.priceMax) return false;
-
-    if (filters.badges.size > 0 && !filters.badges.has(p.badge)) return false;
 
     if (filters.stock === 'in' && (p.stock === 0 || p.stock == null)) return false;
 
@@ -282,9 +270,8 @@ function renderActiveFilterTags() {
 
   const tags = [];
 
-  if (filters.subcat !== 'all') {
-    const label = document.querySelector(`[data-subcat="${filters.subcat}"] .chip-icon`)?.textContent || '';
-    tags.push({ label: label + ' ' + filters.subcat, key: 'subcat' });
+  if (filters.category !== 'all') {
+    tags.push({ label: CATEGORY_LABELS[filters.category] || filters.category, key: 'category' });
   }
 
   if (filters.search) tags.push({ label: `"${filters.search}"`, key: 'search' });
@@ -293,8 +280,6 @@ function renderActiveFilterTags() {
     const max = filters.priceMax === Infinity ? '∞' : `$${filters.priceMax}`;
     tags.push({ label: `$${filters.priceMin} — ${max}`, key: 'price' });
   }
-
-  filters.badges.forEach(b => tags.push({ label: b.toUpperCase(), key: `badge-${b}` }));
 
   if (filters.stock === 'in') tags.push({ label: 'En stock', key: 'stock' });
 
@@ -307,8 +292,8 @@ function renderActiveFilterTags() {
 }
 
 function removeFilterTag(key) {
-  if (key === 'subcat') {
-    clearFilter('subcat');
+  if (key === 'category') {
+    clearFilter('category');
   } else if (key === 'search') {
     filters.search = '';
     const catSearch = document.getElementById('catSearch');
@@ -316,8 +301,6 @@ function removeFilterTag(key) {
     applyFilters();
   } else if (key === 'price') {
     clearFilter('price');
-  } else if (key.startsWith('badge-')) {
-    toggleBadge(key.replace('badge-', ''));
   } else if (key === 'stock') {
     filters.stock = 'all';
     document.querySelector('[data-stock="all"]')?.classList.add('active');
@@ -327,37 +310,25 @@ function removeFilterTag(key) {
 }
 
 /* ─────────────────────────────────────
-   CONTADORES DE SUBCATEGORÍAS
+   CONTADORES DE CATEGORÍAS
 ───────────────────────────────────── */
-function updateSubcatCounts(prods) {
+function updateCategoryCounts(prods) {
   const counts = {};
 
   prods.forEach(p => {
-    if (p.subcat) {
-      counts[p.subcat] = (counts[p.subcat] || 0) + 1;
+    if (p.coleccion) {
+      counts[p.coleccion] = (counts[p.coleccion] || 0) + 1;
     }
   });
 
-  const subcats = [
-    'ofertas flash',
-    '2x1',
-    'combo',
-    'bebidas',
-    'snacks',
-    'hogar'
-  ];
-
-  subcats.forEach(s => {
-    const el = document.getElementById('cnt-' + s);
-    const n = counts[s] || 0;
+  Object.keys(CATEGORY_LABELS).forEach(slug => {
+    const el = document.getElementById('cnt-' + slug);
+    const n = counts[slug] || 0;
     if (el) el.textContent = n;
   });
 
   const allEl = document.getElementById('cnt-all');
   if (allEl) allEl.textContent = prods.length;
-
-  const heroSubcats = document.getElementById('heroSubcats');
-  if (heroSubcats) heroSubcats.textContent = subcats.length;
 }
 
 /* ─────────────────────────────────────
@@ -391,9 +362,8 @@ if (catSearch) {
 /* ─────────────────────────────────────
    EXPORTS DE LA SECCIÓN
 ───────────────────────────────────── */
-window.selectSubcat = selectSubcat;
+window.selectCategory = selectCategory;
 window.selectStock = selectStock;
-window.toggleBadge = toggleBadge;
 window.clearFilter = clearFilter;
 window.resetAllFilters = resetAllFilters;
 window.applyFilters = applyFilters;

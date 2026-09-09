@@ -23,6 +23,13 @@
       pointer-events: none;
     }
   </style>
+  <link rel="icon" type="image/png" href="imagenes/iconoLobo24.png">
+  <link rel="apple-touch-icon" href="imagenes/apple-touch-icon.png">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#0c0c0e">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Lobo24">
 </head>
 <body>
 
@@ -77,7 +84,7 @@
       <span>Ofertas</span>
     </div>
     <h1>SECCIÓN DE <em>OFERTAS</em></h1>
-    <p>Productos destacados con descuentos imperdibles. Ofertas flash, 2x1, combos y más. ¡Aprovechá los precios bajos!</p>
+    <p>Todos los productos con descuento de cualquier categoría, en un solo lugar. ¡Aprovechá los precios bajos!</p>
     <div class="cat-hero-stats">
       <div class="cat-hero-stat">
         <strong id="heroTotalProds">—</strong>
@@ -88,8 +95,8 @@
         en stock
       </div>
       <div class="cat-hero-stat">
-        <strong id="heroSubcats">6</strong>
-        subcategorías
+        <strong id="heroSubcats">9</strong>
+        categorías
       </div>
     </div>
   </div>
@@ -99,7 +106,7 @@
 <div class="cat-search-bar">
   <div class="cat-search-inner">
     <div class="cat-search-input-wrap">
-      <input type="text" id="catSearch" placeholder="Buscar en Ofertas... ej: 2x1, combo, descuento"/>
+      <input type="text" id="catSearch" placeholder="Buscar en Ofertas..."/>
       <span class="search-icon">🔍</span>
     </div>
     <select class="cat-sort-select" id="sortSelect" onchange="applyFilters()">
@@ -121,40 +128,52 @@
   <!-- SIDEBAR FILTROS -->
   <aside class="filters-sidebar">
 
-    <!-- Subcategorías -->
+    <!-- Categorías -->
     <div class="filter-group">
       <div class="filter-group-title">
-        Tipo de oferta
-        <button class="filter-clear" onclick="clearFilter('subcat')">limpiar</button>
+        Categoría
+        <button class="filter-clear" onclick="clearFilter('category')">limpiar</button>
       </div>
-      <div class="filter-chips" id="subcatFilters">
-        <div class="filter-chip active" data-subcat="all" onclick="selectSubcat(this)">
+      <div class="filter-chips" id="categoryFilters">
+        <div class="filter-chip active" data-category="all" onclick="selectCategory(this)">
           <span><span class="chip-icon">🛒</span>Todas</span>
           <span class="chip-count" id="cnt-all">0</span>
         </div>
-        <div class="filter-chip" data-subcat="flash" onclick="selectSubcat(this)">
-          <span><span class="chip-icon">⚡</span>Oferta flash</span>
-          <span class="chip-count" id="cnt-flash">0</span>
-        </div>
-        <div class="filter-chip" data-subcat="2x1" onclick="selectSubcat(this)">
-          <span><span class="chip-icon">🛍️</span>2x1</span>
-          <span class="chip-count" id="cnt-2x1">0</span>
-        </div>
-        <div class="filter-chip" data-subcat="combo" onclick="selectSubcat(this)">
-          <span><span class="chip-icon">🎁</span>Combo</span>
-          <span class="chip-count" id="cnt-combo">0</span>
-        </div>
-        <div class="filter-chip" data-subcat="bebidas" onclick="selectSubcat(this)">
+        <div class="filter-chip" data-category="bebidas" onclick="selectCategory(this)">
           <span><span class="chip-icon">🥤</span>Bebidas</span>
           <span class="chip-count" id="cnt-bebidas">0</span>
         </div>
-        <div class="filter-chip" data-subcat="snacks" onclick="selectSubcat(this)">
+        <div class="filter-chip" data-category="snacks" onclick="selectCategory(this)">
           <span><span class="chip-icon">🍪</span>Snacks</span>
           <span class="chip-count" id="cnt-snacks">0</span>
         </div>
-        <div class="filter-chip" data-subcat="hogar" onclick="selectSubcat(this)">
-          <span><span class="chip-icon">🏠</span>Hogar</span>
-          <span class="chip-count" id="cnt-hogar">0</span>
+        <div class="filter-chip" data-category="almacen" onclick="selectCategory(this)">
+          <span><span class="chip-icon">🍝</span>Almacén</span>
+          <span class="chip-count" id="cnt-almacen">0</span>
+        </div>
+        <div class="filter-chip" data-category="higiene" onclick="selectCategory(this)">
+          <span><span class="chip-icon">🧼</span>Higiene</span>
+          <span class="chip-count" id="cnt-higiene">0</span>
+        </div>
+        <div class="filter-chip" data-category="limpieza" onclick="selectCategory(this)">
+          <span><span class="chip-icon">🧴</span>Limpieza</span>
+          <span class="chip-count" id="cnt-limpieza">0</span>
+        </div>
+        <div class="filter-chip" data-category="congelados" onclick="selectCategory(this)">
+          <span><span class="chip-icon">🧊</span>Congelados</span>
+          <span class="chip-count" id="cnt-congelados">0</span>
+        </div>
+        <div class="filter-chip" data-category="lacteos" onclick="selectCategory(this)">
+          <span><span class="chip-icon">🧀</span>Lácteos</span>
+          <span class="chip-count" id="cnt-lacteos">0</span>
+        </div>
+        <div class="filter-chip" data-category="panaderia" onclick="selectCategory(this)">
+          <span><span class="chip-icon">🍞</span>Panadería</span>
+          <span class="chip-count" id="cnt-panaderia">0</span>
+        </div>
+        <div class="filter-chip" data-category="mascotas" onclick="selectCategory(this)">
+          <span><span class="chip-icon">🐾</span>Mascotas</span>
+          <span class="chip-count" id="cnt-mascotas">0</span>
         </div>
       </div>
     </div>
@@ -177,19 +196,6 @@
           </div>
         </div>
         <button class="apply-price-btn" onclick="applyFilters()">Aplicar precio</button>
-      </div>
-    </div>
-
-    <!-- Ofertas / badges -->
-    <div class="filter-group">
-      <div class="filter-group-title">
-        Promociones
-        <button class="filter-clear" onclick="clearFilter('badge')">limpiar</button>
-      </div>
-      <div class="filter-badges">
-        <button class="filter-badge-btn offer" id="badgeOffer" onclick="toggleBadge('offer')">🔖 Ofertas</button>
-        <button class="filter-badge-btn new"   id="badgeNew"   onclick="toggleBadge('new')">✨ Nuevos</button>
-        <button class="filter-badge-btn hot"   id="badgeHot"   onclick="toggleBadge('hot')">🔥 Hot</button>
       </div>
     </div>
 
@@ -393,19 +399,32 @@ onSnapshot(doc(db, 'config', 'general'), snap => {
   if (topbar && d.topbar) topbar.innerHTML = d.topbar;
 });
 
-/* Productos de ofertas en tiempo real */
-onSnapshot(collection(db, 'ofertas'), snap => {
-  const prods = snap.docs.map(d => ({
-    docId: d.id,
-    coleccion: 'ofertas',
-    ...d.data()
-  }));
+/* Ofertas: no es una colección propia — se arma en vivo juntando los
+   productos con badge "offer" de las 9 categorías reales. Así el producto
+   que se ve acá es el mismo doc real (mismo stock, mismo precio), sin
+   duplicados que haya que mantener sincronizados a mano. */
+const OFERTAS_SLUGS = [
+  'bebidas', 'snacks', 'almacen', 'higiene', 'limpieza',
+  'congelados', 'lacteos', 'panaderia', 'mascotas'
+];
+const _ofertasBySlug = {};
 
+function recomputeOfertas() {
+  const prods = OFERTAS_SLUGS.flatMap(slug => _ofertasBySlug[slug] || []);
   window._ofertasAll = prods;
 
   if (typeof updateHeroStats === 'function') updateHeroStats(prods);
-  if (typeof updateSubcatCounts === 'function') updateSubcatCounts(prods);
+  if (typeof updateCategoryCounts === 'function') updateCategoryCounts(prods);
   if (typeof applyFilters === 'function') applyFilters();
+}
+
+OFERTAS_SLUGS.forEach(slug => {
+  onSnapshot(collection(db, slug), snap => {
+    _ofertasBySlug[slug] = snap.docs
+      .map(d => ({ docId: d.id, coleccion: slug, ...d.data() }))
+      .filter(p => p.badge === 'offer');
+    recomputeOfertas();
+  });
 });
 
 /* Auth state */
