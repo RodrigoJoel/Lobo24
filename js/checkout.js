@@ -39,6 +39,11 @@ const DEFAULT_SHIPPING = {
 };
 let SHIPPING = { ...DEFAULT_SHIPPING };
 
+// Mínimo de compra: mismo documento config/shipping (campo minPurchase),
+// así queda editable desde Firestore sin tocar código, igual que el envío.
+const DEFAULT_MIN_PURCHASE = 10000;
+let MIN_PURCHASE = DEFAULT_MIN_PURCHASE;
+
 async function loadShippingConfig() {
   try {
     if (!window._db || !window._fbDoc || !window._fbGetDoc) return;
@@ -51,7 +56,9 @@ async function loadShippingConfig() {
         COSTO_FIJO: Number(data.costoFijo ?? DEFAULT_SHIPPING.COSTO_FIJO),
         RADIO_KM: Number(data.radioKm ?? DEFAULT_SHIPPING.RADIO_KM),
       };
+      MIN_PURCHASE = Number(data.minPurchase ?? DEFAULT_MIN_PURCHASE);
     }
+    renderSummary();
   } catch (e) {
     console.error('No se pudo leer config/shipping, se usan los valores por defecto:', e);
   }
@@ -175,6 +182,7 @@ function normalizeCartItem(item) {
     priceEfectivo: item.priceEfectivo != null ? Number(item.priceEfectivo) : null,
     old: item.old != null ? Number(item.old) : null,
     stock: item.stock != null ? Number(item.stock) : null,
+    maxPorCompra: item.maxPorCompra != null ? Number(item.maxPorCompra) : null,
     coleccion: item.coleccion || item.collection || 'productos',
     name: item.name || '',
     brand: item.brand || '',
@@ -245,8 +253,12 @@ function renderStep1() {
   const itemsHtml = cartItems.map(item => {
     const total = Number(precioSegunPago(item)) * item.qty;
     const stock = item.stock ?? null;
-    const maxQty = stock !== null ? stock : 999999;
+    const limit = item.maxPorCompra ?? null;
+    const maxQty = Math.min(stock ?? 999999, limit ?? 999999);
     const atMax = item.qty >= maxQty;
+    const maxReason = (limit !== null && limit <= (stock ?? Infinity))
+      ? `⚠️ Límite de compra: ${limit} unidad${limit !== 1 ? 'es' : ''}`
+      : '⚠️ Stock máximo alcanzado';
 
     return `
       <div class="cart-item-row" id="ci-${item.docId}">
@@ -257,7 +269,7 @@ function renderStep1() {
           <div class="cart-item-name">${esc(item.name || '')}</div>
           <div class="cart-item-brand">${esc(item.brand || '')}</div>
           <div class="cart-item-unit">$${Number(precioSegunPago(item)).toLocaleString('es-AR')} c/u</div>
-          ${atMax && stock !== null ? `<div class="stock-warning">⚠️ Stock máximo alcanzado</div>` : ''}
+          ${atMax && maxQty < 999999 ? `<div class="stock-warning">${maxReason}</div>` : ''}
         </div>
         <div class="qty-row">
           <button class="qty-btn" onclick="changeQtyCheckout('${item.docId}', -1)">−</button>
@@ -295,10 +307,14 @@ function changeQtyCheckout(docId, delta) {
   if (!item) return;
 
   const stock = item.stock ?? null;
-  const maxQty = stock !== null ? stock : 999999;
+  const limit = item.maxPorCompra ?? null;
+  const maxQty = Math.min(stock ?? 999999, limit ?? 999999);
 
   if (delta > 0 && item.qty >= maxQty) {
-    showToast(`⚠️ Solo hay ${stock} unidad${stock !== 1 ? 'es' : ''} disponible${stock !== 1 ? 's' : ''}`, 'warn');
+    const msg = (limit !== null && limit <= (stock ?? Infinity))
+      ? `Límite de compra: ${limit} unidad${limit !== 1 ? 'es' : ''} por pedido`
+      : `Solo hay ${stock} unidad${stock !== 1 ? 'es' : ''} disponible${stock !== 1 ? 's' : ''}`;
+    showToast(`⚠️ ${msg}`, 'warn');
     return;
   }
 
@@ -624,6 +640,7 @@ function renderStep4() {
   const userPts = window._userPoints || 0;
   const availPts = Math.min(userPts, maxPoints);
   const canEfectivo = STATE.delivery === 'local';
+  const belowMin = subtotal < MIN_PURCHASE;
   const puntosActuales = Math.min(STATE.pointsUsed, availPts);
   
   if (STATE.pointsUsed !== puntosActuales) STATE.pointsUsed = puntosActuales;
@@ -641,6 +658,13 @@ function renderStep4() {
         </div>
       </div>
       <div class="panel-body">
+        ${belowMin ? `
+        <div class="points-section" style="background:rgba(229,62,62,0.1);border-color:rgba(229,62,62,0.2)">
+          <div style="font-size:13px;color:var(--red);text-align:center;padding:8px 0">
+            ⚠️ Te faltan $${(MIN_PURCHASE - subtotal).toLocaleString('es-AR')} para el mínimo de compra de $${MIN_PURCHASE.toLocaleString('es-AR')}
+          </div>
+        </div>
+        ` : ''}
         ${hasPoints ? `
         <div class="points-section">
           <div class="points-header">
@@ -731,7 +755,7 @@ function renderStep4() {
 
         <div class="btn-row">
           <button class="btn btn-ghost" onclick="renderStep(3)">← Volver</button>
-          <button class="btn btn-primary btn-large" id="btnConfirmar" onclick="submitStep4()" ${!STATE.payment ? 'disabled' : ''}>
+          <button class="btn btn-primary btn-large" id="btnConfirmar" onclick="submitStep4()" ${!STATE.payment || belowMin ? 'disabled' : ''}>
             🔒 Confirmar y Pagar
           </button>
         </div>
@@ -744,7 +768,7 @@ function selectPayment(type) {
   document.querySelectorAll('.payment-option').forEach(el => el.classList.remove('selected'));
   document.getElementById(`pay-${type}`)?.classList.add('selected');
   const btn = document.getElementById('btnConfirmar');
-  if (btn) btn.disabled = false;
+  if (btn) btn.disabled = getSubtotal() < MIN_PURCHASE;
   renderSummary();
 }
 
@@ -760,7 +784,12 @@ async function submitStep4() {
     showToast('⚠️ Seleccioná un método de pago', 'warn');
     return;
   }
-  
+
+  if (getSubtotal() < MIN_PURCHASE) {
+    showToast(`⚠️ El pedido no alcanza el mínimo de compra de $${MIN_PURCHASE.toLocaleString('es-AR')}`, 'warn');
+    return;
+  }
+
   const btn = document.getElementById('btnConfirmar');
   if (btn) {
     btn.disabled = true;
@@ -810,15 +839,8 @@ async function submitStep4() {
       pointsEarned: pointsEarned
     };
     
-    // 1. Guardar en Firestore
-    if (window._fbAddDoc && window._db) {
-      const ordersRef = window._fbCollection(window._db, 'pedidos');
-      await window._fbAddDoc(ordersRef, orderData);
-    }
-
-    // 2. Guardar items para MP ANTES de limpiar el carrito
-    // coleccion es necesaria para que el backend pueda buscar el precio
-    // real del producto en Firestore y no confiar en el precio que
+    // Items con coleccion, necesaria para que el backend pueda buscar el
+    // precio real del producto en Firestore y no confiar en el precio que
     // manda el navegador.
     const cartItemsParaMP = STATE.cart.map(i => ({
       id:        i.docId,
@@ -833,6 +855,15 @@ async function submitStep4() {
     // 5. Redirigir a Mercado Pago si corresponde
     if (STATE.payment === 'mp') {
       showToast('⏳ Conectando con Mercado Pago...', 'ok');
+
+      // El pedido se guarda acá (status pending_payment); el backend lo
+      // corrige con los valores reales al validar contra Firestore en
+      // /crear-preferencia, y recién se confirma cuando el webhook de MP
+      // avisa que el pago se acreditó.
+      if (window._fbAddDoc && window._db) {
+        const ordersRef = window._fbCollection(window._db, 'pedidos');
+        await window._fbAddDoc(ordersRef, orderData);
+      }
 
       const mpRes = await fetch('https://lobo24-backend.onrender.com/crear-preferencia', {
         method: 'POST',
@@ -885,50 +916,54 @@ async function submitStep4() {
 // ══════════════════════════════════════════════════════════════
 
       } else {
-        // Transferencia o efectivo: descontar stock y puntos inmediatamente
-        for (const item of cartItemsParaMP) {
-          const cartItem = STATE.cart.find(x => x.docId === item.id);
-          if (cartItem && cartItem.coleccion && cartItem.docId && cartItem.stock !== null && cartItem.stock !== undefined) {
-            try {
-              const productRef = window._fbDoc(window._db, cartItem.coleccion, cartItem.docId);
-              const newStock = Math.max(0, Number(cartItem.stock) - Number(cartItem.qty));
-              await window._fbUpdateDoc(productRef, { stock: newStock });
-            } catch (err) { console.error('Stock err:', err); }
-          }
+        // Transferencia o efectivo: el backend valida precios reales,
+        // mínimo de compra y límites por producto contra Firestore antes
+        // de guardar el pedido, descontar stock y acreditar/descontar
+        // puntos — nada de esto puede depender de lo que mande el
+        // navegador, que puede manipularse desde las herramientas de
+        // desarrollador.
+        const confirmRes = await fetch('https://lobo24-backend.onrender.com/confirmar-pedido-manual', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            orderId,
+            items: cartItemsParaMP,
+            contact: STATE.contact,
+            delivery: STATE.delivery,
+            payment: STATE.payment,
+            pointsUsed: STATE.pointsUsed,
+            userId: window._currentUser?.uid || null
+          })
+        });
+
+        if (!confirmRes.ok) {
+          const errBody = await confirmRes.json().catch(() => ({}));
+          throw new Error(errBody.error || 'No se pudo confirmar el pedido');
         }
 
-        if (window._currentUser) {
-          try {
-            const userRef = window._fbDoc(window._db, 'users', window._currentUser.uid);
-            const userSnap = await window._fbGetDoc(userRef);
-            if (userSnap.exists()) {
-              const currentPoints = userSnap.data().points || 0;
-              const newPoints = Math.max(0, currentPoints - STATE.pointsUsed + pointsEarned);
-              await window._fbUpdateDoc(userRef, { points: newPoints });
-            }
-          } catch (err) { console.error('Points err:', err); }
-        }
+        const confirmData = await confirmRes.json();
 
-        // ── NUEVO: enviar emails de confirmación vía backend ──
-        try {
-          await fetch('https://lobo24-backend.onrender.com/enviar-email-pedido', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(orderData)
-          });
-        } catch (emailErr) {
-          console.warn('⚠️ No se pudo enviar email de confirmación:', emailErr);
-        }
+        STATE.lastOrder = {
+          orderId,
+          contact: { ...STATE.contact },
+          delivery: STATE.delivery,
+          deliveryCost: confirmData.deliveryCost,
+          payment: STATE.payment,
+          subtotal: confirmData.subtotal,
+          total: confirmData.total,
+          pointsUsed: confirmData.pointsUsed,
+          pointsEarned: confirmData.pointsEarned
+        };
 
         STATE.cart = [];
         localStorage.removeItem('lobo24_cart');
-        showToast('🎉 Pedido #' + orderId + ' realizado con éxito! Ganaste ' + pointsEarned + ' puntos.', 'success');
+        showToast('🎉 Pedido #' + orderId + ' realizado con éxito! Ganaste ' + confirmData.pointsEarned + ' puntos.', 'success');
         renderStep(5);
       }
-    
+
   } catch (err) {
     console.error('Error al procesar el pedido:', err);
-    showToast('❌ Error al procesar el pedido. Intentá de nuevo.', 'error');
+    showToast(`❌ ${err.message || 'Error al procesar el pedido. Intentá de nuevo.'}`, 'error');
     if (btn) {
       btn.disabled = false;
       btn.textContent = '🔒 Confirmar y Pagar';
@@ -1065,6 +1100,7 @@ function renderSummary() {
     <div class="summary-row${shipping > 0 ? ' shipping-cost' : ''}"><span class="label">Envío</span><span class="value">${shipping === 0 ? '<span style="color:var(--green)">Gratis</span>' : '$' + shipping.toLocaleString('es-AR')}</span></div>
     ${pointsDisc > 0 ? `<div class="summary-row discount"><span class="label">⭐ Descuento puntos</span><span class="value">-$${pointsDisc.toLocaleString('es-AR')}</span></div>` : ''}
     <div class="summary-row total"><span class="label">Total</span><span class="value">$${total.toLocaleString('es-AR')}</span></div>
+    ${subtotal < MIN_PURCHASE ? `<div class="summary-row" style="color:var(--red);font-size:12px;margin-top:6px">⚠️ Faltan $${(MIN_PURCHASE - subtotal).toLocaleString('es-AR')} para el mínimo de compra ($${MIN_PURCHASE.toLocaleString('es-AR')})</div>` : ''}
   `;
 }
 
