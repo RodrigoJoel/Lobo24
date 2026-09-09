@@ -177,13 +177,14 @@ function renderProducts(list) {
         ? `<span class="stock-badge low">¡Últimas ${stock}!</span>`
         : '';
 
-    const stockInfoHtml = sinStock
+    // Comentado a pedido de Rodrigo: no mostrar la cantidad disponible por ahora.
+    const stockInfoHtml = ''; /* sinStock
       ? `<span class="stock-info empty">Sin stock</span>`
       : stockBajo
         ? `<span class="stock-info low">⚠️ Solo quedan ${stock}</span>`
         : stock !== null
           ? `<span class="stock-info">${stock} disponibles</span>`
-          : '';
+          : ''; */
 
     const id = p.docId || p.id || '';
 
