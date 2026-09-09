@@ -173,6 +173,11 @@ const stockHtml = (stock) => {
   return `<span style="font-family:var(--font-mono);font-size:11px;color:${color}">${text}</span>`;
 };
 
+const maxPorCompraHtml = (maxPorCompra) => {
+  if (maxPorCompra === null || maxPorCompra === undefined) return "";
+  return `<span style="font-family:var(--font-mono);font-size:11px;color:#e05c20">🚫 Máx ${maxPorCompra}/pedido</span>`;
+};
+
 function render(page) {
   const main = document.getElementById("mainContent");
   if (!main) return;
@@ -213,7 +218,9 @@ function pageCategoryManager(collectionName) {
       !term ||
       (p.name || "").toLowerCase().includes(term) ||
       (p.brand || "").toLowerCase().includes(term) ||
-      (p.subcat || "").toLowerCase().includes(term);
+      (p.subcat || "").toLowerCase().includes(term) ||
+      (p.codigoBarras || "").toLowerCase().includes(term) ||
+      (p.codigoBarrasAlternativo || "").toLowerCase().includes(term);
 
     const matchesSubcat =
       selectedSubcat === "all" || p.subcat === selectedSubcat;
@@ -244,7 +251,7 @@ function pageCategoryManager(collectionName) {
             <label>Buscar productos</label>
             <input
               id="${collectionName}AdminSearch"
-              placeholder="Buscar por nombre, marca o subcategoría..."
+              placeholder="Buscar por nombre, marca, subcategoría o código de barras..."
               value="${esc(searchTerm)}"
               oninput="filterAdminProducts('${collectionName}')"
             />
@@ -292,6 +299,7 @@ function pageCategoryManager(collectionName) {
                       : ""
                   }
                   ${stockHtml(p.stock)}
+                  ${maxPorCompraHtml(p.maxPorCompra)}
                   <span style="font-size:11px;color:var(--muted)">${p.subcat || "sin cat."}</span>
                 </div>
               </div>
@@ -331,6 +339,8 @@ function pageCategoryManager(collectionName) {
       </div>
 
       ${field("Precio efectivo/transferencia ($)", `<input id="${collectionName}PriceEfectivo" type="number" placeholder="Vacío = mismo precio que tarjeta"/>`)}
+
+      ${field("Límite de compra (unidades por pedido)", `<input id="${collectionName}MaxPorCompra" type="number" placeholder="Vacío = sin límite" min="1"/>`)}
 
       ${field("URL imagen", `<input id="${collectionName}Img" placeholder="https://..." oninput="previewImg('${collectionName}Img','${collectionName}ImgPrev')"/>`)}
 
@@ -372,6 +382,8 @@ function pageCategoryManager(collectionName) {
         </div>
 
         ${field("Precio efectivo/transferencia ($)", `<input id="${collectionName}EditPriceEfectivo" type="number" placeholder="Vacío = mismo precio que tarjeta"/>`)}
+
+        ${field("Límite de compra (unidades por pedido)", `<input id="${collectionName}EditMaxPorCompra" type="number" placeholder="Vacío = sin límite" min="1"/>`)}
 
         ${field("URL imagen", `<input id="${collectionName}EditImg" oninput="previewImg('${collectionName}EditImg','${collectionName}EditImgPrev')"/>`)}
 
@@ -430,6 +442,7 @@ function editCategoryItem(collectionName, docId) {
   document.getElementById(`${collectionName}EditPriceEfectivo`).value = item.priceEfectivo || "";
   document.getElementById(`${collectionName}EditOld`).value = item.old || "";
   document.getElementById(`${collectionName}EditStock`).value = item.stock !== null && item.stock !== undefined ? item.stock : "";
+  document.getElementById(`${collectionName}EditMaxPorCompra`).value = item.maxPorCompra !== null && item.maxPorCompra !== undefined ? item.maxPorCompra : "";
   document.getElementById(`${collectionName}EditImg`).value = item.img || "";
   previewImg(`${collectionName}EditImg`, `${collectionName}EditImgPrev`);
   const modal = document.getElementById(`${collectionName}Modal`);
@@ -456,6 +469,7 @@ document.addEventListener("click", (e) => {
 async function saveCategoryItem(collectionName) {
   const docId = document.getElementById(`${collectionName}DocId`).value;
   const stockRaw = document.getElementById(`${collectionName}EditStock`).value;
+  const maxPorCompraRaw = document.getElementById(`${collectionName}EditMaxPorCompra`).value;
   const data = {
     name: document.getElementById(`${collectionName}EditName`).value.trim(),
     brand: document.getElementById(`${collectionName}EditBrand`).value.trim(),
@@ -467,6 +481,7 @@ async function saveCategoryItem(collectionName) {
     priceEfectivo: Number(document.getElementById(`${collectionName}EditPriceEfectivo`).value) || null,
     old: Number(document.getElementById(`${collectionName}EditOld`).value) || null,
     stock: stockRaw === "" ? null : Number(stockRaw),
+    maxPorCompra: maxPorCompraRaw === "" ? null : Number(maxPorCompraRaw),
     img: document.getElementById(`${collectionName}EditImg`).value.trim()
   };
   const ok = await fbSave(collectionName, docId, data);
@@ -480,6 +495,7 @@ window.saveCategoryItem = saveCategoryItem;
 async function addCategoryItem(collectionName) {
   const conf = window.CATEGORY_CONFIG[collectionName];
   const stockRaw = document.getElementById(`${collectionName}Stock`).value;
+  const maxPorCompraRaw = document.getElementById(`${collectionName}MaxPorCompra`).value;
   const name = document.getElementById(`${collectionName}Name`).value.trim();
   const price = Number(document.getElementById(`${collectionName}Price`).value) || 0;
   if (!name || !price) {
@@ -497,6 +513,7 @@ async function addCategoryItem(collectionName) {
     priceEfectivo: Number(document.getElementById(`${collectionName}PriceEfectivo`).value) || null,
     old: Number(document.getElementById(`${collectionName}Old`).value) || null,
     stock: stockRaw === "" ? null : Number(stockRaw),
+    maxPorCompra: maxPorCompraRaw === "" ? null : Number(maxPorCompraRaw),
     img: document.getElementById(`${collectionName}Img`).value.trim()
   };
   const newId = await fbAdd(collectionName, data);
@@ -512,6 +529,7 @@ async function addCategoryItem(collectionName) {
     document.getElementById(`${collectionName}PriceEfectivo`).value = "";
     document.getElementById(`${collectionName}Old`).value = "";
     document.getElementById(`${collectionName}Stock`).value = "";
+    document.getElementById(`${collectionName}MaxPorCompra`).value = "";
     document.getElementById(`${collectionName}Img`).value = "";
     previewImg(`${collectionName}Img`, `${collectionName}ImgPrev`);
   }

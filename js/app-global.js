@@ -379,6 +379,7 @@ function addToCart(id, e) {
 
   const key = getCartKey(normalized);
   const stock = normalized.stock ?? null;
+  const limit = normalized.maxPorCompra ?? null;
   const inCart = cart[key]?.qty || 0;
 
   if (stock !== null && stock <= 0) {
@@ -388,6 +389,11 @@ function addToCart(id, e) {
 
   if (stock !== null && inCart >= stock) {
     showToast(`⚠️ Solo hay ${stock} unidad${stock !== 1 ? 'es' : ''} disponible${stock !== 1 ? 's' : ''}`);
+    return;
+  }
+
+  if (limit !== null && inCart >= limit) {
+    showToast(`⚠️ Límite de compra: ${limit} unidad${limit !== 1 ? 'es' : ''} por pedido`);
     return;
   }
 
@@ -416,9 +422,15 @@ function changeQty(key, delta) {
   );
 
   const stock = liveProduct?.stock ?? item.stock ?? null;
+  const limit = liveProduct?.maxPorCompra ?? item.maxPorCompra ?? null;
 
   if (delta > 0 && stock !== null && cart[key].qty >= stock) {
     showToast('⚠️ No hay más stock disponible');
+    return;
+  }
+
+  if (delta > 0 && limit !== null && cart[key].qty >= limit) {
+    showToast(`⚠️ Límite de compra: ${limit} unidad${limit !== 1 ? 'es' : ''} por pedido`);
     return;
   }
 
@@ -500,6 +512,7 @@ function saveCartToLocalStorage() {
     price: Number(item.price || 0),
     old: item.old != null ? Number(item.old) : null,
     stock: item.stock != null ? Number(item.stock) : null,
+    maxPorCompra: item.maxPorCompra != null ? Number(item.maxPorCompra) : null,
     coleccion: item.coleccion || item.collection || '',
     name: item.name || '',
     brand: item.brand || '',
@@ -569,4 +582,15 @@ window.changeQty = changeQty;
 window.toggleCart = toggleCart;
 window.checkout = checkout;
 window.clearCart = clearCart;
+
+/* ─────────────────────────────────────
+   PWA — SERVICE WORKER
+───────────────────────────────────── */
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js').catch(err => {
+      console.error('No se pudo registrar el service worker:', err);
+    });
+  });
+}
 window.saveCartToLocalStorage = saveCartToLocalStorage;
