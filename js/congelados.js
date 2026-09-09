@@ -189,11 +189,12 @@ function renderProducts(list) {
     const sinStock = stock !== null && stock <= 0;
     const stockBajo = stock !== null && stock > 0 && stock <= 5;
 
+    // "¡Últimas N!" comentado a pedido de Rodrigo: no mostrar la cantidad.
     const stockBadgeHtml = sinStock
       ? `<span class="stock-badge out">Sin stock</span>`
-      : stockBajo
+      : ''; /* stockBajo
         ? `<span class="stock-badge low">¡Últimas ${stock}!</span>`
-        : '';
+        : ''; */
 
     // Comentado a pedido de Rodrigo: no mostrar la cantidad disponible por ahora.
     const stockInfoHtml = ''; /* sinStock
