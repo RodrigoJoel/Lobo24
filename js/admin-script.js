@@ -196,6 +196,7 @@ function render(page) {
   };
   for (const key of window.CATEGORY_COLLECTIONS) pages[key] = () => pageCategoryManager(key);
   main.innerHTML = pages[page] ? pages[page]() : '<p style="color:var(--muted)">Página no encontrada</p>';
+  if (page === 'pedidos' && typeof renderOrdersList === 'function') renderOrdersList();
 }
 window.render = render;
 
@@ -1420,6 +1421,22 @@ function pagePedidos() {
       </div>
     </div>
 
+    <div class="modal-back hidden" id="editPedidoModal">
+      <div class="modal-box" style="max-width:560px">
+        <button class="modal-close" onclick="closeEditPedidoModal()">✕</button>
+        <div class="modal-title">EDITAR <span style="color:var(--purple-lt)">PEDIDO</span></div>
+        <div style="font-size:12px;color:var(--muted);margin-bottom:12px">
+          Sacá productos sin stock o ajustá la cantidad. El total se recalcula solo.
+        </div>
+        <div id="editPedidoItemsList"></div>
+        <div id="editPedidoTotals" style="margin-top:16px;padding-top:16px;border-top:1px solid var(--border)"></div>
+        <div class="btn-row" style="margin-top:14px">
+          <button class="btn btn-primary" onclick="saveEditPedido()">💾 Guardar cambios</button>
+          <button class="btn btn-ghost" onclick="closeEditPedidoModal()">Cancelar</button>
+        </div>
+      </div>
+    </div>
+
     <style>
       .order-card {
         background: var(--bg3);
@@ -1642,6 +1659,7 @@ function renderOrdersList() {
           </div>
 
           <div class="status-buttons">
+            <button class="btn btn-ghost btn-xs" onclick="openEditPedidoModal('${order.id}')">✏️ Editar pedido</button>
             ${status.next ? `
               <button class="btn btn-primary btn-xs" onclick="updateOrderStatus('${order.id}', '${status.next}')">
                 → ${ORDER_STATUS[status.next].label}
@@ -1706,6 +1724,126 @@ async function updateOrderStatus(orderId, newStatus) {
     showToast('❌ Error al actualizar el estado', 'err');
   }
 }
+
+/* ─────────────────────────────────────
+   EDITAR PEDIDO (sacar productos sin stock)
+───────────────────────────────────── */
+let editingPedido = null;
+
+function openEditPedidoModal(docId) {
+  const order = (window.DATA.pedidos || []).find(o => o.id === docId);
+  if (!order) return;
+
+  editingPedido = {
+    docId,
+    items: (order.items || []).map(i => ({ ...i })),
+    deliveryCost: Number(order.deliveryCost || 0),
+    pointsUsed: Number(order.pointsUsed || 0)
+  };
+
+  renderEditPedidoItems();
+
+  const modal = document.getElementById('editPedidoModal');
+  modal.classList.remove('hidden');
+  modal.classList.add('open');
+}
+window.openEditPedidoModal = openEditPedidoModal;
+
+function closeEditPedidoModal() {
+  const modal = document.getElementById('editPedidoModal');
+  if (modal) {
+    modal.classList.remove('open');
+    modal.classList.add('hidden');
+  }
+  editingPedido = null;
+}
+window.closeEditPedidoModal = closeEditPedidoModal;
+
+function removeEditingItem(idx) {
+  if (!editingPedido) return;
+  editingPedido.items.splice(idx, 1);
+  renderEditPedidoItems();
+}
+window.removeEditingItem = removeEditingItem;
+
+function changeEditingItemQty(idx, delta) {
+  if (!editingPedido) return;
+  const item = editingPedido.items[idx];
+  if (!item) return;
+
+  const newQty = Number(item.qty || 1) + delta;
+  if (newQty <= 0) {
+    editingPedido.items.splice(idx, 1);
+  } else {
+    item.qty = newQty;
+  }
+  renderEditPedidoItems();
+}
+window.changeEditingItemQty = changeEditingItemQty;
+
+function renderEditPedidoItems() {
+  const list = document.getElementById('editPedidoItemsList');
+  const totalsEl = document.getElementById('editPedidoTotals');
+  if (!list || !totalsEl || !editingPedido) return;
+
+  if (editingPedido.items.length === 0) {
+    list.innerHTML = `<p style="color:var(--muted);text-align:center;padding:12px">Sin productos — vaciaste el pedido.</p>`;
+  } else {
+    list.innerHTML = editingPedido.items.map((item, idx) => `
+      <div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)">
+        <div style="flex:1">
+          <div style="font-weight:600">${esc(item.name)}</div>
+          <div style="font-size:12px;color:var(--muted)">$${Number(item.price || 0).toLocaleString('es-AR')} c/u</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:6px">
+          <button class="btn btn-ghost btn-sm" onclick="changeEditingItemQty(${idx}, -1)">−</button>
+          <span style="min-width:20px;text-align:center">${item.qty}</span>
+          <button class="btn btn-ghost btn-sm" onclick="changeEditingItemQty(${idx}, 1)">+</button>
+        </div>
+        <div style="width:90px;text-align:right;font-weight:600">$${(Number(item.price || 0) * Number(item.qty || 0)).toLocaleString('es-AR')}</div>
+        <button class="btn btn-danger btn-sm" onclick="removeEditingItem(${idx})" title="Quitar">✕</button>
+      </div>
+    `).join('');
+  }
+
+  const subtotal = editingPedido.items.reduce((s, i) => s + Number(i.price || 0) * Number(i.qty || 0), 0);
+  const total = Math.max(0, subtotal + editingPedido.deliveryCost - editingPedido.pointsUsed);
+
+  totalsEl.innerHTML = `
+    <div style="display:flex;justify-content:space-between;font-size:14px;margin-bottom:4px"><span>Subtotal</span><span>$${subtotal.toLocaleString('es-AR')}</span></div>
+    <div style="display:flex;justify-content:space-between;font-size:14px;margin-bottom:4px"><span>Envío</span><span>$${editingPedido.deliveryCost.toLocaleString('es-AR')}</span></div>
+    ${editingPedido.pointsUsed > 0 ? `<div style="display:flex;justify-content:space-between;font-size:14px;margin-bottom:4px;color:var(--purple-lt)"><span>⭐ Puntos usados</span><span>-$${editingPedido.pointsUsed.toLocaleString('es-AR')}</span></div>` : ''}
+    <div style="display:flex;justify-content:space-between;font-size:18px;font-weight:bold;margin-top:8px"><span>Total</span><span style="color:var(--yellow)">$${total.toLocaleString('es-AR')}</span></div>
+  `;
+}
+window.renderEditPedidoItems = renderEditPedidoItems;
+
+async function saveEditPedido() {
+  if (!editingPedido) return;
+
+  if (!confirm('¿Guardar los cambios? Esto actualiza el total y los productos que ve el cliente.')) return;
+
+  const newItems = editingPedido.items.map(i => ({
+    ...i,
+    subtotal: Number(i.price || 0) * Number(i.qty || 0)
+  }));
+  const subtotal = newItems.reduce((s, i) => s + i.subtotal, 0);
+  const total = Math.max(0, subtotal + editingPedido.deliveryCost - editingPedido.pointsUsed);
+  const pointsEarned = Math.floor(subtotal / 100);
+
+  const ok = await fbSave('pedidos', editingPedido.docId, {
+    items: newItems,
+    subtotal,
+    total,
+    pointsEarned
+  });
+
+  if (ok) {
+    showToast('✅ Pedido actualizado');
+    closeEditPedidoModal();
+  }
+}
+window.saveEditPedido = saveEditPedido;
 
 // Exponer funciones globales
 window.pagePedidos = pagePedidos;
