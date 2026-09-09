@@ -84,8 +84,7 @@ window.CATEGORY_CONFIG = {
 },
   lacteos: { label: "Lácteos", singleLabel: "producto", title: "GESTIÓN DE <span>LÁCTEOS</span>", icon: "🧀", emptyIcon: "🧀", pageSub: "Gestión de leches, quesos, yogures y derivados.", subcategories: [["leches","🥛 Leches"],["quesos","🧀 Quesos"],["yogures","🍶 Yogures"],["manteca","🧈 Manteca y crema"],["postres","🍮 Postres"],["huevos","🥚 Huevos"]] },
   panaderia: { label: "Panadería", singleLabel: "producto", title: "GESTIÓN DE <span>PANADERÍA</span>", icon: "🍞", emptyIcon: "🍞", pageSub: "Gestión de panificados, facturas y productos dulces.", subcategories: [["panes","🍞 Panes"],["facturas","🥐 Facturas"],["tortillas","🫓 Tortillas"],["budines","🍰 Budines"],["galletas","🧁 Galletas"],["sin-tacc","🌾 Sin TACC"],["prepizzas","🍕 PREPIZZAS"],["tostadas","🍞 TOSTADAS"]] },
-  mascotas: { label: "Mascotas", singleLabel: "producto", title: "GESTIÓN DE <span>MASCOTAS</span>", icon: "🐾", emptyIcon: "🐾", pageSub: "Gestión de alimento, higiene y accesorios para mascotas.", subcategories: [["perros","🐶 Perros"],["gatos","🐱 Gatos"],["higiene","🧴 Higiene"],["snacks","🦴 Snacks"],["arena","🪨 Arena"],["accesorios","🎾 Accesorios"]] },
-  ofertas: { label: "Ofertas", singleLabel: "oferta", title: "GESTIÓN DE <span>OFERTAS</span>", icon: "🔥", emptyIcon: "🔥", pageSub: "Gestión de productos destacados en oferta con el mismo flujo de edición.", subcategories: [["flash","⚡ Oferta flash"],["2x1","🛍️ 2x1"],["combo","🎁 Combo"],["bebidas","🥤 Bebidas"],["snacks","🍪 Snacks"],["hogar","🏠 Hogar"]] }
+  mascotas: { label: "Mascotas", singleLabel: "producto", title: "GESTIÓN DE <span>MASCOTAS</span>", icon: "🐾", emptyIcon: "🐾", pageSub: "Gestión de alimento, higiene y accesorios para mascotas.", subcategories: [["perros","🐶 Perros"],["gatos","🐱 Gatos"],["higiene","🧴 Higiene"],["snacks","🦴 Snacks"],["arena","🪨 Arena"],["accesorios","🎾 Accesorios"]] }
 };
 window.CATEGORY_COLLECTIONS = Object.keys(window.CATEGORY_CONFIG);
 window.DATA = {
@@ -742,7 +741,6 @@ function dashboard() {
           <button class="btn btn-ghost" onclick="navigate('lacteos',null)" style="justify-content:flex-start">🧀 Lácteos</button>
           <button class="btn btn-ghost" onclick="navigate('panaderia',null)" style="justify-content:flex-start">🍞 Panadería</button>
           <button class="btn btn-ghost" onclick="navigate('mascotas',null)" style="justify-content:flex-start">🐾 Mascotas</button>
-          <button class="btn btn-ghost" onclick="navigate('ofertas',null)" style="justify-content:flex-start">🔥 Ofertas</button>
           <button class="btn btn-ghost" onclick="navigate('usuarios',null)" style="justify-content:flex-start">👥 Usuarios / Puntos</button>
           <button class="btn btn-ghost" onclick="navigate('categories',null)" style="justify-content:flex-start">🗂️ Categorías</button>
           <button class="btn btn-ghost" onclick="navigate('sections',null)" style="justify-content:flex-start">👁️ Secciones</button>
