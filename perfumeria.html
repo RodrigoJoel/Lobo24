@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Lobo24 — Lácteos</title>
+  <title>Lobo24 — Perfumería</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
@@ -12,7 +12,7 @@
   <link rel="stylesheet" href="css/secciones.css?v=2"/>
   <style>
     .cat-hero::before {
-      content: '🧀';
+      content: '🌸';
       position: absolute;
       right: 80px;
       top: 50%;
@@ -23,6 +23,13 @@
       pointer-events: none;
     }
   </style>
+  <link rel="icon" type="image/png" href="imagenes/iconoLobo24.png">
+  <link rel="apple-touch-icon" href="imagenes/apple-touch-icon.png">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#0c0c0e">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Lobo24">
 </head>
 <body>
 
@@ -76,10 +83,10 @@
     <div class="cat-breadcrumb">
       <a href="index.html">Inicio</a>
       <span>/</span>
-      <span>Lácteos</span>
+      <span>Perfumería</span>
     </div>
-    <h1>SECCIÓN DE <em>LÁCTEOS</em></h1>
-    <p>Leches, quesos, yogures, mantecas y derivados. Productos frescos y de la mejor calidad para tu mesa.</p>
+    <h1>SECCIÓN DE <em>PERFUMERÍA</em></h1>
+    <p>Perfumes, cremas y productos de perfumería de las mejores marcas: Victoria's Secret, Saphirus y más. ¡Comprá al mejor precio!</p>
     <div class="cat-hero-stats">
       <div class="cat-hero-stat">
         <strong id="heroTotalProds">—</strong>
@@ -90,7 +97,7 @@
         en stock
       </div>
       <div class="cat-hero-stat">
-        <strong id="heroSubcats">6</strong>
+        <strong id="heroSubcats">4</strong>
         subcategorías
       </div>
     </div>
@@ -101,7 +108,7 @@
 <div class="cat-search-bar">
   <div class="cat-search-inner">
     <div class="cat-search-input-wrap">
-      <input type="text" id="catSearch" placeholder="Buscar en Lácteos... ej: leche, queso, yogur, manteca"/>
+      <input type="text" id="catSearch" placeholder="Buscar en Perfumería... ej: perfume, crema, desodorante"/>
       <span class="search-icon">🔍</span>
     </div>
     <select class="cat-sort-select" id="sortSelect" onchange="applyFilters()">
@@ -134,29 +141,21 @@
           <span><span class="chip-icon">🛒</span>Todas</span>
           <span class="chip-count" id="cnt-all">0</span>
         </div>
-        <div class="filter-chip" data-subcat="leches" onclick="selectSubcat(this)">
-          <span><span class="chip-icon">🥛</span>Leches</span>
-          <span class="chip-count" id="cnt-leches">0</span>
+        <div class="filter-chip" data-subcat="perfumes" onclick="selectSubcat(this)">
+          <span><span class="chip-icon">🌸</span>Perfumes</span>
+          <span class="chip-count" id="cnt-perfumes">0</span>
         </div>
-        <div class="filter-chip" data-subcat="quesos" onclick="selectSubcat(this)">
-          <span><span class="chip-icon">🧀</span>Quesos</span>
-          <span class="chip-count" id="cnt-quesos">0</span>
+        <div class="filter-chip" data-subcat="cremas" onclick="selectSubcat(this)">
+          <span><span class="chip-icon">🧴</span>Cremas y lociones</span>
+          <span class="chip-count" id="cnt-cremas">0</span>
         </div>
-        <div class="filter-chip" data-subcat="yogures" onclick="selectSubcat(this)">
-          <span><span class="chip-icon">🍶</span>Yogures</span>
-          <span class="chip-count" id="cnt-yogures">0</span>
+        <div class="filter-chip" data-subcat="desodorantes" onclick="selectSubcat(this)">
+          <span><span class="chip-icon">🫧</span>Desodorantes y body splash</span>
+          <span class="chip-count" id="cnt-desodorantes">0</span>
         </div>
-        <div class="filter-chip" data-subcat="manteca" onclick="selectSubcat(this)">
-          <span><span class="chip-icon">🧈</span>Manteca y crema</span>
-          <span class="chip-count" id="cnt-manteca">0</span>
-        </div>
-        <div class="filter-chip" data-subcat="postres" onclick="selectSubcat(this)">
-          <span><span class="chip-icon">🍮</span>Postres</span>
-          <span class="chip-count" id="cnt-postres">0</span>
-        </div>
-        <div class="filter-chip" data-subcat="huevos" onclick="selectSubcat(this)">
-          <span><span class="chip-icon">🥚</span>Huevos</span>
-          <span class="chip-count" id="cnt-huevos">0</span>
+        <div class="filter-chip" data-subcat="ambientadores" onclick="selectSubcat(this)">
+          <span><span class="chip-icon">🏠</span>Ambientadores</span>
+          <span class="chip-count" id="cnt-ambientadores">0</span>
         </div>
       </div>
     </div>
@@ -262,7 +261,7 @@
         <i class="fas fa-cog"></i> Panel de Administración
       </a>
     </div>
-    
+
     <span>© 2025 Lobo24 — Todos los derechos reservados</span>
     <span>🐺 Abierto 24/7 · Siempre para vos</span>
   </div>
@@ -393,14 +392,14 @@ onSnapshot(doc(db, 'config', 'general'), snap => {
   if (topbar && d.topbar) topbar.innerHTML = d.topbar;
 });
 
-onSnapshot(collection(db, 'lacteos'), snap => {
+onSnapshot(collection(db, 'perfumeria'), snap => {
   const prods = snap.docs.map(d => ({
     docId: d.id,
-    coleccion: 'lacteos',
+    coleccion: 'perfumeria',
     ...d.data()
   }));
 
-  window._lacteosAll = prods;
+  window._perfumeriaAll = prods;
 
   if (typeof updateHeroStats === 'function') updateHeroStats(prods);
   if (typeof updateSubcatCounts === 'function') updateSubcatCounts(prods);
@@ -435,7 +434,7 @@ onAuthStateChanged(auth, async (user) => {
 </script>
 
 <!-- ══ LÓGICA DE LA PÁGINA ══ -->
-<script src="js/app-global.js"></script>
-<script src="js/lacteos.js"></script>
+ <script src="js/app-global.js"></script>
+<script src="js/perfumeria.js"></script>
 </body>
 </html>

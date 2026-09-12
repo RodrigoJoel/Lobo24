@@ -72,6 +72,8 @@
   <a href="lacteos.html"><span class="icon">🧀</span> Lácteos</a>
   <a href="panaderia.html"><span class="icon">🍞</span> Panadería</a>
   <a href="mascotas.html"><span class="icon">🐾</span> Mascotas</a>
+  <a href="perfumeria.html"><span class="icon">🌸</span> Perfumería</a>
+  <a href="bazar.html"><span class="icon">🍽️</span> Bazar</a>
   <a href="ofertas.html" class="active"><span class="icon">🔥</span> Ofertas</a>
 </div>
 
@@ -174,6 +176,14 @@
         <div class="filter-chip" data-category="mascotas" onclick="selectCategory(this)">
           <span><span class="chip-icon">🐾</span>Mascotas</span>
           <span class="chip-count" id="cnt-mascotas">0</span>
+        </div>
+        <div class="filter-chip" data-category="perfumeria" onclick="selectCategory(this)">
+          <span><span class="chip-icon">🌸</span>Perfumería</span>
+          <span class="chip-count" id="cnt-perfumeria">0</span>
+        </div>
+        <div class="filter-chip" data-category="bazar" onclick="selectCategory(this)">
+          <span><span class="chip-icon">🍽️</span>Bazar</span>
+          <span class="chip-count" id="cnt-bazar">0</span>
         </div>
       </div>
     </div>
@@ -400,12 +410,13 @@ onSnapshot(doc(db, 'config', 'general'), snap => {
 });
 
 /* Ofertas: no es una colección propia — se arma en vivo juntando los
-   productos con badge "offer" de las 9 categorías reales. Así el producto
+   productos con badge "offer" de las 11 categorías reales. Así el producto
    que se ve acá es el mismo doc real (mismo stock, mismo precio), sin
    duplicados que haya que mantener sincronizados a mano. */
 const OFERTAS_SLUGS = [
   'bebidas', 'snacks', 'almacen', 'higiene', 'limpieza',
-  'congelados', 'lacteos', 'panaderia', 'mascotas'
+  'congelados', 'lacteos', 'panaderia', 'mascotas',
+  'perfumeria', 'bazar'
 ];
 const _ofertasBySlug = {};
 

@@ -55,21 +55,25 @@ service cloud.firestore {
 
     // ─── Catálogo de productos por categoría ──────────────────
     // bebidas, snacks, almacen, higiene, limpieza, congelados,
-    // lacteos, panaderia, mascotas. "ofertas" ya no es una colección
-    // real — la página de ofertas se arma en vivo con los productos que
-    // tengan badge "offer" en su categoría real (ver ofertas.html).
+    // lacteos, panaderia, mascotas, perfumeria, bazar. "ofertas" ya no
+    // es una colección real — la página de ofertas se arma en vivo con
+    // los productos que tengan badge "offer" en su categoría real (ver
+    // ofertas.html).
     match /{coleccion}/{docId} {
       allow read: if coleccion in [
         'bebidas', 'snacks', 'almacen', 'higiene', 'limpieza',
-        'congelados', 'lacteos', 'panaderia', 'mascotas'
+        'congelados', 'lacteos', 'panaderia', 'mascotas',
+        'perfumeria', 'bazar'
       ];
       allow create, delete: if coleccion in [
         'bebidas', 'snacks', 'almacen', 'higiene', 'limpieza',
-        'congelados', 'lacteos', 'panaderia', 'mascotas'
+        'congelados', 'lacteos', 'panaderia', 'mascotas',
+        'perfumeria', 'bazar'
       ] && isAdmin();
       allow update: if coleccion in [
         'bebidas', 'snacks', 'almacen', 'higiene', 'limpieza',
-        'congelados', 'lacteos', 'panaderia', 'mascotas'
+        'congelados', 'lacteos', 'panaderia', 'mascotas',
+        'perfumeria', 'bazar'
       ] && (isAdmin() || isValidStockDecrement());
     }
 
