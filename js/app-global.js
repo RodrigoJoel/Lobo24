@@ -316,6 +316,8 @@ function getAllAvailableProducts() {
     window._lacteosAll || [],
     window._panaderiaAll || [],
     window._mascotasAll || [],
+    window._perfumeriaAll || [],
+    window._bazarAll || [],
     window._ofertasAll || []
   ];
 

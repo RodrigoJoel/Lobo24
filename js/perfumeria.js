@@ -2,26 +2,13 @@
    ESTADO DE FILTROS
 ───────────────────────────────────── */
 const filters = {
-  category: 'all',
+  subcat: 'all',
   search: '',
   priceMin: 0,
   priceMax: Infinity,
+  badges: new Set(),
   stock: 'all',
   sort: 'default',
-};
-
-const CATEGORY_LABELS = {
-  bebidas: '🥤 Bebidas',
-  snacks: '🍪 Snacks',
-  almacen: '🍝 Almacén',
-  higiene: '🧼 Higiene',
-  limpieza: '🧴 Limpieza',
-  congelados: '🧊 Congelados',
-  lacteos: '🧀 Lácteos',
-  panaderia: '🍞 Panadería',
-  mascotas: '🐾 Mascotas',
-  perfumeria: '🌸 Perfumería',
-  bazar: '🍽️ Bazar',
 };
 
 /* ─────────────────────────────────────
@@ -34,10 +21,10 @@ let lastFilteredProducts = [];
 /* ─────────────────────────────────────
    FILTROS
 ───────────────────────────────────── */
-function selectCategory(el) {
-  document.querySelectorAll('#categoryFilters .filter-chip').forEach(c => c.classList.remove('active'));
+function selectSubcat(el) {
+  document.querySelectorAll('#subcatFilters .filter-chip').forEach(c => c.classList.remove('active'));
   el.classList.add('active');
-  filters.category = el.dataset.category;
+  filters.subcat = el.dataset.subcat;
   applyFilters();
 }
 
@@ -48,30 +35,51 @@ function selectStock(el) {
   applyFilters();
 }
 
+function toggleBadge(b) {
+  const btn = document.getElementById('badge' + b.charAt(0).toUpperCase() + b.slice(1));
+  if (!btn) return;
+
+  if (filters.badges.has(b)) {
+    filters.badges.delete(b);
+    btn.classList.remove('active');
+  } else {
+    filters.badges.add(b);
+    btn.classList.add('active');
+  }
+
+  applyFilters();
+}
+
 function clearFilter(type) {
-  if (type === 'category') {
-    filters.category = 'all';
-    document.querySelectorAll('#categoryFilters .filter-chip').forEach(c => c.classList.remove('active'));
-    document.querySelector('[data-category="all"]')?.classList.add('active');
+  if (type === 'subcat') {
+    filters.subcat = 'all';
+    document.querySelectorAll('#subcatFilters .filter-chip').forEach(c => c.classList.remove('active'));
+    document.querySelector('[data-subcat="all"]')?.classList.add('active');
   }
 
   if (type === 'price') {
     filters.priceMin = 0;
     filters.priceMax = Infinity;
 
-    const priceMin = document.getElementById('priceMin');
-    const priceMax = document.getElementById('priceMax');
+    const min = document.getElementById('priceMin');
+    const max = document.getElementById('priceMax');
 
-    if (priceMin) priceMin.value = '';
-    if (priceMax) priceMax.value = '';
+    if (min) min.value = '';
+    if (max) max.value = '';
+  }
+
+  if (type === 'badge') {
+    filters.badges.clear();
+    document.querySelectorAll('.filter-badge-btn').forEach(b => b.classList.remove('active'));
   }
 
   applyFilters();
 }
 
 function resetAllFilters() {
-  clearFilter('category');
+  clearFilter('subcat');
   clearFilter('price');
+  clearFilter('badge');
 
   filters.stock = 'all';
   filters.search = '';
@@ -90,7 +98,7 @@ function resetAllFilters() {
 }
 
 function applyFilters() {
-  const all = window._ofertasAll || [];
+  const all = window._perfumeriaAll || [];
 
   filters.search = (document.getElementById('catSearch')?.value || '').toLowerCase().trim();
   filters.sort = document.getElementById('sortSelect')?.value || 'default';
@@ -102,7 +110,7 @@ function applyFilters() {
   filters.priceMax = pMax;
 
   let result = all.filter(p => {
-    if (filters.category !== 'all' && p.coleccion !== filters.category) return false;
+    if (filters.subcat !== 'all' && p.subcat !== filters.subcat) return false;
 
     if (filters.search) {
       const haystack = `${p.name || ''} ${p.brand || ''} ${p.subcat || ''}`.toLowerCase();
@@ -113,6 +121,8 @@ function applyFilters() {
 
     if (price < filters.priceMin) return false;
     if (filters.priceMax !== Infinity && price > filters.priceMax) return false;
+
+    if (filters.badges.size > 0 && !filters.badges.has(p.badge)) return false;
 
     if (filters.stock === 'in' && (p.stock === 0 || p.stock == null)) return false;
 
@@ -158,7 +168,7 @@ function renderProducts(list) {
     grid.innerHTML = `
       <div class="no-results">
         <div class="nr-icon">🔍</div>
-        <p>No encontramos ofertas con esos filtros.</p>
+        <p>No encontramos productos en Perfumería con esos filtros.</p>
         <button onclick="resetAllFilters()">Limpiar filtros</button>
       </div>`;
 
@@ -171,23 +181,12 @@ function renderProducts(list) {
   grid.innerHTML = visibleList.map(p => {
     const stock = p.stock ?? null;
     const sinStock = stock !== null && stock <= 0;
-    const stockBajo = stock !== null && stock > 0 && stock <= 5;
 
-    // "¡Últimas N!" comentado a pedido de Rodrigo: no mostrar la cantidad.
     const stockBadgeHtml = sinStock
       ? `<span class="stock-badge out">Sin stock</span>`
-      : ''; /* stockBajo
-        ? `<span class="stock-badge low">¡Últimas ${stock}!</span>`
-        : ''; */
+      : '';
 
-    // Comentado a pedido de Rodrigo: no mostrar la cantidad disponible por ahora.
-    const stockInfoHtml = ''; /* sinStock
-      ? `<span class="stock-info empty">Sin stock</span>`
-      : stockBajo
-        ? `<span class="stock-info low">⚠️ Solo quedan ${stock}</span>`
-        : stock !== null
-          ? `<span class="stock-info">${stock} disponibles</span>`
-          : ''; */
+    const stockInfoHtml = '';
 
     const id = p.docId || p.id || '';
 
@@ -274,18 +273,25 @@ function renderActiveFilterTags() {
 
   const tags = [];
 
-  if (filters.category !== 'all') {
-    tags.push({ label: CATEGORY_LABELS[filters.category] || filters.category, key: 'category' });
+  if (filters.subcat !== 'all') {
+    const label = document.querySelector(`[data-subcat="${filters.subcat}"] .chip-icon`)?.textContent || '';
+    tags.push({ label: label + ' ' + filters.subcat, key: 'subcat' });
   }
 
-  if (filters.search) tags.push({ label: `"${filters.search}"`, key: 'search' });
+  if (filters.search) {
+    tags.push({ label: `"${filters.search}"`, key: 'search' });
+  }
 
   if (filters.priceMin > 0 || filters.priceMax !== Infinity) {
     const max = filters.priceMax === Infinity ? '∞' : `$${filters.priceMax}`;
     tags.push({ label: `$${filters.priceMin} — ${max}`, key: 'price' });
   }
 
-  if (filters.stock === 'in') tags.push({ label: 'En stock', key: 'stock' });
+  filters.badges.forEach(b => tags.push({ label: b.toUpperCase(), key: `badge-${b}` }));
+
+  if (filters.stock === 'in') {
+    tags.push({ label: 'En stock', key: 'stock' });
+  }
 
   wrap.innerHTML = tags.map(t => `
     <span class="active-filter-tag">
@@ -296,15 +302,17 @@ function renderActiveFilterTags() {
 }
 
 function removeFilterTag(key) {
-  if (key === 'category') {
-    clearFilter('category');
+  if (key === 'subcat') {
+    clearFilter('subcat');
   } else if (key === 'search') {
     filters.search = '';
-    const catSearch = document.getElementById('catSearch');
-    if (catSearch) catSearch.value = '';
+    const search = document.getElementById('catSearch');
+    if (search) search.value = '';
     applyFilters();
   } else if (key === 'price') {
     clearFilter('price');
+  } else if (key.startsWith('badge-')) {
+    toggleBadge(key.replace('badge-', ''));
   } else if (key === 'stock') {
     filters.stock = 'all';
     document.querySelector('[data-stock="all"]')?.classList.add('active');
@@ -314,25 +322,30 @@ function removeFilterTag(key) {
 }
 
 /* ─────────────────────────────────────
-   CONTADORES DE CATEGORÍAS
+   CONTADORES DE SUBCATEGORÍAS
 ───────────────────────────────────── */
-function updateCategoryCounts(prods) {
+function updateSubcatCounts(prods) {
   const counts = {};
 
   prods.forEach(p => {
-    if (p.coleccion) {
-      counts[p.coleccion] = (counts[p.coleccion] || 0) + 1;
+    if (p.subcat) {
+      counts[p.subcat] = (counts[p.subcat] || 0) + 1;
     }
   });
 
-  Object.keys(CATEGORY_LABELS).forEach(slug => {
-    const el = document.getElementById('cnt-' + slug);
-    const n = counts[slug] || 0;
+  const subcats = ['perfumes', 'cremas', 'desodorantes', 'ambientadores'];
+
+  subcats.forEach(s => {
+    const el = document.getElementById('cnt-' + s);
+    const n = counts[s] || 0;
     if (el) el.textContent = n;
   });
 
   const allEl = document.getElementById('cnt-all');
   if (allEl) allEl.textContent = prods.length;
+
+  const heroSubcats = document.getElementById('heroSubcats');
+  if (heroSubcats) heroSubcats.textContent = subcats.length;
 }
 
 /* ─────────────────────────────────────
@@ -366,8 +379,9 @@ if (catSearch) {
 /* ─────────────────────────────────────
    EXPORTS DE LA SECCIÓN
 ───────────────────────────────────── */
-window.selectCategory = selectCategory;
+window.selectSubcat = selectSubcat;
 window.selectStock = selectStock;
+window.toggleBadge = toggleBadge;
 window.clearFilter = clearFilter;
 window.resetAllFilters = resetAllFilters;
 window.applyFilters = applyFilters;

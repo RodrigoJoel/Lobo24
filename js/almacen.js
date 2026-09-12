@@ -350,7 +350,7 @@ function updateSubcatCounts(prods) {
     'azucar', 'sal', 'yerba', 'cafe', 'galletitas', 'pan-rallado',
     'leche-polvo', 'premezclas', 'frutos-secos', 'alimentos-bebe',
     'aceitunas', 'saborizadores', 'reposteria', 'enlatados', 'jugos-polvo',
-    'postres', 'infusiones'
+    'postres', 'infusiones', 'carbon'
   ];
 
   subcats.forEach(s => {
