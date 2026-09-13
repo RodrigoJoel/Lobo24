@@ -10,6 +10,13 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="stylesheet" href="css/styles.css"/>
   <link rel="stylesheet" href="css/usuario.css"/>
+  <link rel="icon" type="image/png" href="imagenes/iconoLobo24.png">
+  <link rel="apple-touch-icon" href="imagenes/apple-touch-icon.png">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#0c0c0e">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Lobo24">
 </head>
 <body>
 
@@ -39,7 +46,9 @@
 </nav>
 
 <!-- CATEGORY NAV -->
-<div class="cat-nav">
+<div class="cat-nav-wrap">
+  <button class="cat-nav-arrow" onclick="scrollCatNav(-1)" aria-label="Ver categorías anteriores">‹</button>
+  <div class="cat-nav">
   <a href="index.html"><span class="icon">⭐</span> Destacados</a>
   <a href="bebidas.html"><span class="icon">🥤</span> Bebidas</a>
   <a href="snacks.html"><span class="icon">🍪</span> Snacks</a>
@@ -53,6 +62,8 @@
   <a href="perfumeria.html"><span class="icon">🌸</span> Perfumería</a>
   <a href="bazar.html"><span class="icon">🍽️</span> Bazar</a>
   <a href="ofertas.html"><span class="icon">🔥</span> Ofertas</a>
+  </div>
+  <button class="cat-nav-arrow" onclick="scrollCatNav(1)" aria-label="Ver más categorías">›</button>
 </div>
 
 <!-- HERO USUARIO -->
@@ -328,5 +339,10 @@ onAuthStateChanged(auth, (user) => {
 
 <script src="js/usuario.js"></script>
 <script src="js/scripts.js"></script>
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => navigator.serviceWorker.register('/sw.js').catch(() => {}));
+  }
+</script>
 </body>
 </html>

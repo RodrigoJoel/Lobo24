@@ -41,6 +41,14 @@ function showToast(msg) {
 }
 
 /* ─────────────────────────────────────
+   SCROLL DEL MENÚ DE CATEGORÍAS
+───────────────────────────────────── */
+function scrollCatNav(dir) {
+  document.querySelector('.cat-nav')?.scrollBy({ left: dir * 220, behavior: 'smooth' });
+}
+window.scrollCatNav = scrollCatNav;
+
+/* ─────────────────────────────────────
    SEARCH GLOBAL
 ───────────────────────────────────── */
 function handleSearch() {
