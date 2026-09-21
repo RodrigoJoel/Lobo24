@@ -34,9 +34,14 @@ const ADMIN_EMAILS = ["rodrigoatatat@gmail.com"];
 const pedidosContainer = document.getElementById("pedidosContainer");
 const emptyState = document.getElementById("emptyState");
 const pedidoCount = document.getElementById("pedidoCount");
-const alertSound = document.getElementById("alertSound");
+const soundGate = document.getElementById("soundGate");
+const enableAlertsBtn = document.getElementById("enableAlertsBtn");
+const alertModal = document.getElementById("alertModal");
+const alertBody = document.getElementById("alertBody");
+const alertExtra = document.getElementById("alertExtra");
+const acceptOrderBtn = document.getElementById("acceptOrderBtn");
 
-let knownOrders = new Set();
+const knownOrders = new Map();
 let firstLoad = true;
 
 const STATUS_LABELS = {
@@ -91,46 +96,164 @@ function listenOrders() {
 function detectNewOrders(pedidos) {
   pedidos.forEach((pedido) => {
     const id = pedido.firebaseId;
+    const prevStatus = knownOrders.get(id);
+    knownOrders.set(id, pedido.status);
 
-    if (!knownOrders.has(id)) {
-      knownOrders.add(id);
-
-      if (!firstLoad) {
-        notifyNewOrder(pedido);
-      }
+    // Los pedidos de Mercado Pago nacen como "pending_payment" (el cliente
+    // todavía no pagó): suenan recién cuando se confirma el pago.
+    const esNuevo = prevStatus === undefined || prevStatus === "pending_payment";
+    if (!firstLoad && esNuevo && pedido.status !== "pending_payment") {
+      queueAlert(pedido);
     }
   });
+
+  // Si el pedido ya se atendió desde otro dispositivo, dejar de avisar por él.
+  const atendidos = new Set(
+    pedidos.filter(p => p.status === "processing").map(p => p.firebaseId)
+  );
+  const vigentes = new Set(pedidos.map(p => p.firebaseId));
+  const antes = alertQueue.length;
+  alertQueue = alertQueue.filter(p => vigentes.has(p.firebaseId) && !atendidos.has(p.firebaseId));
+  if (alertQueue.length !== antes) refreshAlert();
 
   firstLoad = false;
 }
 
-function notifyNewOrder(pedido) {
-  playSound();
+// ---------- Alerta fuerte hasta aceptar el pedido ----------
+
+let alertQueue = [];
+let audioCtx = null;
+let sirenTimer = null;
+let titleTimer = null;
+let wakeLock = null;
+const originalTitle = document.title;
+
+function queueAlert(pedido) {
+  alertQueue.push(pedido);
+  refreshAlert();
 
   if ("Notification" in window && Notification.permission === "granted") {
-    new Notification("Nuevo pedido en Lobo24", {
+    new Notification("🚨 NUEVO PEDIDO en Lobo24", {
       body: `Pedido #${pedido.orderId || pedido.firebaseId} - Total $${Number(pedido.total || 0).toLocaleString("es-AR")}`,
-      icon: "imagenes/iconoLobo24.png"
+      icon: "imagenes/iconoLobo24.png",
+      requireInteraction: true,
+      tag: "lobo24-pedido-" + pedido.firebaseId
     });
   }
 }
 
-function playSound() {
-  if (!alertSound) return;
+function refreshAlert() {
+  if (!alertQueue.length) {
+    stopAlert();
+    return;
+  }
 
-  alertSound.currentTime = 0;
-  alertSound.play().catch(() => {
-    console.warn("El navegador bloqueó el sonido hasta que el usuario interactúe.");
+  const p = alertQueue[0];
+  const esRetiro = p.delivery === "local";
+  alertBody.innerHTML = `
+    <div>Pedido <strong>#${escapeHtml(p.orderId || p.firebaseId)}</strong></div>
+    <div class="alert-total">$${Number(p.total || 0).toLocaleString("es-AR")}</div>
+    <div>${escapeHtml(p.contact?.name || "Cliente")}</div>
+    <div>${esRetiro ? "🏪 Retiro en sucursal" : "🛵 Envío a domicilio"} · ${escapeHtml(getPaymentLabel(p.payment))}</div>
+  `;
+  alertExtra.textContent = alertQueue.length > 1 ? `Hay ${alertQueue.length} pedidos sin aceptar` : "";
+  alertModal.classList.add("show");
+  startSiren();
+  startTitleFlash();
+}
+
+function acceptCurrentAlert() {
+  alertQueue.shift();
+  refreshAlert();
+}
+
+function stopAlert() {
+  alertModal.classList.remove("show");
+  clearInterval(sirenTimer);
+  sirenTimer = null;
+  clearInterval(titleTimer);
+  titleTimer = null;
+  document.title = originalTitle;
+  if (navigator.vibrate) navigator.vibrate(0);
+}
+
+// Sirena sintetizada (no depende de ningún archivo externo): dos tonos
+// alternados a volumen máximo, repetida hasta que se acepte el pedido.
+function beepSiren() {
+  if (!audioCtx) return;
+  const t0 = audioCtx.currentTime;
+
+  const master = audioCtx.createGain();
+  master.gain.value = 1;
+  const comp = audioCtx.createDynamicsCompressor();
+  master.connect(comp).connect(audioCtx.destination);
+
+  [880, 1320, 880, 1320].forEach((freq, i) => {
+    const osc = audioCtx.createOscillator();
+    const g = audioCtx.createGain();
+    osc.type = "square";
+    osc.frequency.value = freq;
+    const start = t0 + i * 0.25;
+    g.gain.setValueAtTime(0.0001, start);
+    g.gain.exponentialRampToValueAtTime(1, start + 0.02);
+    g.gain.setValueAtTime(1, start + 0.2);
+    g.gain.exponentialRampToValueAtTime(0.0001, start + 0.24);
+    osc.connect(g).connect(master);
+    osc.start(start);
+    osc.stop(start + 0.25);
   });
+
+  if (navigator.vibrate) navigator.vibrate([300, 100, 300, 100, 300]);
+}
+
+function startSiren() {
+  if (sirenTimer) return;
+  if (audioCtx && audioCtx.state === "suspended") audioCtx.resume();
+  beepSiren();
+  sirenTimer = setInterval(beepSiren, 1300);
+}
+
+function startTitleFlash() {
+  if (titleTimer) return;
+  let on = false;
+  titleTimer = setInterval(() => {
+    on = !on;
+    document.title = on ? "🚨 ¡NUEVO PEDIDO! 🚨" : originalTitle;
+  }, 600);
+}
+
+async function keepScreenAwake() {
+  try {
+    if ("wakeLock" in navigator) wakeLock = await navigator.wakeLock.request("screen");
+  } catch (e) {
+    console.warn("No se pudo mantener la pantalla encendida:", e);
+  }
+}
+
+document.addEventListener("visibilitychange", () => {
+  if (document.visibilityState === "visible" && wakeLock) keepScreenAwake();
+});
+
+// El navegador no deja reproducir sonido hasta un toque del usuario.
+function enableAlerts() {
+  const Ctx = window.AudioContext || window.webkitAudioContext;
+  if (Ctx && !audioCtx) audioCtx = new Ctx();
+  if (audioCtx) audioCtx.resume();
+  soundGate.classList.remove("show");
+  keepScreenAwake();
+  beepSiren(); // prueba: confirma que el sonido funciona
 }
 
 function initNotifications() {
-  if (!("Notification" in window)) return;
+  soundGate.classList.add("show");
 
-  if (Notification.permission === "default") {
+  if ("Notification" in window && Notification.permission === "default") {
     Notification.requestPermission();
   }
 }
+
+enableAlertsBtn.addEventListener("click", enableAlerts);
+acceptOrderBtn.addEventListener("click", acceptCurrentAlert);
 
 function formatFecha(createdAt) {
   if (!createdAt) return "—";
