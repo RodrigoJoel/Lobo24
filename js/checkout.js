@@ -35,7 +35,7 @@ const STORE = {
 const DEFAULT_SHIPPING = {
   LOCAL_MIN: 85000,
   COSTO_FIJO: 4500,
-  RADIO_KM: 4,
+  RADIO_KM: 3,
 };
 let SHIPPING = { ...DEFAULT_SHIPPING };
 
@@ -611,7 +611,7 @@ function selectDeliveryExact(type, cost) {
   renderSummary();
 }
 
-function submitStep3() {
+async function submitStep3() {
   if (!STATE.delivery) {
     showToast('⚠️ Seleccioná un método de entrega', 'warn');
     return;
@@ -623,6 +623,34 @@ function submitStep3() {
     if (!province.includes('chaco')) {
       showToast('⚠️ No realizamos envíos a otras provincias', 'warn');
       return;
+    }
+
+    // Avisa antes de llegar al pago; el backend vuelve a validar al confirmar.
+    const btn = document.querySelector('.btn-row .btn-primary');
+    const btnText = btn ? btn.textContent : '';
+    if (btn) { btn.disabled = true; btn.textContent = '⏳ Verificando dirección...'; }
+    try {
+      const res = await fetch('https://lobo24-backend-zibj.onrender.com/validar-distancia', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          street: STATE.contact.street,
+          city: STATE.contact.city,
+          province: STATE.contact.province
+        })
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || !data.ok) {
+        showToast(`❌ ${data.error || 'No se pudo validar la dirección. Intentá de nuevo.'}`, 'error');
+        return;
+      }
+      STATE.deliveryDistanceKm = data.distanceKm;
+    } catch (e) {
+      console.error('Error validando distancia:', e);
+      showToast('❌ No se pudo validar la dirección. Intentá de nuevo o elegí retiro en sucursal.', 'error');
+      return;
+    } finally {
+      if (btn) { btn.disabled = false; btn.textContent = btnText; }
     }
   }
 
@@ -865,7 +893,7 @@ async function submitStep4() {
         await window._fbAddDoc(ordersRef, orderData);
       }
 
-      const mpRes = await fetch('https://lobo24-backend.onrender.com/crear-preferencia', {
+      const mpRes = await fetch('https://lobo24-backend-zibj.onrender.com/crear-preferencia', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -881,6 +909,11 @@ async function submitStep4() {
             delivery:     STATE.delivery,
             pointsUsed:   STATE.pointsUsed,
             userId:       window._currentUser?.uid || null,
+            address: {
+              street:   STATE.contact.street,
+              city:     STATE.contact.city,
+              province: STATE.contact.province
+            },
             // El backend recalcula el total real desde Firestore y lo usa
             // para cobrar en Mercado Pago; esto solo viaja a modo informativo.
             total:        totalAmount
@@ -922,7 +955,7 @@ async function submitStep4() {
         // puntos — nada de esto puede depender de lo que mande el
         // navegador, que puede manipularse desde las herramientas de
         // desarrollador.
-        const confirmRes = await fetch('https://lobo24-backend.onrender.com/confirmar-pedido-manual', {
+        const confirmRes = await fetch('https://lobo24-backend-zibj.onrender.com/confirmar-pedido-manual', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
