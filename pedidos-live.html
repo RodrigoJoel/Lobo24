@@ -202,6 +202,121 @@ header h1{
     font-size:18px;
 }
 
+#soundGate,
+#alertModal{
+    display:none;
+    position:fixed;
+    inset:0;
+    z-index:9999;
+    align-items:center;
+    justify-content:center;
+    padding:20px;
+    text-align:center;
+}
+
+#soundGate{
+    background:rgba(0,0,0,.92);
+}
+
+#soundGate.show,
+#alertModal.show{
+    display:flex;
+}
+
+.gate-box{
+    max-width:420px;
+}
+
+.gate-icon{
+    font-size:64px;
+    margin-bottom:10px;
+}
+
+.gate-box p{
+    color:#ccc;
+    margin:12px 0 22px;
+    line-height:1.4;
+}
+
+#enableAlertsBtn{
+    background:var(--accent);
+    color:#000;
+    border:none;
+    border-radius:14px;
+    padding:18px 32px;
+    font-size:20px;
+    font-weight:bold;
+    cursor:pointer;
+}
+
+#alertModal{
+    background:#d50000;
+    animation:alertFlash .7s steps(1) infinite;
+}
+
+@keyframes alertFlash{
+    0%{ background:#d50000; }
+    50%{ background:#ff9800; }
+}
+
+.alert-box{
+    background:#fff;
+    color:#111;
+    border-radius:24px;
+    padding:28px 24px;
+    width:min(560px,100%);
+    max-height:92vh;
+    overflow:auto;
+    box-shadow:0 20px 60px rgba(0,0,0,.6);
+    animation:alertShake .6s ease-in-out infinite;
+}
+
+@keyframes alertShake{
+    0%,100%{ transform:translateX(0) scale(1); }
+    25%{ transform:translateX(-6px) scale(1.02); }
+    75%{ transform:translateX(6px) scale(1.02); }
+}
+
+.alert-icon{
+    font-size:72px;
+    line-height:1;
+}
+
+.alert-box h2{
+    font-size:38px;
+    color:#d50000;
+    margin:8px 0 14px;
+}
+
+.alert-extra{
+    font-weight:bold;
+    color:#b71c1c;
+    margin-bottom:8px;
+}
+
+.alert-body{
+    font-size:20px;
+    line-height:1.5;
+    margin-bottom:22px;
+}
+
+.alert-body .alert-total{
+    font-size:34px;
+    font-weight:bold;
+    color:#0a8f4d;
+}
+
+#acceptOrderBtn{
+    width:100%;
+    background:#0a8f4d;
+    color:#fff;
+    border:none;
+    border-radius:16px;
+    padding:22px;
+    font-size:26px;
+    font-weight:bold;
+    cursor:pointer;
+}
 </style>
 </head>
 
@@ -222,11 +337,26 @@ header h1{
 
 </div>
 
-<audio id="alertSound">
-    <source src="https://actions.google.com/sounds/v1/alarms/digital_watch_alarm_long.ogg" type="audio/ogg">
-</audio>
+<!-- Los navegadores bloquean el audio hasta que hay un toque del usuario -->
+<div id="soundGate">
+    <div class="gate-box">
+        <div class="gate-icon">🔔</div>
+        <h2>Activar alertas de pedidos</h2>
+        <p>Tocá el botón para que suene la alarma cuando entre un pedido nuevo. Dejá esta pantalla abierta.</p>
+        <button id="enableAlertsBtn">ACTIVAR SONIDO</button>
+    </div>
+</div>
+
+<div id="alertModal" role="alertdialog" aria-live="assertive">
+    <div class="alert-box">
+        <div class="alert-icon">🚨</div>
+        <h2>¡NUEVO PEDIDO!</h2>
+        <div id="alertExtra" class="alert-extra"></div>
+        <div id="alertBody" class="alert-body"></div>
+        <button id="acceptOrderBtn">✅ ACEPTAR PEDIDO</button>
+    </div>
+</div>
 
 <script type="module" src="./pedidos-live.js"></script>
-
 </body>
 </html>
