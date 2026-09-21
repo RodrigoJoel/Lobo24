@@ -630,7 +630,7 @@ async function submitStep3() {
     const btnText = btn ? btn.textContent : '';
     if (btn) { btn.disabled = true; btn.textContent = '⏳ Verificando dirección...'; }
     try {
-      const res = await fetch('https://lobo24-backend.onrender.com/validar-distancia', {
+      const res = await fetch('https://lobo24-backend-zibj.onrender.com/validar-distancia', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -893,7 +893,7 @@ async function submitStep4() {
         await window._fbAddDoc(ordersRef, orderData);
       }
 
-      const mpRes = await fetch('https://lobo24-backend.onrender.com/crear-preferencia', {
+      const mpRes = await fetch('https://lobo24-backend-zibj.onrender.com/crear-preferencia', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -955,7 +955,7 @@ async function submitStep4() {
         // puntos — nada de esto puede depender de lo que mande el
         // navegador, que puede manipularse desde las herramientas de
         // desarrollador.
-        const confirmRes = await fetch('https://lobo24-backend.onrender.com/confirmar-pedido-manual', {
+        const confirmRes = await fetch('https://lobo24-backend-zibj.onrender.com/confirmar-pedido-manual', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
