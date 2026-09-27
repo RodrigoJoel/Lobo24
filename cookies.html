@@ -3,38 +3,24 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Lobo24 — Lácteos</title>
-  <meta name="description" content="Lácteos online en Lobo24: leche, quesos, yogures y más, con entrega rápida en Resistencia, Chaco.">
-  <meta property="og:title" content="Lobo24 — Lácteos">
-  <meta property="og:description" content="Lácteos online en Lobo24: leche, quesos, yogures y más, con entrega rápida en Resistencia, Chaco.">
+  <title>Lobo24 — Política de Cookies</title>
+  <meta name="description" content="Qué cookies y tecnologías de almacenamiento usa Lobo24, y cómo administrarlas desde tu navegador.">
+  <meta property="og:title" content="Lobo24 — Política de Cookies">
+  <meta property="og:description" content="Qué cookies y tecnologías de almacenamiento usa Lobo24, y cómo administrarlas desde tu navegador.">
   <meta property="og:image" content="https://marketlobo24.com.ar/imagenes/og-image.png">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
-  <meta property="og:url" content="https://marketlobo24.com.ar/lacteos.html">
+  <meta property="og:url" content="https://marketlobo24.com.ar/cookies.html">
   <meta property="og:type" content="website">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="Lobo24 — Lácteos">
-  <meta name="twitter:description" content="Lácteos online en Lobo24: leche, quesos, yogures y más, con entrega rápida en Resistencia, Chaco.">
+  <meta name="twitter:title" content="Lobo24 — Política de Cookies">
+  <meta name="twitter:description" content="Qué cookies y tecnologías de almacenamiento usa Lobo24, y cómo administrarlas desde tu navegador.">
   <meta name="twitter:image" content="https://marketlobo24.com.ar/imagenes/og-image.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="stylesheet" href="css/styles.css?v=2"/>
-  <link rel="stylesheet" href="css/secciones.css?v=2"/>
-  <style>
-    .cat-hero::before {
-      content: '🧀';
-      position: absolute;
-      right: 80px;
-      top: 50%;
-      transform: translateY(-50%);
-      font-size: 160px;
-      opacity: .06;
-      line-height: 1;
-      pointer-events: none;
-    }
-  </style>
   <link rel="icon" type="image/png" href="imagenes/iconoLobo24.png">
   <link rel="apple-touch-icon" href="imagenes/apple-touch-icon.png">
   <link rel="manifest" href="/manifest.json">
@@ -76,7 +62,7 @@
 <div class="cat-nav-wrap">
   <button class="cat-nav-arrow" onclick="scrollCatNav(-1)" aria-label="Ver categorías anteriores">‹</button>
   <div class="cat-nav">
-  <a href="#" class="active"><span class="icon">⭐</span> Destacados</a>
+  <a href="index.html"><span class="icon">⭐</span> Destacados</a>
   <a href="bebidas.html"><span class="icon">🥤</span> Bebidas</a>
   <a href="snacks.html"><span class="icon">🍪</span> Snacks</a>
   <a href="almacen.html"><span class="icon">🍝</span> Almacén</a>
@@ -93,166 +79,33 @@
   <button class="cat-nav-arrow" onclick="scrollCatNav(1)" aria-label="Ver más categorías">›</button>
 </div>
 
-<!-- HERO CATEGORÍA -->
-<div class="cat-hero">
-  <div class="cat-hero-inner">
-    <div class="cat-breadcrumb">
-      <a href="index.html">Inicio</a>
-      <span>/</span>
-      <span>Lácteos</span>
-    </div>
-    <h1>SECCIÓN DE <em>LÁCTEOS</em></h1>
-    <p>Leches, quesos, yogures, mantecas y derivados. Productos frescos y de la mejor calidad para tu mesa.</p>
-    <div class="cat-hero-stats">
-      <div class="cat-hero-stat">
-        <strong id="heroTotalProds">—</strong>
-        productos
-      </div>
-      <div class="cat-hero-stat">
-        <strong id="heroInStock">—</strong>
-        en stock
-      </div>
-      <div class="cat-hero-stat">
-        <strong id="heroSubcats">6</strong>
-        subcategorías
-      </div>
-    </div>
-  </div>
-</div>
+<main class="content-page">
+  <h1>POLÍTICA DE COOKIES</h1>
+  <p class="content-updated">Última actualización: septiembre de 2026</p>
 
-<!-- BARRA DE BÚSQUEDA DE CATEGORÍA -->
-<div class="cat-search-bar">
-  <div class="cat-search-inner">
-    <div class="cat-search-input-wrap">
-      <input type="text" id="catSearch" placeholder="Buscar en Lácteos... ej: leche, queso, yogur, manteca"/>
-      <span class="search-icon">🔍</span>
-    </div>
-    <select class="cat-sort-select" id="sortSelect" onchange="applyFilters()">
-      <option value="default">Ordenar por: Relevancia</option>
-      <option value="price-asc">Precio: menor a mayor</option>
-      <option value="price-desc">Precio: mayor a menor</option>
-      <option value="name-asc">Nombre: A → Z</option>
-      <option value="stock-desc">Mayor stock primero</option>
-    </select>
-    <span class="results-count" id="resultsCount">
-      <strong id="countNum">0</strong> productos
-    </span>
-  </div>
-</div>
-
-<!-- LAYOUT: FILTROS + PRODUCTOS -->
-<div class="cat-layout">
-
-  <!-- SIDEBAR FILTROS -->
-  <aside class="filters-sidebar">
-
-    <!-- Subcategorías -->
-    <div class="filter-group">
-      <div class="filter-group-title">
-        Categorías
-        <button class="filter-clear" onclick="clearFilter('subcat')">limpiar</button>
-      </div>
-      <div class="filter-chips" id="subcatFilters">
-        <div class="filter-chip active" data-subcat="all" onclick="selectSubcat(this)">
-          <span><span class="chip-icon">🛒</span>Todas</span>
-          <span class="chip-count" id="cnt-all">0</span>
-        </div>
-        <div class="filter-chip" data-subcat="leches" onclick="selectSubcat(this)">
-          <span><span class="chip-icon">🥛</span>Leches</span>
-          <span class="chip-count" id="cnt-leches">0</span>
-        </div>
-        <div class="filter-chip" data-subcat="quesos" onclick="selectSubcat(this)">
-          <span><span class="chip-icon">🧀</span>Quesos</span>
-          <span class="chip-count" id="cnt-quesos">0</span>
-        </div>
-        <div class="filter-chip" data-subcat="yogures" onclick="selectSubcat(this)">
-          <span><span class="chip-icon">🍶</span>Yogures</span>
-          <span class="chip-count" id="cnt-yogures">0</span>
-        </div>
-        <div class="filter-chip" data-subcat="manteca" onclick="selectSubcat(this)">
-          <span><span class="chip-icon">🧈</span>Manteca y crema</span>
-          <span class="chip-count" id="cnt-manteca">0</span>
-        </div>
-        <div class="filter-chip" data-subcat="postres" onclick="selectSubcat(this)">
-          <span><span class="chip-icon">🍮</span>Postres</span>
-          <span class="chip-count" id="cnt-postres">0</span>
-        </div>
-        <div class="filter-chip" data-subcat="huevos" onclick="selectSubcat(this)">
-          <span><span class="chip-icon">🥚</span>Huevos</span>
-          <span class="chip-count" id="cnt-huevos">0</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- Rango de precio -->
-    <div class="filter-group">
-      <div class="filter-group-title">
-        Precio
-        <button class="filter-clear" onclick="clearFilter('price')">limpiar</button>
-      </div>
-      <div class="price-range">
-        <div class="price-inputs">
-          <div class="price-input-wrap">
-            <span>$</span>
-            <input type="number" id="priceMin" placeholder="Mín" min="0"/>
-          </div>
-          <div class="price-input-wrap">
-            <span>$</span>
-            <input type="number" id="priceMax" placeholder="Máx" min="0"/>
-          </div>
-        </div>
-        <button class="apply-price-btn" onclick="applyFilters()">Aplicar precio</button>
-      </div>
-    </div>
-
-    <!-- Ofertas / badges -->
-    <div class="filter-group">
-      <div class="filter-group-title">
-        Promociones
-        <button class="filter-clear" onclick="clearFilter('badge')">limpiar</button>
-      </div>
-      <div class="filter-badges">
-        <button class="filter-badge-btn offer" id="badgeOffer" onclick="toggleBadge('offer')">🔖 Ofertas</button>
-        <button class="filter-badge-btn new"   id="badgeNew"   onclick="toggleBadge('new')">✨ Nuevos</button>
-        <button class="filter-badge-btn hot"   id="badgeHot"   onclick="toggleBadge('hot')">🔥 Hot</button>
-      </div>
-    </div>
-
-    <!-- Disponibilidad -->
-    <div class="filter-group">
-      <div class="filter-group-title">Disponibilidad</div>
-      <div class="filter-chips">
-        <div class="filter-chip active" data-stock="all" onclick="selectStock(this)">
-          <span>Todo</span>
-        </div>
-        <div class="filter-chip" data-stock="in" onclick="selectStock(this)">
-          <span>✅ En stock</span>
-        </div>
-      </div>
-    </div>
-
-    <button class="reset-all-btn" onclick="resetAllFilters()">↺ Limpiar todos los filtros</button>
-  </aside>
-
-  <!-- ÁREA DE PRODUCTOS -->
-  <div class="products-area">
-    <div class="products-toolbar">
-      <div class="active-filters" id="activeFilterTags"></div>
-    </div>
-    <div class="products-grid" id="productsGrid">
-      <!-- skeletons mientras carga -->
-      <div class="skeleton"><div class="sk-img"></div><div class="sk-body"><div class="sk-line"></div><div class="sk-line short"></div><div class="sk-line price"></div></div></div>
-      <div class="skeleton"><div class="sk-img"></div><div class="sk-body"><div class="sk-line"></div><div class="sk-line short"></div><div class="sk-line price"></div></div></div>
-      <div class="skeleton"><div class="sk-img"></div><div class="sk-body"><div class="sk-line"></div><div class="sk-line short"></div><div class="sk-line price"></div></div></div>
-      <div class="skeleton"><div class="sk-img"></div><div class="sk-body"><div class="sk-line"></div><div class="sk-line short"></div><div class="sk-line price"></div></div></div>
-      <div class="skeleton"><div class="sk-img"></div><div class="sk-body"><div class="sk-line"></div><div class="sk-line short"></div><div class="sk-line price"></div></div></div>
-      <div class="skeleton"><div class="sk-img"></div><div class="sk-body"><div class="sk-line"></div><div class="sk-line short"></div><div class="sk-line price"></div></div></div>
-      <div class="skeleton"><div class="sk-img"></div><div class="sk-body"><div class="sk-line"></div><div class="sk-line short"></div><div class="sk-line price"></div></div></div>
-      <div class="skeleton"><div class="sk-img"></div><div class="sk-body"><div class="sk-line"></div><div class="sk-line short"></div><div class="sk-line price"></div></div></div>
-    </div>
+  <div class="content-note">
+    A diferencia de otros sitios, Lobo24 no usa cookies de rastreo publicitario. Igual te contamos abajo qué tecnologías de almacenamiento del navegador usamos, para ser transparentes.
   </div>
 
-</div><!-- /cat-layout -->
+  <h2>1. Qué es una cookie</h2>
+  <p>Es un archivo pequeño que un sitio guarda en tu navegador. Nuestro sitio usa principalmente <strong>localStorage</strong> (almacenamiento local del navegador), una tecnología similar, además de las cookies de sesión que genera Firebase Authentication para mantenerte identificado.</p>
+
+  <h2>2. Qué guardamos y para qué</h2>
+  <ul>
+    <li><strong>Preferencia de tema:</strong> si elegiste modo claro u oscuro, lo recordamos en tu navegador.</li>
+    <li><strong>Carrito de compras:</strong> los productos que agregaste se guardan localmente para que no los pierdas si cerrás la pestaña.</li>
+    <li><strong>Sesión de usuario:</strong> Firebase Authentication guarda tu sesión para que no tengas que iniciar sesión en cada visita.</li>
+  </ul>
+
+  <h2>3. Lo que no usamos</h2>
+  <p>No usamos cookies de publicidad de terceros ni de redes de rastreo (como Google Analytics o Meta Pixel).</p>
+
+  <h2>4. Cómo administrarlas</h2>
+  <p>Podés borrar el almacenamiento local y las cookies desde la configuración de privacidad de tu navegador en cualquier momento. Tené en cuenta que si lo hacés, vas a perder el carrito guardado y tu sesión iniciada.</p>
+
+  <h2>5. Más información</h2>
+  <p>Para saber qué datos personales tratamos y con qué fines, consultá nuestra <a href="privacidad.html">Política de Privacidad</a>.</p>
+</main>
 
 <!-- FOOTER -->
 <footer>
@@ -289,7 +142,7 @@
         <i class="fas fa-cog"></i> Panel de Administración
       </a>
     </div>
-    
+
     <span>© 2025 Lobo24 — Todos los derechos reservados</span>
     <span>🐺 Abierto 24/7 · Siempre para vos</span>
   </div>
@@ -370,7 +223,6 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebas
 import {
   getFirestore,
   doc,
-  collection,
   onSnapshot,
   setDoc,
   getDoc,
@@ -398,6 +250,7 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
 
+/* Exponer helpers globales */
 window.fbAuth = {
   auth,
   createUserWithEmailAndPassword,
@@ -413,6 +266,7 @@ window.fbSendPasswordReset = (email) => sendPasswordResetEmail(auth, email);
 window.fbUpdateDoc = updateDoc;
 window.fbDoc = (...args) => doc(db, ...args);
 
+/* Topbar */
 onSnapshot(doc(db, 'config', 'general'), snap => {
   if (!snap.exists()) return;
   const d = snap.data();
@@ -420,20 +274,7 @@ onSnapshot(doc(db, 'config', 'general'), snap => {
   if (topbar && d.topbar) topbar.innerHTML = d.topbar;
 });
 
-onSnapshot(collection(db, 'lacteos'), snap => {
-  const prods = snap.docs.map(d => ({
-    docId: d.id,
-    coleccion: 'lacteos',
-    ...d.data()
-  }));
-
-  window._lacteosAll = prods;
-
-  if (typeof updateHeroStats === 'function') updateHeroStats(prods);
-  if (typeof updateSubcatCounts === 'function') updateSubcatCounts(prods);
-  if (typeof applyFilters === 'function') applyFilters();
-});
-
+/* Auth state */
 onAuthStateChanged(auth, async (user) => {
   const container = document.getElementById('userStatusContainer');
   if (!container) return;
@@ -463,6 +304,5 @@ onAuthStateChanged(auth, async (user) => {
 
 <!-- ══ LÓGICA DE LA PÁGINA ══ -->
 <script src="js/app-global.js"></script>
-<script src="js/lacteos.js"></script>
 </body>
 </html>
