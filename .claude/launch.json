@@ -1,0 +1,17 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "lobo24-hosting",
+      "runtimeExecutable": "firebase",
+      "runtimeArgs": ["serve", "--only", "hosting", "--port", "5050"],
+      "port": 5050
+    },
+    {
+      "name": "lobo24-static",
+      "runtimeExecutable": "python",
+      "runtimeArgs": ["-m", "http.server", "5051"],
+      "port": 5051
+    }
+  ]
+}

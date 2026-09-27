@@ -318,6 +318,12 @@ header h1{
     cursor:pointer;
 }
 </style>
+<link rel="apple-touch-icon" href="imagenes/apple-touch-icon.png">
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#0c0c0e">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Lobo24">
 </head>
 
 <body>
@@ -358,5 +364,11 @@ header h1{
 </div>
 
 <script type="module" src="./pedidos-live.js"></script>
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => navigator.serviceWorker.register('/sw.js').catch(() => {}));
+  }
+</script>
+
 </body>
 </html>
