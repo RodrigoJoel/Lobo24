@@ -3,38 +3,24 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Lobo24 — Lácteos</title>
-  <meta name="description" content="Lácteos online en Lobo24: leche, quesos, yogures y más, con entrega rápida en Resistencia, Chaco.">
-  <meta property="og:title" content="Lobo24 — Lácteos">
-  <meta property="og:description" content="Lácteos online en Lobo24: leche, quesos, yogures y más, con entrega rápida en Resistencia, Chaco.">
+  <title>Lobo24 — Términos de Uso</title>
+  <meta name="description" content="Términos y condiciones de uso de Lobo24, minimarket online en Resistencia, Chaco.">
+  <meta property="og:title" content="Lobo24 — Términos de Uso">
+  <meta property="og:description" content="Términos y condiciones de uso de Lobo24, minimarket online en Resistencia, Chaco.">
   <meta property="og:image" content="https://marketlobo24.com.ar/imagenes/og-image.png">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
-  <meta property="og:url" content="https://marketlobo24.com.ar/lacteos.html">
+  <meta property="og:url" content="https://marketlobo24.com.ar/terminos.html">
   <meta property="og:type" content="website">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="Lobo24 — Lácteos">
-  <meta name="twitter:description" content="Lácteos online en Lobo24: leche, quesos, yogures y más, con entrega rápida en Resistencia, Chaco.">
+  <meta name="twitter:title" content="Lobo24 — Términos de Uso">
+  <meta name="twitter:description" content="Términos y condiciones de uso de Lobo24, minimarket online en Resistencia, Chaco.">
   <meta name="twitter:image" content="https://marketlobo24.com.ar/imagenes/og-image.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="stylesheet" href="css/styles.css?v=2"/>
-  <link rel="stylesheet" href="css/secciones.css?v=2"/>
-  <style>
-    .cat-hero::before {
-      content: '🧀';
-      position: absolute;
-      right: 80px;
-      top: 50%;
-      transform: translateY(-50%);
-      font-size: 160px;
-      opacity: .06;
-      line-height: 1;
-      pointer-events: none;
-    }
-  </style>
   <link rel="icon" type="image/png" href="imagenes/iconoLobo24.png">
   <link rel="apple-touch-icon" href="imagenes/apple-touch-icon.png">
   <link rel="manifest" href="/manifest.json">
@@ -76,7 +62,7 @@
 <div class="cat-nav-wrap">
   <button class="cat-nav-arrow" onclick="scrollCatNav(-1)" aria-label="Ver categorías anteriores">‹</button>
   <div class="cat-nav">
-  <a href="#" class="active"><span class="icon">⭐</span> Destacados</a>
+  <a href="index.html"><span class="icon">⭐</span> Destacados</a>
   <a href="bebidas.html"><span class="icon">🥤</span> Bebidas</a>
   <a href="snacks.html"><span class="icon">🍪</span> Snacks</a>
   <a href="almacen.html"><span class="icon">🍝</span> Almacén</a>
@@ -93,166 +79,50 @@
   <button class="cat-nav-arrow" onclick="scrollCatNav(1)" aria-label="Ver más categorías">›</button>
 </div>
 
-<!-- HERO CATEGORÍA -->
-<div class="cat-hero">
-  <div class="cat-hero-inner">
-    <div class="cat-breadcrumb">
-      <a href="index.html">Inicio</a>
-      <span>/</span>
-      <span>Lácteos</span>
-    </div>
-    <h1>SECCIÓN DE <em>LÁCTEOS</em></h1>
-    <p>Leches, quesos, yogures, mantecas y derivados. Productos frescos y de la mejor calidad para tu mesa.</p>
-    <div class="cat-hero-stats">
-      <div class="cat-hero-stat">
-        <strong id="heroTotalProds">—</strong>
-        productos
-      </div>
-      <div class="cat-hero-stat">
-        <strong id="heroInStock">—</strong>
-        en stock
-      </div>
-      <div class="cat-hero-stat">
-        <strong id="heroSubcats">6</strong>
-        subcategorías
-      </div>
-    </div>
-  </div>
-</div>
+<main class="content-page">
+  <h1>TÉRMINOS DE USO</h1>
+  <p class="content-updated">Última actualización: septiembre de 2026</p>
 
-<!-- BARRA DE BÚSQUEDA DE CATEGORÍA -->
-<div class="cat-search-bar">
-  <div class="cat-search-inner">
-    <div class="cat-search-input-wrap">
-      <input type="text" id="catSearch" placeholder="Buscar en Lácteos... ej: leche, queso, yogur, manteca"/>
-      <span class="search-icon">🔍</span>
-    </div>
-    <select class="cat-sort-select" id="sortSelect" onchange="applyFilters()">
-      <option value="default">Ordenar por: Relevancia</option>
-      <option value="price-asc">Precio: menor a mayor</option>
-      <option value="price-desc">Precio: mayor a menor</option>
-      <option value="name-asc">Nombre: A → Z</option>
-      <option value="stock-desc">Mayor stock primero</option>
-    </select>
-    <span class="results-count" id="resultsCount">
-      <strong id="countNum">0</strong> productos
-    </span>
-  </div>
-</div>
-
-<!-- LAYOUT: FILTROS + PRODUCTOS -->
-<div class="cat-layout">
-
-  <!-- SIDEBAR FILTROS -->
-  <aside class="filters-sidebar">
-
-    <!-- Subcategorías -->
-    <div class="filter-group">
-      <div class="filter-group-title">
-        Categorías
-        <button class="filter-clear" onclick="clearFilter('subcat')">limpiar</button>
-      </div>
-      <div class="filter-chips" id="subcatFilters">
-        <div class="filter-chip active" data-subcat="all" onclick="selectSubcat(this)">
-          <span><span class="chip-icon">🛒</span>Todas</span>
-          <span class="chip-count" id="cnt-all">0</span>
-        </div>
-        <div class="filter-chip" data-subcat="leches" onclick="selectSubcat(this)">
-          <span><span class="chip-icon">🥛</span>Leches</span>
-          <span class="chip-count" id="cnt-leches">0</span>
-        </div>
-        <div class="filter-chip" data-subcat="quesos" onclick="selectSubcat(this)">
-          <span><span class="chip-icon">🧀</span>Quesos</span>
-          <span class="chip-count" id="cnt-quesos">0</span>
-        </div>
-        <div class="filter-chip" data-subcat="yogures" onclick="selectSubcat(this)">
-          <span><span class="chip-icon">🍶</span>Yogures</span>
-          <span class="chip-count" id="cnt-yogures">0</span>
-        </div>
-        <div class="filter-chip" data-subcat="manteca" onclick="selectSubcat(this)">
-          <span><span class="chip-icon">🧈</span>Manteca y crema</span>
-          <span class="chip-count" id="cnt-manteca">0</span>
-        </div>
-        <div class="filter-chip" data-subcat="postres" onclick="selectSubcat(this)">
-          <span><span class="chip-icon">🍮</span>Postres</span>
-          <span class="chip-count" id="cnt-postres">0</span>
-        </div>
-        <div class="filter-chip" data-subcat="huevos" onclick="selectSubcat(this)">
-          <span><span class="chip-icon">🥚</span>Huevos</span>
-          <span class="chip-count" id="cnt-huevos">0</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- Rango de precio -->
-    <div class="filter-group">
-      <div class="filter-group-title">
-        Precio
-        <button class="filter-clear" onclick="clearFilter('price')">limpiar</button>
-      </div>
-      <div class="price-range">
-        <div class="price-inputs">
-          <div class="price-input-wrap">
-            <span>$</span>
-            <input type="number" id="priceMin" placeholder="Mín" min="0"/>
-          </div>
-          <div class="price-input-wrap">
-            <span>$</span>
-            <input type="number" id="priceMax" placeholder="Máx" min="0"/>
-          </div>
-        </div>
-        <button class="apply-price-btn" onclick="applyFilters()">Aplicar precio</button>
-      </div>
-    </div>
-
-    <!-- Ofertas / badges -->
-    <div class="filter-group">
-      <div class="filter-group-title">
-        Promociones
-        <button class="filter-clear" onclick="clearFilter('badge')">limpiar</button>
-      </div>
-      <div class="filter-badges">
-        <button class="filter-badge-btn offer" id="badgeOffer" onclick="toggleBadge('offer')">🔖 Ofertas</button>
-        <button class="filter-badge-btn new"   id="badgeNew"   onclick="toggleBadge('new')">✨ Nuevos</button>
-        <button class="filter-badge-btn hot"   id="badgeHot"   onclick="toggleBadge('hot')">🔥 Hot</button>
-      </div>
-    </div>
-
-    <!-- Disponibilidad -->
-    <div class="filter-group">
-      <div class="filter-group-title">Disponibilidad</div>
-      <div class="filter-chips">
-        <div class="filter-chip active" data-stock="all" onclick="selectStock(this)">
-          <span>Todo</span>
-        </div>
-        <div class="filter-chip" data-stock="in" onclick="selectStock(this)">
-          <span>✅ En stock</span>
-        </div>
-      </div>
-    </div>
-
-    <button class="reset-all-btn" onclick="resetAllFilters()">↺ Limpiar todos los filtros</button>
-  </aside>
-
-  <!-- ÁREA DE PRODUCTOS -->
-  <div class="products-area">
-    <div class="products-toolbar">
-      <div class="active-filters" id="activeFilterTags"></div>
-    </div>
-    <div class="products-grid" id="productsGrid">
-      <!-- skeletons mientras carga -->
-      <div class="skeleton"><div class="sk-img"></div><div class="sk-body"><div class="sk-line"></div><div class="sk-line short"></div><div class="sk-line price"></div></div></div>
-      <div class="skeleton"><div class="sk-img"></div><div class="sk-body"><div class="sk-line"></div><div class="sk-line short"></div><div class="sk-line price"></div></div></div>
-      <div class="skeleton"><div class="sk-img"></div><div class="sk-body"><div class="sk-line"></div><div class="sk-line short"></div><div class="sk-line price"></div></div></div>
-      <div class="skeleton"><div class="sk-img"></div><div class="sk-body"><div class="sk-line"></div><div class="sk-line short"></div><div class="sk-line price"></div></div></div>
-      <div class="skeleton"><div class="sk-img"></div><div class="sk-body"><div class="sk-line"></div><div class="sk-line short"></div><div class="sk-line price"></div></div></div>
-      <div class="skeleton"><div class="sk-img"></div><div class="sk-body"><div class="sk-line"></div><div class="sk-line short"></div><div class="sk-line price"></div></div></div>
-      <div class="skeleton"><div class="sk-img"></div><div class="sk-body"><div class="sk-line"></div><div class="sk-line short"></div><div class="sk-line price"></div></div></div>
-      <div class="skeleton"><div class="sk-img"></div><div class="sk-body"><div class="sk-line"></div><div class="sk-line short"></div><div class="sk-line price"></div></div></div>
-    </div>
+  <div class="content-note">
+    Este texto es un modelo general para comercio electrónico en Argentina, pensado para arrancar. Te recomendamos reemplazarlo por la versión definitiva que te prepare tu contador/abogado, con los datos exactos de tu negocio.
   </div>
 
-</div><!-- /cat-layout -->
+  <h2>1. Aceptación de los términos</h2>
+  <p>Al acceder y usar Lobo24 aceptás estos Términos de Uso. Si no estás de acuerdo con alguna parte, te pedimos que no utilices el sitio.</p>
+
+  <h2>2. Objeto</h2>
+  <p>Lobo24 es una tienda online de minimarket que ofrece productos de almacén, bebidas, snacks, higiene, limpieza, congelados, lácteos, panadería, mascotas, perfumería y bazar, con entrega a domicilio o retiro en sucursal en Resistencia, Chaco.</p>
+
+  <h2>3. Cuenta de usuario</h2>
+  <p>Para comprar podés crear una cuenta o completar tus datos como invitado. Sos responsable de mantener la confidencialidad de tu contraseña y de la actividad realizada desde tu cuenta.</p>
+
+  <h2>4. Precios y stock</h2>
+  <p>Los precios se muestran en pesos argentinos e incluyen los impuestos vigentes. El stock se actualiza en tiempo real, pero puede haber diferencias puntuales; si un producto no está disponible tras confirmar tu pedido, te contactaremos para ofrecerte un reemplazo o el reintegro correspondiente.</p>
+
+  <h2>5. Métodos de pago</h2>
+  <p>Aceptamos efectivo, transferencia bancaria y Mercado Pago. Los pedidos con Mercado Pago quedan confirmados una vez acreditado el pago.</p>
+
+  <h2>6. Entrega y retiro en sucursal</h2>
+  <p>El envío a domicilio está disponible dentro de un radio de cobertura definido desde nuestro local; la dirección se valida automáticamente al finalizar la compra. También podés optar por retirar tu pedido en el local.</p>
+
+  <h2>7. Venta de bebidas alcohólicas</h2>
+  <p>De acuerdo con la <strong>Ley 24.788</strong>, la venta de bebidas alcohólicas está prohibida a menores de 18 años. Nos reservamos el derecho de solicitar verificación de edad al momento de la entrega y de no completar la venta si no se acredita la mayoría de edad. Bebé con moderación.</p>
+
+  <h2>8. Derecho de arrepentimiento</h2>
+  <p>Conforme a la Ley 24.240 de Defensa del Consumidor, tenés derecho a revocar tu aceptación dentro de los 10 días corridos desde la entrega, salvo en productos perecederos, ya abiertos o consumidos. Para ejercerlo, contactanos por los medios indicados en la página de <a href="contacto.html">Contacto</a>.</p>
+
+  <h2>9. Responsabilidad</h2>
+  <p>Hacemos nuestro mejor esfuerzo para que la información del sitio sea precisa, pero no garantizamos la ausencia total de errores. No nos responsabilizamos por daños derivados del uso indebido de los productos.</p>
+
+  <h2>10. Modificaciones</h2>
+  <p>Podemos actualizar estos Términos en cualquier momento; la versión vigente es siempre la publicada en esta página.</p>
+
+  <h2>11. Ley aplicable y jurisdicción</h2>
+  <p>Estos Términos se rigen por las leyes de la República Argentina. Para cualquier controversia, las partes se someten a los tribunales competentes de Resistencia, Chaco.</p>
+
+  <h2>12. Contacto</h2>
+  <p>Ante cualquier consulta sobre estos Términos, escribinos desde la página de <a href="contacto.html">Contacto</a>.</p>
+</main>
 
 <!-- FOOTER -->
 <footer>
@@ -289,7 +159,7 @@
         <i class="fas fa-cog"></i> Panel de Administración
       </a>
     </div>
-    
+
     <span>© 2025 Lobo24 — Todos los derechos reservados</span>
     <span>🐺 Abierto 24/7 · Siempre para vos</span>
   </div>
@@ -370,7 +240,6 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebas
 import {
   getFirestore,
   doc,
-  collection,
   onSnapshot,
   setDoc,
   getDoc,
@@ -398,6 +267,7 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
 
+/* Exponer helpers globales */
 window.fbAuth = {
   auth,
   createUserWithEmailAndPassword,
@@ -413,6 +283,7 @@ window.fbSendPasswordReset = (email) => sendPasswordResetEmail(auth, email);
 window.fbUpdateDoc = updateDoc;
 window.fbDoc = (...args) => doc(db, ...args);
 
+/* Topbar */
 onSnapshot(doc(db, 'config', 'general'), snap => {
   if (!snap.exists()) return;
   const d = snap.data();
@@ -420,20 +291,7 @@ onSnapshot(doc(db, 'config', 'general'), snap => {
   if (topbar && d.topbar) topbar.innerHTML = d.topbar;
 });
 
-onSnapshot(collection(db, 'lacteos'), snap => {
-  const prods = snap.docs.map(d => ({
-    docId: d.id,
-    coleccion: 'lacteos',
-    ...d.data()
-  }));
-
-  window._lacteosAll = prods;
-
-  if (typeof updateHeroStats === 'function') updateHeroStats(prods);
-  if (typeof updateSubcatCounts === 'function') updateSubcatCounts(prods);
-  if (typeof applyFilters === 'function') applyFilters();
-});
-
+/* Auth state */
 onAuthStateChanged(auth, async (user) => {
   const container = document.getElementById('userStatusContainer');
   if (!container) return;
@@ -463,6 +321,5 @@ onAuthStateChanged(auth, async (user) => {
 
 <!-- ══ LÓGICA DE LA PÁGINA ══ -->
 <script src="js/app-global.js"></script>
-<script src="js/lacteos.js"></script>
 </body>
 </html>

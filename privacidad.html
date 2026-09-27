@@ -3,38 +3,24 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Lobo24 — Lácteos</title>
-  <meta name="description" content="Lácteos online en Lobo24: leche, quesos, yogures y más, con entrega rápida en Resistencia, Chaco.">
-  <meta property="og:title" content="Lobo24 — Lácteos">
-  <meta property="og:description" content="Lácteos online en Lobo24: leche, quesos, yogures y más, con entrega rápida en Resistencia, Chaco.">
+  <title>Lobo24 — Política de Privacidad</title>
+  <meta name="description" content="Cómo Lobo24 recolecta, usa y protege tus datos personales al comprar en nuestro minimarket online.">
+  <meta property="og:title" content="Lobo24 — Política de Privacidad">
+  <meta property="og:description" content="Cómo Lobo24 recolecta, usa y protege tus datos personales al comprar en nuestro minimarket online.">
   <meta property="og:image" content="https://marketlobo24.com.ar/imagenes/og-image.png">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
-  <meta property="og:url" content="https://marketlobo24.com.ar/lacteos.html">
+  <meta property="og:url" content="https://marketlobo24.com.ar/privacidad.html">
   <meta property="og:type" content="website">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="Lobo24 — Lácteos">
-  <meta name="twitter:description" content="Lácteos online en Lobo24: leche, quesos, yogures y más, con entrega rápida en Resistencia, Chaco.">
+  <meta name="twitter:title" content="Lobo24 — Política de Privacidad">
+  <meta name="twitter:description" content="Cómo Lobo24 recolecta, usa y protege tus datos personales al comprar en nuestro minimarket online.">
   <meta name="twitter:image" content="https://marketlobo24.com.ar/imagenes/og-image.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="stylesheet" href="css/styles.css?v=2"/>
-  <link rel="stylesheet" href="css/secciones.css?v=2"/>
-  <style>
-    .cat-hero::before {
-      content: '🧀';
-      position: absolute;
-      right: 80px;
-      top: 50%;
-      transform: translateY(-50%);
-      font-size: 160px;
-      opacity: .06;
-      line-height: 1;
-      pointer-events: none;
-    }
-  </style>
   <link rel="icon" type="image/png" href="imagenes/iconoLobo24.png">
   <link rel="apple-touch-icon" href="imagenes/apple-touch-icon.png">
   <link rel="manifest" href="/manifest.json">
@@ -76,7 +62,7 @@
 <div class="cat-nav-wrap">
   <button class="cat-nav-arrow" onclick="scrollCatNav(-1)" aria-label="Ver categorías anteriores">‹</button>
   <div class="cat-nav">
-  <a href="#" class="active"><span class="icon">⭐</span> Destacados</a>
+  <a href="index.html"><span class="icon">⭐</span> Destacados</a>
   <a href="bebidas.html"><span class="icon">🥤</span> Bebidas</a>
   <a href="snacks.html"><span class="icon">🍪</span> Snacks</a>
   <a href="almacen.html"><span class="icon">🍝</span> Almacén</a>
@@ -93,166 +79,47 @@
   <button class="cat-nav-arrow" onclick="scrollCatNav(1)" aria-label="Ver más categorías">›</button>
 </div>
 
-<!-- HERO CATEGORÍA -->
-<div class="cat-hero">
-  <div class="cat-hero-inner">
-    <div class="cat-breadcrumb">
-      <a href="index.html">Inicio</a>
-      <span>/</span>
-      <span>Lácteos</span>
-    </div>
-    <h1>SECCIÓN DE <em>LÁCTEOS</em></h1>
-    <p>Leches, quesos, yogures, mantecas y derivados. Productos frescos y de la mejor calidad para tu mesa.</p>
-    <div class="cat-hero-stats">
-      <div class="cat-hero-stat">
-        <strong id="heroTotalProds">—</strong>
-        productos
-      </div>
-      <div class="cat-hero-stat">
-        <strong id="heroInStock">—</strong>
-        en stock
-      </div>
-      <div class="cat-hero-stat">
-        <strong id="heroSubcats">6</strong>
-        subcategorías
-      </div>
-    </div>
-  </div>
-</div>
+<main class="content-page">
+  <h1>POLÍTICA DE PRIVACIDAD</h1>
+  <p class="content-updated">Última actualización: septiembre de 2026</p>
 
-<!-- BARRA DE BÚSQUEDA DE CATEGORÍA -->
-<div class="cat-search-bar">
-  <div class="cat-search-inner">
-    <div class="cat-search-input-wrap">
-      <input type="text" id="catSearch" placeholder="Buscar en Lácteos... ej: leche, queso, yogur, manteca"/>
-      <span class="search-icon">🔍</span>
-    </div>
-    <select class="cat-sort-select" id="sortSelect" onchange="applyFilters()">
-      <option value="default">Ordenar por: Relevancia</option>
-      <option value="price-asc">Precio: menor a mayor</option>
-      <option value="price-desc">Precio: mayor a menor</option>
-      <option value="name-asc">Nombre: A → Z</option>
-      <option value="stock-desc">Mayor stock primero</option>
-    </select>
-    <span class="results-count" id="resultsCount">
-      <strong id="countNum">0</strong> productos
-    </span>
-  </div>
-</div>
 
-<!-- LAYOUT: FILTROS + PRODUCTOS -->
-<div class="cat-layout">
+  <h2>1. Responsable del tratamiento</h2>
+  <p>Lobo24 es responsable de los datos personales que nos brindás a través de este sitio.</p>
 
-  <!-- SIDEBAR FILTROS -->
-  <aside class="filters-sidebar">
+  <h2>2. Qué datos recolectamos</h2>
+  <ul>
+    <li>Datos de cuenta: nombre, email, teléfono y contraseña (encriptada).</li>
+    <li>Datos de pedido: dirección de entrega, productos comprados, método de pago elegido.</li>
+    <li>Datos de uso: preferencias como el modo claro/oscuro y el contenido de tu carrito.</li>
+  </ul>
 
-    <!-- Subcategorías -->
-    <div class="filter-group">
-      <div class="filter-group-title">
-        Categorías
-        <button class="filter-clear" onclick="clearFilter('subcat')">limpiar</button>
-      </div>
-      <div class="filter-chips" id="subcatFilters">
-        <div class="filter-chip active" data-subcat="all" onclick="selectSubcat(this)">
-          <span><span class="chip-icon">🛒</span>Todas</span>
-          <span class="chip-count" id="cnt-all">0</span>
-        </div>
-        <div class="filter-chip" data-subcat="leches" onclick="selectSubcat(this)">
-          <span><span class="chip-icon">🥛</span>Leches</span>
-          <span class="chip-count" id="cnt-leches">0</span>
-        </div>
-        <div class="filter-chip" data-subcat="quesos" onclick="selectSubcat(this)">
-          <span><span class="chip-icon">🧀</span>Quesos</span>
-          <span class="chip-count" id="cnt-quesos">0</span>
-        </div>
-        <div class="filter-chip" data-subcat="yogures" onclick="selectSubcat(this)">
-          <span><span class="chip-icon">🍶</span>Yogures</span>
-          <span class="chip-count" id="cnt-yogures">0</span>
-        </div>
-        <div class="filter-chip" data-subcat="manteca" onclick="selectSubcat(this)">
-          <span><span class="chip-icon">🧈</span>Manteca y crema</span>
-          <span class="chip-count" id="cnt-manteca">0</span>
-        </div>
-        <div class="filter-chip" data-subcat="postres" onclick="selectSubcat(this)">
-          <span><span class="chip-icon">🍮</span>Postres</span>
-          <span class="chip-count" id="cnt-postres">0</span>
-        </div>
-        <div class="filter-chip" data-subcat="huevos" onclick="selectSubcat(this)">
-          <span><span class="chip-icon">🥚</span>Huevos</span>
-          <span class="chip-count" id="cnt-huevos">0</span>
-        </div>
-      </div>
-    </div>
+  <h2>3. Para qué usamos tus datos</h2>
+  <ul>
+    <li>Procesar y entregar tus pedidos.</li>
+    <li>Validar que tu dirección esté dentro de la zona de cobertura.</li>
+    <li>Gestionar tu cuenta y el programa de puntos Lobo24.</li>
+    <li>Comunicarnos con vos sobre el estado de tu compra.</li>
+  </ul>
 
-    <!-- Rango de precio -->
-    <div class="filter-group">
-      <div class="filter-group-title">
-        Precio
-        <button class="filter-clear" onclick="clearFilter('price')">limpiar</button>
-      </div>
-      <div class="price-range">
-        <div class="price-inputs">
-          <div class="price-input-wrap">
-            <span>$</span>
-            <input type="number" id="priceMin" placeholder="Mín" min="0"/>
-          </div>
-          <div class="price-input-wrap">
-            <span>$</span>
-            <input type="number" id="priceMax" placeholder="Máx" min="0"/>
-          </div>
-        </div>
-        <button class="apply-price-btn" onclick="applyFilters()">Aplicar precio</button>
-      </div>
-    </div>
+  <h2>4. Con quién compartimos datos</h2>
+  <p>Usamos Firebase (Google) para la autenticación y el almacenamiento de datos de la tienda, y Mercado Pago para procesar pagos. Estos proveedores acceden solo a los datos necesarios para prestar su servicio y tienen sus propias políticas de privacidad.</p>
 
-    <!-- Ofertas / badges -->
-    <div class="filter-group">
-      <div class="filter-group-title">
-        Promociones
-        <button class="filter-clear" onclick="clearFilter('badge')">limpiar</button>
-      </div>
-      <div class="filter-badges">
-        <button class="filter-badge-btn offer" id="badgeOffer" onclick="toggleBadge('offer')">🔖 Ofertas</button>
-        <button class="filter-badge-btn new"   id="badgeNew"   onclick="toggleBadge('new')">✨ Nuevos</button>
-        <button class="filter-badge-btn hot"   id="badgeHot"   onclick="toggleBadge('hot')">🔥 Hot</button>
-      </div>
-    </div>
+  <h2>5. Cookies y almacenamiento local</h2>
+  <p>Usamos tecnologías de almacenamiento del navegador para recordar tu sesión, tu carrito y tus preferencias. Los detalles están en nuestra <a href="cookies.html">Política de Cookies</a>.</p>
 
-    <!-- Disponibilidad -->
-    <div class="filter-group">
-      <div class="filter-group-title">Disponibilidad</div>
-      <div class="filter-chips">
-        <div class="filter-chip active" data-stock="all" onclick="selectStock(this)">
-          <span>Todo</span>
-        </div>
-        <div class="filter-chip" data-stock="in" onclick="selectStock(this)">
-          <span>✅ En stock</span>
-        </div>
-      </div>
-    </div>
+  <h2>6. Tus derechos</h2>
+  <p>De acuerdo con la Ley 25.326 de Protección de Datos Personales, podés solicitar acceso, rectificación, actualización o supresión de tus datos personales escribiéndonos desde la página de <a href="contacto.html">Contacto</a>. La Agencia de Acceso a la Información Pública, en su carácter de Órgano de Control de la Ley N° 25.326, tiene la atribución de atender denuncias y reclamos que interpongan quienes resulten afectados en sus derechos.</p>
 
-    <button class="reset-all-btn" onclick="resetAllFilters()">↺ Limpiar todos los filtros</button>
-  </aside>
+  <h2>7. Seguridad</h2>
+  <p>Tomamos medidas razonables para proteger tus datos, aunque ningún sistema es 100% infalible. Tu contraseña nunca se almacena en texto plano.</p>
 
-  <!-- ÁREA DE PRODUCTOS -->
-  <div class="products-area">
-    <div class="products-toolbar">
-      <div class="active-filters" id="activeFilterTags"></div>
-    </div>
-    <div class="products-grid" id="productsGrid">
-      <!-- skeletons mientras carga -->
-      <div class="skeleton"><div class="sk-img"></div><div class="sk-body"><div class="sk-line"></div><div class="sk-line short"></div><div class="sk-line price"></div></div></div>
-      <div class="skeleton"><div class="sk-img"></div><div class="sk-body"><div class="sk-line"></div><div class="sk-line short"></div><div class="sk-line price"></div></div></div>
-      <div class="skeleton"><div class="sk-img"></div><div class="sk-body"><div class="sk-line"></div><div class="sk-line short"></div><div class="sk-line price"></div></div></div>
-      <div class="skeleton"><div class="sk-img"></div><div class="sk-body"><div class="sk-line"></div><div class="sk-line short"></div><div class="sk-line price"></div></div></div>
-      <div class="skeleton"><div class="sk-img"></div><div class="sk-body"><div class="sk-line"></div><div class="sk-line short"></div><div class="sk-line price"></div></div></div>
-      <div class="skeleton"><div class="sk-img"></div><div class="sk-body"><div class="sk-line"></div><div class="sk-line short"></div><div class="sk-line price"></div></div></div>
-      <div class="skeleton"><div class="sk-img"></div><div class="sk-body"><div class="sk-line"></div><div class="sk-line short"></div><div class="sk-line price"></div></div></div>
-      <div class="skeleton"><div class="sk-img"></div><div class="sk-body"><div class="sk-line"></div><div class="sk-line short"></div><div class="sk-line price"></div></div></div>
-    </div>
-  </div>
+  <h2>8. Menores de edad</h2>
+  <p>La compra de bebidas alcohólicas no está permitida a menores de 18 años, conforme a la Ley 24.788.</p>
 
-</div><!-- /cat-layout -->
+  <h2>9. Cambios a esta política</h2>
+  <p>Podemos actualizar esta política; la versión vigente es siempre la publicada en esta página.</p>
+</main>
 
 <!-- FOOTER -->
 <footer>
@@ -289,7 +156,7 @@
         <i class="fas fa-cog"></i> Panel de Administración
       </a>
     </div>
-    
+
     <span>© 2025 Lobo24 — Todos los derechos reservados</span>
     <span>🐺 Abierto 24/7 · Siempre para vos</span>
   </div>
@@ -370,7 +237,6 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebas
 import {
   getFirestore,
   doc,
-  collection,
   onSnapshot,
   setDoc,
   getDoc,
@@ -398,6 +264,7 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
 
+/* Exponer helpers globales */
 window.fbAuth = {
   auth,
   createUserWithEmailAndPassword,
@@ -413,6 +280,7 @@ window.fbSendPasswordReset = (email) => sendPasswordResetEmail(auth, email);
 window.fbUpdateDoc = updateDoc;
 window.fbDoc = (...args) => doc(db, ...args);
 
+/* Topbar */
 onSnapshot(doc(db, 'config', 'general'), snap => {
   if (!snap.exists()) return;
   const d = snap.data();
@@ -420,20 +288,7 @@ onSnapshot(doc(db, 'config', 'general'), snap => {
   if (topbar && d.topbar) topbar.innerHTML = d.topbar;
 });
 
-onSnapshot(collection(db, 'lacteos'), snap => {
-  const prods = snap.docs.map(d => ({
-    docId: d.id,
-    coleccion: 'lacteos',
-    ...d.data()
-  }));
-
-  window._lacteosAll = prods;
-
-  if (typeof updateHeroStats === 'function') updateHeroStats(prods);
-  if (typeof updateSubcatCounts === 'function') updateSubcatCounts(prods);
-  if (typeof applyFilters === 'function') applyFilters();
-});
-
+/* Auth state */
 onAuthStateChanged(auth, async (user) => {
   const container = document.getElementById('userStatusContainer');
   if (!container) return;
@@ -463,6 +318,5 @@ onAuthStateChanged(auth, async (user) => {
 
 <!-- ══ LÓGICA DE LA PÁGINA ══ -->
 <script src="js/app-global.js"></script>
-<script src="js/lacteos.js"></script>
 </body>
 </html>
