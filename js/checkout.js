@@ -110,10 +110,15 @@ function handleMpReturn() {
 async function showMpReturnConfirmation(orderId, mpStatus) {
   let pedido = null;
   try {
-    if (orderId && window._db && window._fbQuery) {
+    // Las reglas solo dejan leer los pedidos propios, así que la consulta
+    // tiene que filtrar también por la cuenta: sin ese filtro Firestore la
+    // rechaza entera. Un invitado no puede leer el pedido; ve la
+    // confirmación con el número que vuelve en la URL.
+    if (orderId && window._db && window._fbQuery && window._currentUser) {
       const q = window._fbQuery(
         window._fbCollection(window._db, 'pedidos'),
-        window._fbWhere('orderId', '==', orderId)
+        window._fbWhere('orderId', '==', orderId),
+        window._fbWhere('userId', '==', window._currentUser.uid)
       );
       const snap = await window._fbGetDocs(q);
       if (!snap.empty) pedido = snap.docs[0].data();
@@ -801,6 +806,16 @@ function updatePoints(val) {
   renderSummary();
 }
 
+// El backend identifica al cliente por su sesión de Firebase (el token va
+// en el header), no por un userId escrito en el pedido.
+async function backendHeaders() {
+  const headers = { 'Content-Type': 'application/json' };
+  if (window._currentUser) {
+    headers.Authorization = 'Bearer ' + await window._currentUser.getIdToken();
+  }
+  return headers;
+}
+
 async function submitStep4() {
   if (!STATE.payment) {
     showToast('⚠️ Seleccioná un método de pago', 'warn');
@@ -825,30 +840,6 @@ async function submitStep4() {
     // Calcular puntos ganados (1 punto cada $100 gastados en productos, sin contar envío)
     const pointsEarned = Math.floor(getSubtotal() / 100);
     
-    const orderData = {
-      orderId,
-      userId: window._currentUser?.uid || null,
-      contact: STATE.contact,
-      items: STATE.cart.map(i => ({
-        docId: i.docId,
-        coleccion: i.coleccion,
-        name: i.name,
-        brand: i.brand,
-        price: precioSegunPago(i),
-        qty: i.qty,
-        subtotal: precioSegunPago(i) * i.qty,
-        stockOriginal: i.stock
-      })),
-      subtotal: getSubtotal(),
-      delivery: STATE.delivery,
-      deliveryCost: STATE.deliveryCost,
-      pointsUsed: STATE.pointsUsed,
-      pointsEarned: pointsEarned,
-      payment: STATE.payment,
-      total: totalAmount,
-      status: STATE.payment === 'mp' ? 'pending_payment' : 'confirmed',
-      createdAt: new Date()
-    };
     STATE.lastOrder = {
       orderId,
       contact: { ...STATE.contact },
@@ -878,18 +869,13 @@ async function submitStep4() {
     if (STATE.payment === 'mp') {
       showToast('⏳ Conectando con Mercado Pago...', 'ok');
 
-      // El pedido se guarda acá (status pending_payment); el backend lo
-      // corrige con los valores reales al validar contra Firestore en
-      // /crear-preferencia, y recién se confirma cuando el webhook de MP
-      // avisa que el pago se acreditó.
-      if (window._fbAddDoc && window._db) {
-        const ordersRef = window._fbCollection(window._db, 'pedidos');
-        await window._fbAddDoc(ordersRef, orderData);
-      }
-
+      // El pedido lo guarda el backend (status pending_payment) con los
+      // valores validados contra Firestore y su propio número de pedido, y
+      // recién se confirma cuando el webhook de MP avisa que el pago se
+      // acreditó.
       const mpRes = await fetch('https://lobo24-backend-zibj.onrender.com/crear-preferencia', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: await backendHeaders(),
         body: JSON.stringify({
           items: cartItemsParaMP,
           customerData: {
@@ -898,11 +884,9 @@ async function submitStep4() {
             phone: STATE.contact.phone
           },
           orderData: {
-            orderId:      orderId,
-            orderNumber:  orderId,
             delivery:     STATE.delivery,
             pointsUsed:   STATE.pointsUsed,
-            userId:       window._currentUser?.uid || null,
+            contact:      STATE.contact,
             address: {
               street:   STATE.contact.street,
               city:     STATE.contact.city,
@@ -916,12 +900,15 @@ async function submitStep4() {
       });
 
       if (!mpRes.ok) {
-        const errBody = await mpRes.text();
+        const errBody = await mpRes.json().catch(() => ({}));
         console.error('MP backend error:', errBody);
-        throw new Error('Error al crear la preferencia de Mercado Pago');
+        throw new Error(errBody.error || 'Error al crear la preferencia de Mercado Pago');
       }
 
       const mpData = await mpRes.json();
+
+      STATE.orderId = mpData.orderId;
+      STATE.lastOrder.orderId = mpData.orderId;
 
       // Produccion: usar init_point. Para volver a TEST cambiar a sandbox_init_point
       const mpUrl = mpData.init_point || mpData.sandbox_init_point;
@@ -932,7 +919,7 @@ async function submitStep4() {
 
       // NO limpiar el carrito todavía.
       // Se limpia recién cuando el pago se confirma o cuando el usuario finaliza por transferencia/efectivo.
-      showToast('🎉 Pedido #' + orderId + ' registrado. Te redirigimos a Mercado Pago.', 'success');
+      showToast('🎉 Pedido #' + mpData.orderId + ' registrado. Te redirigimos a Mercado Pago.', 'success');
 
       // Redirigir al checkout de MP
       window.location.href = mpUrl;
@@ -951,15 +938,14 @@ async function submitStep4() {
         // desarrollador.
         const confirmRes = await fetch('https://lobo24-backend-zibj.onrender.com/confirmar-pedido-manual', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: await backendHeaders(),
           body: JSON.stringify({
             orderId,
             items: cartItemsParaMP,
             contact: STATE.contact,
             delivery: STATE.delivery,
             payment: STATE.payment,
-            pointsUsed: STATE.pointsUsed,
-            userId: window._currentUser?.uid || null
+            pointsUsed: STATE.pointsUsed
           })
         });
 
@@ -970,8 +956,9 @@ async function submitStep4() {
 
         const confirmData = await confirmRes.json();
 
+        STATE.orderId = confirmData.orderId;
         STATE.lastOrder = {
-          orderId,
+          orderId: confirmData.orderId,
           contact: { ...STATE.contact },
           delivery: STATE.delivery,
           deliveryCost: confirmData.deliveryCost,
@@ -985,7 +972,7 @@ async function submitStep4() {
         STATE.cart = [];
         localStorage.removeItem('lobo24_cart');
         // Los puntos solo se acreditan con sesión iniciada.
-        showToast('Pedido #' + orderId + ' realizado con éxito.' + (window._currentUser ? ' Ganaste ' + confirmData.pointsEarned + ' puntos.' : ''), 'success');
+        showToast('Pedido #' + confirmData.orderId + ' realizado con éxito.' + (window._currentUser ? ' Ganaste ' + confirmData.pointsEarned + ' puntos.' : ''), 'success');
         renderStep(5);
       }
 

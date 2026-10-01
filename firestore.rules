@@ -109,30 +109,26 @@ service cloud.firestore {
       allow create: if isOwner(userId) &&
                      request.resource.data.points == 0;
 
-      // El dueño puede editar su propio perfil y sus puntos.
-      // TODO: mover el cálculo de puntos ganados/usados al backend
-      // para que el cliente no pueda escribir cualquier valor.
+      // El dueño puede editar su propio perfil, pero no sus puntos: el
+      // saldo solo lo escribe el backend (Admin SDK, que no pasa por
+      // estas reglas) al confirmar un pedido, y el admin desde el panel.
       allow update: if isAdmin() ||
                      (isOwner(userId) &&
                       request.resource.data.diff(resource.data)
                         .affectedKeys()
-                        .hasOnly(['name', 'phone', 'email', 'points']));
+                        .hasOnly(['name', 'phone', 'email']));
 
       allow delete: if isAdmin();
     }
 
     // ─── Pedidos ───────────────────────────────────────────────
     match /pedidos/{pedidoId} {
-      // Se permite crear sin login (compra como invitado), pero con
-      // una validación mínima de forma. La verdad de precios/total
-      // debería validarse en el backend antes de cobrar (ver
-      // webVentas-backend/server.js: /crear-preferencia confía en
-      // el total que manda el cliente).
-      allow create: if request.resource.data.keys().hasAll(
-                      ['orderId', 'contact', 'items', 'total', 'payment', 'status', 'createdAt']
-                    ) &&
-                    request.resource.data.total is number &&
-                    request.resource.data.total > 0;
+      // Los pedidos los crea solo el backend (/crear-preferencia y
+      // /confirmar-pedido-manual en webVentas-backend/server.js), con
+      // precios, puntos y cuenta ya validados. El navegador no puede
+      // crear ninguno: si pudiera, escribiría a mano el estado, los
+      // puntos o la cuenta del pedido.
+      allow create: if isAdmin();
 
       // Un cliente logueado puede ver SU historial de compras
       // (usuario.js filtra por where userId == auth.uid); el admin
