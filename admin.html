@@ -132,7 +132,7 @@
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
-import { getFirestore, doc, collection, onSnapshot, setDoc, addDoc, deleteDoc, updateDoc, getDocs } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
+import { getFirestore, doc, collection, onSnapshot, setDoc, addDoc, deleteDoc, updateDoc, getDocs, getCountFromServer } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-auth.js";
 
 const firebaseConfig = {
@@ -231,14 +231,22 @@ async function loadAll() {
     if (d.id === "sections") window.DATA.sections = d.data();
   });
 
-  // Inicializar DATA para cada colección
-  for (const collectionName of window.CATEGORY_COLLECTIONS) {
+  // Los productos de cada categoría se cargan recién al abrir su sección
+  // (ensureCategoryLoaded). Antes se leían las 11 categorías enteras dos
+  // veces en cada carga del panel (acá y en los listeners), unas 2.000
+  // lecturas de Firestore de la cuota diaria gratuita. Para el panel de
+  // control alcanza con la cantidad: una lectura por categoría.
+  await Promise.all(window.CATEGORY_COLLECTIONS.map(async (collectionName) => {
     if (!window.DATA[collectionName]) {
       window.DATA[collectionName] = [];
     }
-    const snap = await getDocs(collection(db, collectionName));
-    window.DATA[collectionName] = snap.docs.map((d) => ({ docId: d.id, ...d.data() }));
-  }
+    try {
+      const snap = await getCountFromServer(collection(db, collectionName));
+      window.CATEGORY_COUNTS[collectionName] = snap.data().count;
+    } catch (error) {
+      console.error("No se pudo contar " + collectionName + ":", error);
+    }
+  }));
 
   setupRealtimeListeners();
   document.getElementById("adminLoading").classList.add("fade");
@@ -246,17 +254,27 @@ async function loadAll() {
   render("dashboard");
 }
 
-function setupRealtimeListeners() {
-  // Listener para cada colección de categorías
-  for (const collectionName of window.CATEGORY_COLLECTIONS) {
-    onSnapshot(collection(db, collectionName), (snap) => {
-      window.DATA[collectionName] = snap.docs.map((d) => ({ docId: d.id, ...d.data() }));
-      if (window.currentPage === collectionName && typeof window.render === "function") {
-        window.render(collectionName);
-      }
-    });
-  }
+// Listener de una categoría de productos, creado la primera vez que se abre
+// su sección (lo llama render() en admin-script.js).
+window.CATEGORY_COUNTS = {};
+window.CATEGORY_LOADED = {};
+const categoryListeners = new Set();
 
+window.ensureCategoryLoaded = function (collectionName) {
+  if (categoryListeners.has(collectionName)) return;
+  categoryListeners.add(collectionName);
+
+  onSnapshot(collection(db, collectionName), (snap) => {
+    window.DATA[collectionName] = snap.docs.map((d) => ({ docId: d.id, ...d.data() }));
+    window.CATEGORY_LOADED[collectionName] = true;
+    window.CATEGORY_COUNTS[collectionName] = snap.size;
+    if (window.currentPage === collectionName && typeof window.render === "function") {
+      window.render(collectionName);
+    }
+  });
+};
+
+function setupRealtimeListeners() {
   onSnapshot(collection(db, "users"), (snap) => {
   window.DATA.users = snap.docs.map(d => ({ docId: d.id, ...d.data() }));
 
@@ -300,6 +318,6 @@ onAuthStateChanged(auth, (user) => {
 });
 </script>
 
-<script src="js/admin-script.js?v=6"></script>
+<script src="js/admin-script.js?v=7"></script>
 </body>
 </html>
