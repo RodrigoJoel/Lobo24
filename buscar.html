@@ -3,18 +3,19 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Lobo24 — Panadería</title>
-  <meta name="description" content="Panadería online en Lobo24: pan, facturas, tostadas y más, con delivery 24hs en Resistencia, Chaco.">
-  <meta property="og:title" content="Lobo24 — Panadería">
-  <meta property="og:description" content="Panadería online en Lobo24: pan, facturas, tostadas y más, con delivery 24hs en Resistencia, Chaco.">
+  <title>Lobo24 — Buscar</title>
+  <meta name="description" content="Buscá cualquier producto de Lobo24: bebidas, snacks, almacén, limpieza y más, con delivery 24hs en Resistencia, Chaco.">
+  <meta name="robots" content="noindex, follow">
+  <meta property="og:title" content="Lobo24 — Buscar">
+  <meta property="og:description" content="Buscá cualquier producto de Lobo24: bebidas, snacks, almacén, limpieza y más, con delivery 24hs en Resistencia, Chaco.">
   <meta property="og:image" content="https://marketlobo24.com.ar/imagenes/og-image.png">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
-  <meta property="og:url" content="https://marketlobo24.com.ar/panaderia.html">
+  <meta property="og:url" content="https://marketlobo24.com.ar/buscar.html">
   <meta property="og:type" content="website">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="Lobo24 — Panadería">
-  <meta name="twitter:description" content="Panadería online en Lobo24: pan, facturas, tostadas y más, con delivery 24hs en Resistencia, Chaco.">
+  <meta name="twitter:title" content="Lobo24 — Buscar">
+  <meta name="twitter:description" content="Buscá cualquier producto de Lobo24: bebidas, snacks, almacén, limpieza y más, con delivery 24hs en Resistencia, Chaco.">
   <meta name="twitter:image" content="https://marketlobo24.com.ar/imagenes/og-image.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -23,6 +24,7 @@
   <link rel="stylesheet" href="css/styles.css?v=2"/>
   <link rel="stylesheet" href="css/secciones.css?v=2"/>
   <link rel="stylesheet" href="css/rediseno.css?v=4"/>
+  <link rel="stylesheet" href="css/buscar.css?v=1"/>
   <link rel="icon" type="image/png" href="imagenes/iconoLobo24.png">
   <link rel="apple-touch-icon" href="imagenes/apple-touch-icon.png">
   <link rel="manifest" href="/manifest.json">
@@ -31,7 +33,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Lobo24">
 </head>
-<body class="page-categoria">
+<body class="page-buscar">
 
 <!-- TOPBAR -->
 <div class="topbar" id="elTopbar">
@@ -72,7 +74,7 @@
   <a href="limpieza.html"><i class="fa-solid fa-spray-can-sparkles"></i> Limpieza</a>
   <a href="congelados.html"><i class="fa-solid fa-snowflake"></i> Congelados</a>
   <a href="lacteos.html"><i class="fa-solid fa-cheese"></i> Lácteos</a>
-  <a href="panaderia.html" class="active" aria-current="page"><i class="fa-solid fa-bread-slice"></i> Panadería</a>
+  <a href="panaderia.html"><i class="fa-solid fa-bread-slice"></i> Panadería</a>
   <a href="mascotas.html"><i class="fa-solid fa-paw"></i> Mascotas</a>
   <a href="perfumeria.html"><i class="fa-solid fa-bottle-droplet"></i> Perfumería</a>
   <a href="bazar.html"><i class="fa-solid fa-utensils"></i> Bazar</a>
@@ -81,179 +83,41 @@
   <button class="cat-nav-arrow" onclick="scrollCatNav(1)" aria-label="Ver más categorías">›</button>
 </div>
 
-<!-- HERO CATEGORÍA -->
-<div class="cat-hero">
-  <i class="cat-hero-icon fa-solid fa-bread-slice" aria-hidden="true"></i>
+<!-- CABECERA DE LA BÚSQUEDA -->
+<div class="cat-hero search-hero">
+  <i class="cat-hero-icon fa-solid fa-magnifying-glass" aria-hidden="true"></i>
   <div class="cat-hero-inner">
     <div class="cat-breadcrumb">
       <a href="index.html">Inicio</a>
       <span>/</span>
-      <span>Panadería</span>
+      <span>Buscar</span>
     </div>
-    <h1>SECCIÓN DE <em>PANADERÍA</em></h1>
-    <p>Panes, facturas, tortillas, galletitas y productos de panificación recién horneados para disfrutar en casa.</p>
-    <div class="cat-hero-stats">
-      <div class="cat-hero-stat">
-        <strong id="heroTotalProds">—</strong>
-        productos
-      </div>
-      <div class="cat-hero-stat">
-        <strong id="heroInStock">—</strong>
-        en stock
-      </div>
-      <div class="cat-hero-stat">
-        <strong id="heroSubcats">7</strong>
-        subcategorías
-      </div>
-    </div>
+    <h1 id="searchTitle">Buscar en <em>Lobo24</em></h1>
+    <p id="searchSummary" aria-live="polite">Escribí arriba lo que necesitás: un producto, una marca o un tipo de producto.</p>
   </div>
 </div>
 
-<!-- BARRA DE BÚSQUEDA DE CATEGORÍA -->
-<div class="cat-search-bar">
-  <div class="cat-search-inner">
-    <div class="cat-search-input-wrap">
-      <input type="text" id="catSearch" placeholder="Buscar en Panadería... ej: pan, facturas, tortillas, galletas"/>
-      <span class="search-icon"><i class="fa-solid fa-magnifying-glass"></i></span>
-    </div>
-    <select class="cat-sort-select" id="sortSelect" onchange="applyFilters()">
+<!-- CATEGORÍAS CON RESULTADOS Y ORDEN -->
+<div class="cat-search-bar search-bar" id="searchBar" hidden>
+  <div class="search-bar-inner">
+    <div class="search-cats" id="searchCats" role="group" aria-label="Filtrar resultados por categoría"></div>
+    <select class="cat-sort-select" id="sortSelect" aria-label="Ordenar resultados" onchange="changeSearchSort(this.value)">
       <option value="default">Ordenar por: Relevancia</option>
       <option value="price-asc">Precio: menor a mayor</option>
       <option value="price-desc">Precio: mayor a menor</option>
       <option value="name-asc">Nombre: A → Z</option>
-      <option value="stock-desc">Mayor stock primero</option>
     </select>
-    <span class="results-count" id="resultsCount">
-      <strong id="countNum">0</strong> productos
-    </span>
   </div>
 </div>
 
-<!-- LAYOUT: FILTROS + PRODUCTOS -->
-<div class="cat-layout">
-
-  <!-- SIDEBAR FILTROS -->
-  <aside class="filters-sidebar">
-
-    <!-- Subcategorías -->
-    <div class="filter-group">
-      <div class="filter-group-title">
-        Categorías
-        <button class="filter-clear" onclick="clearFilter('subcat')">limpiar</button>
-      </div>
-      <div class="filter-chips" id="subcatFilters">
-        <div class="filter-chip active" data-subcat="all" onclick="selectSubcat(this)">
-          <span>Todas</span>
-          <span class="chip-count" id="cnt-all">0</span>
-        </div>
-        <div class="filter-chip" data-subcat="panes" onclick="selectSubcat(this)">
-          <span>Panes</span>
-          <span class="chip-count" id="cnt-panes">0</span>
-        </div>
-        <div class="filter-chip" data-subcat="facturas" onclick="selectSubcat(this)">
-          <span>Facturas</span>
-          <span class="chip-count" id="cnt-facturas">0</span>
-        </div>
-        <div class="filter-chip" data-subcat="tortillas" onclick="selectSubcat(this)">
-          <span>Tortillas</span>
-          <span class="chip-count" id="cnt-tortillas">0</span>
-        </div>
-        <div class="filter-chip" data-subcat="galletitas" onclick="selectSubcat(this)">
-          <span>Galletitas</span>
-          <span class="chip-count" id="cnt-galletitas">0</span>
-        </div>
-        <div class="filter-chip" data-subcat="budines" onclick="selectSubcat(this)">
-          <span>Budines</span>
-          <span class="chip-count" id="cnt-budines">0</span>
-        </div>
-        <div class="filter-chip" data-subcat="tostadas" onclick="selectSubcat(this)">
-          <span>Tostadas</span>
-          <span class="chip-count" id="cnt-tostadas">0</span>
-        </div>
-        <div class="filter-chip" data-subcat="prepizzas" onclick="selectSubcat(this)">
-          <span>Prepizzas</span>
-          <span class="chip-count" id="cnt-prepizzas">0</span>
-        </div>
-        <div class="filter-chip" data-subcat="sin-tacc" onclick="selectSubcat(this)">
-          <span>Sin TACC</span>
-          <span class="chip-count" id="cnt-sin-tacc">0</span>
-        </div>
-
-      </div>
-    </div>
-    <button class="filters-toggle" type="button" aria-expanded="false" aria-controls="filtersExtra" onclick="this.setAttribute('aria-expanded', this.closest('.filters-sidebar').classList.toggle('filters-open'))"><i class="fa-solid fa-sliders"></i>Más filtros<i class="fa-solid fa-chevron-down chev"></i></button>
-    <div class="filters-extra" id="filtersExtra">
-
-    <!-- Rango de precio -->
-    <div class="filter-group">
-      <div class="filter-group-title">
-        Precio
-        <button class="filter-clear" onclick="clearFilter('price')">limpiar</button>
-      </div>
-      <div class="price-range">
-        <div class="price-inputs">
-          <div class="price-input-wrap">
-            <span>$</span>
-            <input type="number" id="priceMin" placeholder="Mín" min="0"/>
-          </div>
-          <div class="price-input-wrap">
-            <span>$</span>
-            <input type="number" id="priceMax" placeholder="Máx" min="0"/>
-          </div>
-        </div>
-        <button class="apply-price-btn" onclick="applyFilters()">Aplicar precio</button>
-      </div>
-    </div>
-
-    <!-- Ofertas / badges -->
-    <div class="filter-group">
-      <div class="filter-group-title">
-        Promociones
-        <button class="filter-clear" onclick="clearFilter('badge')">limpiar</button>
-      </div>
-      <div class="filter-badges">
-        <button class="filter-badge-btn offer" id="badgeOffer" onclick="toggleBadge('offer')">Ofertas</button>
-        <button class="filter-badge-btn new"   id="badgeNew"   onclick="toggleBadge('new')">Nuevos</button>
-        <button class="filter-badge-btn hot"   id="badgeHot"   onclick="toggleBadge('hot')">Hot</button>
-      </div>
-    </div>
-
-    <!-- Disponibilidad -->
-    <div class="filter-group">
-      <div class="filter-group-title">Disponibilidad</div>
-      <div class="filter-chips">
-        <div class="filter-chip active" data-stock="all" onclick="selectStock(this)">
-          <span>Todo</span>
-        </div>
-        <div class="filter-chip" data-stock="in" onclick="selectStock(this)">
-          <span>En stock</span>
-        </div>
-      </div>
-    </div>
-
-    <button class="reset-all-btn" onclick="resetAllFilters()"><i class="fa-solid fa-rotate-left"></i>Limpiar todos los filtros</button>
-    </div><!-- /filters-extra -->
-  </aside>
-
-  <!-- ÁREA DE PRODUCTOS -->
+<!-- RESULTADOS -->
+<div class="cat-layout search-layout">
   <div class="products-area">
-    <div class="products-toolbar">
-      <div class="active-filters" id="activeFilterTags"></div>
-    </div>
-    <div class="products-grid" id="productsGrid">
-      <!-- skeletons mientras carga -->
-      <div class="skeleton"><div class="sk-img"></div><div class="sk-body"><div class="sk-line"></div><div class="sk-line short"></div><div class="sk-line price"></div></div></div>
-      <div class="skeleton"><div class="sk-img"></div><div class="sk-body"><div class="sk-line"></div><div class="sk-line short"></div><div class="sk-line price"></div></div></div>
-      <div class="skeleton"><div class="sk-img"></div><div class="sk-body"><div class="sk-line"></div><div class="sk-line short"></div><div class="sk-line price"></div></div></div>
-      <div class="skeleton"><div class="sk-img"></div><div class="sk-body"><div class="sk-line"></div><div class="sk-line short"></div><div class="sk-line price"></div></div></div>
-      <div class="skeleton"><div class="sk-img"></div><div class="sk-body"><div class="sk-line"></div><div class="sk-line short"></div><div class="sk-line price"></div></div></div>
-      <div class="skeleton"><div class="sk-img"></div><div class="sk-body"><div class="sk-line"></div><div class="sk-line short"></div><div class="sk-line price"></div></div></div>
-      <div class="skeleton"><div class="sk-img"></div><div class="sk-body"><div class="sk-line"></div><div class="sk-line short"></div><div class="sk-line price"></div></div></div>
-      <div class="skeleton"><div class="sk-img"></div><div class="sk-body"><div class="sk-line"></div><div class="sk-line short"></div><div class="sk-line price"></div></div></div>
-    </div>
+    <div class="search-state" id="searchState" hidden></div>
+    <div class="products-grid" id="productsGrid"></div>
+    <div class="load-more-wrap" id="loadMoreWrap"></div>
   </div>
-
-</div><!-- /cat-layout -->
+</div>
 
 <!-- FOOTER -->
 <footer>
@@ -423,20 +287,32 @@ onSnapshot(doc(db, 'config', 'general'), snap => {
   if (topbar && d.topbar) topbar.innerHTML = d.topbar;
 });
 
-/* Productos de panadería en tiempo real */
-onSnapshot(collection(db, 'panaderia'), snap => {
-  const prods = snap.docs.map(d => ({
-    docId: d.id,
-    coleccion: 'panaderia',
-    ...d.data()
-  }));
+/* Catálogo completo: las 11 categorías, igual que las carga cada página de
+   categoría. Se piden recién cuando hay algo para buscar (ver js/buscar.js). */
+const CATALOG_SLUGS = [
+  'bebidas', 'snacks', 'almacen', 'higiene', 'limpieza',
+  'congelados', 'lacteos', 'panaderia', 'mascotas',
+  'perfumeria', 'bazar'
+];
+let catalogStarted = false;
 
-  window._panaderiaAll = prods;
+window.startCatalog = () => {
+  if (catalogStarted) return;
+  catalogStarted = true;
 
-  if (typeof updateHeroStats === 'function') updateHeroStats(prods);
-  if (typeof updateSubcatCounts === 'function') updateSubcatCounts(prods);
-  if (typeof applyFilters === 'function') applyFilters();
-});
+  CATALOG_SLUGS.forEach(slug => {
+    onSnapshot(collection(db, slug), snap => {
+      window['_' + slug + 'All'] = snap.docs
+        .map(d => ({ docId: d.id, coleccion: slug, ...d.data() }));
+      if (typeof onCatalogUpdate === 'function') onCatalogUpdate(slug);
+    }, error => {
+      console.error('No se pudo cargar la categoría ' + slug + ':', error);
+      if (typeof onCatalogUpdate === 'function') onCatalogUpdate(slug, error);
+    });
+  });
+};
+
+if (window._catalogWanted) window.startCatalog();
 
 /* Auth state */
 onAuthStateChanged(auth, async (user) => {
@@ -467,7 +343,7 @@ onAuthStateChanged(auth, async (user) => {
 </script>
 
 <!-- ══ LÓGICA DE LA PÁGINA ══ -->
-<script src="js/app-global.js?v=3"></script>
-<script src="js/panaderia.js?v=3"></script>
+ <script src="js/app-global.js?v=3"></script>
+<script src="js/buscar.js?v=1"></script>
 </body>
 </html>

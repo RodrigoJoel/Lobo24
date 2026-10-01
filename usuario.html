@@ -10,7 +10,7 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="stylesheet" href="css/styles.css?v=2"/>
   <link rel="stylesheet" href="css/usuario.css"/>
-  <link rel="stylesheet" href="css/rediseno.css?v=3"/>
+  <link rel="stylesheet" href="css/rediseno.css?v=4"/>
   <link rel="icon" type="image/png" href="imagenes/iconoLobo24.png">
   <link rel="apple-touch-icon" href="imagenes/apple-touch-icon.png">
   <link rel="manifest" href="/manifest.json">
@@ -185,7 +185,7 @@
           <div class="points-card expiring">
             <div class="points-icon"><i class="fa-solid fa-hourglass-half"></i></div>
             <div class="points-info">
-              <span class="points-label">Puntos a vencer (60 días)</span>
+              <span class="points-label" id="expiringLabel">Vencen en los próximos 7 días</span>
               <strong class="points-value" id="expiringPoints">0</strong>
             </div>
           </div>
@@ -383,8 +383,8 @@ onAuthStateChanged(auth, (user) => {
 });
 </script>
 
-<script src="js/app-global.js?v=2"></script>
-<script src="js/usuario.js?v=2"></script>
+<script src="js/app-global.js?v=3"></script>
+<script src="js/usuario.js?v=3"></script>
 <script src="js/scripts.js?v=4"></script>
 <script>
   if ('serviceWorker' in navigator) {
