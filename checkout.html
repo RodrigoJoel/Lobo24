@@ -7,7 +7,12 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/checkout.css"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="css/checkout.css?v=2"/>
+  <script>
+    // El mismo tema (oscuro o claro) que el cliente eligió en la tienda.
+    try { document.documentElement.setAttribute('data-theme', localStorage.getItem('lob24theme') || 'dark'); } catch (e) {}
+  </script>
   <link rel="icon" type="image/png" href="imagenes/iconoLobo24.png">
   <link rel="apple-touch-icon" href="imagenes/apple-touch-icon.png">
   <link rel="manifest" href="/manifest.json">
@@ -25,38 +30,38 @@
     <div class="header-logo-text">LOBO<span>24</span></div>
   </a>
   <div class="header-secure">
-    🔒 Compra 100% segura
+    <i class="fa-solid fa-lock"></i>Compra segura
   </div>
   <a href="index.html" class="header-back">
-    ← Seguir comprando
+    <i class="fa-solid fa-arrow-left"></i><span>Seguir comprando</span>
   </a>
 </header>
 
 <!-- STEPS BAR -->
 <div class="steps-bar">
-  <div class="steps-inner">
-    <div class="step active" id="step-tab-1">
+  <div class="steps-inner" role="list" aria-label="Pasos de la compra">
+    <div class="step active" id="step-tab-1" role="listitem" aria-current="step">
       <div class="step-num">1</div>
       <div class="step-label">Carrito</div>
     </div>
     <div class="step-connector" id="conn-1"></div>
-    <div class="step" id="step-tab-2">
+    <div class="step" id="step-tab-2" role="listitem">
       <div class="step-num">2</div>
       <div class="step-label">Datos</div>
     </div>
     <div class="step-connector" id="conn-2"></div>
-    <div class="step" id="step-tab-3">
+    <div class="step" id="step-tab-3" role="listitem">
       <div class="step-num">3</div>
       <div class="step-label">Envío</div>
     </div>
     <div class="step-connector" id="conn-3"></div>
-    <div class="step" id="step-tab-4">
+    <div class="step" id="step-tab-4" role="listitem">
       <div class="step-num">4</div>
       <div class="step-label">Pago</div>
     </div>
     <div class="step-connector" id="conn-4"></div>
-    <div class="step" id="step-tab-5">
-      <div class="step-num">✓</div>
+    <div class="step" id="step-tab-5" role="listitem">
+      <div class="step-num"><i class="fa-solid fa-check"></i></div>
       <div class="step-label">Confirmación</div>
     </div>
   </div>
@@ -71,18 +76,26 @@
   <!-- COLUMNA DERECHA — resumen del pedido -->
   <aside class="order-summary" id="orderSummary">
     <div class="summary-header">
-      <span>🛒</span>
-      <h3>TU <span style="color:var(--accent)">PEDIDO</span></h3>
+      <i class="fa-solid fa-bag-shopping"></i>
+      <h3>TU <span>PEDIDO</span></h3>
+      <!-- En celular el resumen arranca plegado: se ve el total y se abre al tocar -->
+      <button class="summary-toggle" id="summaryToggle" type="button" aria-expanded="false" aria-controls="summaryBody" onclick="toggleSummary()">
+        <span id="summaryMini"></span><i class="fa-solid fa-chevron-down"></i>
+      </button>
     </div>
-    <div class="summary-items" id="summaryItems">
-      <!-- items se renderizan desde JS -->
+    <div class="summary-body" id="summaryBody">
+      <div class="summary-items" id="summaryItems">
+        <!-- items se renderizan desde JS -->
+      </div>
+      <div class="summary-totals" id="summaryTotals">
+        <!-- totales se renderizan desde JS -->
+      </div>
+      <div class="secure-badge">
+        <i class="fa-solid fa-lock"></i>Compra protegida
+      </div>
     </div>
-    <div class="summary-totals" id="summaryTotals">
-      <!-- totales se renderizan desde JS -->
-    </div>
-    <div class="secure-badge">
-      🔒 Compra protegida &nbsp;·&nbsp;
-    </div>
+    <!-- aviso de mínimo de compra: se renderiza desde JS y queda visible aunque el resumen esté plegado -->
+    <div class="summary-notice" id="summaryNotice"></div>
   </aside>
 </main>
 
@@ -145,7 +158,7 @@ onAuthStateChanged(auth, async user => {
 </script>
 
 <!-- LÓGICA DEL CHECKOUT -->
-<script src="js/checkout.js?v=2"></script>
+<script src="js/checkout.js?v=3"></script>
 <script>
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => navigator.serviceWorker.register('/sw.js').catch(() => {}));
