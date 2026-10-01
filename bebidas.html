@@ -22,19 +22,7 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="stylesheet" href="css/styles.css?v=2"/>
   <link rel="stylesheet" href="css/secciones.css?v=2"/>
-  <style>
-    .cat-hero::before {
-      content: '🥤';
-      position: absolute;
-      right: 80px;
-      top: 50%;
-      transform: translateY(-50%);
-      font-size: 160px;
-      opacity: .06;
-      line-height: 1;
-      pointer-events: none;
-    }
-  </style>
+  <link rel="stylesheet" href="css/rediseno.css?v=2"/>
   <link rel="icon" type="image/png" href="imagenes/iconoLobo24.png">
   <link rel="apple-touch-icon" href="imagenes/apple-touch-icon.png">
   <link rel="manifest" href="/manifest.json">
@@ -43,7 +31,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Lobo24">
 </head>
-<body>
+<body class="page-categoria">
 
 <!-- TOPBAR -->
 <div class="topbar" id="elTopbar">
@@ -53,20 +41,20 @@
 <!-- NAVBAR -->
 <nav class="navbar">
   <a href="index.html" class="logo">
-    <img src="imagenes/iconoLobo24.png" alt="Lobo24 Logo" class="logo-img"/>
+    <img src="imagenes/iconoLobo24.png" alt="Lobo24" class="logo-img"/>
     <div class="logo-text">LOBO<span>24</span></div>
   </a>
   <div class="search-wrap">
-    <input type="text" id="searchInput" placeholder="Buscá productos, marcas..."/>
-    <button onclick="handleSearch()">🔍</button>
+    <input type="search" id="searchInput" placeholder="Buscá productos, marcas..." aria-label="Buscar productos" enterkeyhint="search"/>
+    <button onclick="handleSearch()" aria-label="Buscar"><i class="fa-solid fa-magnifying-glass"></i></button>
   </div>
   <div class="nav-actions">
-    <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" title="Modo oscuro / claro">🌙</button>
+    <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" aria-label="Cambiar entre modo oscuro y claro"></button>
     <div id="userStatusContainer">
-      <button class="nav-btn" onclick="openModal()"><span>👤</span> Ingresar</button>
+      <button class="nav-btn" onclick="openModal()" aria-label="Ingresar"><i class="fa-regular fa-user"></i><span class="nav-label">Ingresar</span></button>
     </div>
-    <button class="nav-btn primary cart-btn" onclick="toggleCart()">
-      <span>🛒</span> Carrito
+    <button class="nav-btn primary cart-btn" onclick="toggleCart()" aria-label="Abrir carrito">
+      <i class="fa-solid fa-bag-shopping"></i><span class="nav-label">Carrito</span>
       <span class="cart-count" id="cartCount">0</span>
     </button>
   </div>
@@ -76,25 +64,26 @@
 <div class="cat-nav-wrap">
   <button class="cat-nav-arrow" onclick="scrollCatNav(-1)" aria-label="Ver categorías anteriores">‹</button>
   <div class="cat-nav">
-  <a href="#" class="active"><span class="icon">⭐</span> Destacados</a>
-  <a href="bebidas.html"><span class="icon">🥤</span> Bebidas</a>
-  <a href="snacks.html"><span class="icon">🍪</span> Snacks</a>
-  <a href="almacen.html"><span class="icon">🍝</span> Almacén</a>
-  <a href="higiene.html"><span class="icon">🧼</span> Higiene</a>
-  <a href="limpieza.html"><span class="icon">🧴</span> Limpieza</a>
-  <a href="congelados.html"><span class="icon">🧊</span> Congelados</a>
-  <a href="lacteos.html"><span class="icon">🧀</span> Lácteos</a>
-  <a href="panaderia.html"><span class="icon">🍞</span> Panadería</a>
-  <a href="mascotas.html"><span class="icon">🐾</span> Mascotas</a>
-  <a href="perfumeria.html"><span class="icon">🌸</span> Perfumería</a>
-  <a href="bazar.html"><span class="icon">🍽️</span> Bazar</a>
-  <a href="ofertas.html"><span class="icon">🔥</span> Ofertas</a>
+  <a href="index.html"><i class="fa-solid fa-star"></i> Destacados</a>
+  <a href="bebidas.html" class="active" aria-current="page"><i class="fa-solid fa-bottle-water"></i> Bebidas</a>
+  <a href="snacks.html"><i class="fa-solid fa-cookie-bite"></i> Snacks</a>
+  <a href="almacen.html"><i class="fa-solid fa-basket-shopping"></i> Almacén</a>
+  <a href="higiene.html"><i class="fa-solid fa-pump-soap"></i> Higiene</a>
+  <a href="limpieza.html"><i class="fa-solid fa-spray-can-sparkles"></i> Limpieza</a>
+  <a href="congelados.html"><i class="fa-solid fa-snowflake"></i> Congelados</a>
+  <a href="lacteos.html"><i class="fa-solid fa-cheese"></i> Lácteos</a>
+  <a href="panaderia.html"><i class="fa-solid fa-bread-slice"></i> Panadería</a>
+  <a href="mascotas.html"><i class="fa-solid fa-paw"></i> Mascotas</a>
+  <a href="perfumeria.html"><i class="fa-solid fa-bottle-droplet"></i> Perfumería</a>
+  <a href="bazar.html"><i class="fa-solid fa-utensils"></i> Bazar</a>
+  <a href="ofertas.html"><i class="fa-solid fa-tags"></i> Ofertas</a>
   </div>
   <button class="cat-nav-arrow" onclick="scrollCatNav(1)" aria-label="Ver más categorías">›</button>
 </div>
 
 <!-- HERO CATEGORÍA -->
 <div class="cat-hero">
+  <i class="cat-hero-icon fa-solid fa-bottle-water" aria-hidden="true"></i>
   <div class="cat-hero-inner">
     <div class="cat-breadcrumb">
       <a href="index.html">Inicio</a>
@@ -125,7 +114,7 @@
   <div class="cat-search-inner">
     <div class="cat-search-input-wrap">
       <input type="text" id="catSearch" placeholder="Buscar en Bebidas... ej: Coca-Cola, agua, cerveza"/>
-      <span class="search-icon">🔍</span>
+      <span class="search-icon"><i class="fa-solid fa-magnifying-glass"></i></span>
     </div>
     <select class="cat-sort-select" id="sortSelect" onchange="applyFilters()">
       <option value="default">Ordenar por: Relevancia</option>
@@ -154,53 +143,55 @@
       </div>
       <div class="filter-chips" id="subcatFilters">
         <div class="filter-chip active" data-subcat="all" onclick="selectSubcat(this)">
-          <span><span class="chip-icon">🛒</span>Todas</span>
+          <span>Todas</span>
           <span class="chip-count" id="cnt-all">0</span>
         </div>
         <div class="filter-chip" data-subcat="agua" onclick="selectSubcat(this)">
-          <span><span class="chip-icon">💧</span>Agua</span>
+          <span>Agua</span>
           <span class="chip-count" id="cnt-agua">0</span>
         </div>
         <div class="filter-chip" data-subcat="gaseosas" onclick="selectSubcat(this)">
-          <span><span class="chip-icon">🥤</span>Gaseosas</span>
+          <span>Gaseosas</span>
           <span class="chip-count" id="cnt-gaseosas">0</span>
         </div>
         <div class="filter-chip" data-subcat="jugos" onclick="selectSubcat(this)">
-          <span><span class="chip-icon">🍊</span>Jugos <!-- y néctares--></span>
+          <span>Jugos <!-- y néctares--></span>
           <span class="chip-count" id="cnt-jugos">0</span>
         </div>
         <div class="filter-chip" data-subcat="energizantes" onclick="selectSubcat(this)">
-          <span><span class="chip-icon">⚡</span>Energizantes</span>
+          <span>Energizantes</span>
           <span class="chip-count" id="cnt-energizantes">0</span>
         </div>
         <div class="filter-chip" data-subcat="cervezas" onclick="selectSubcat(this)">
-          <span><span class="chip-icon">🍺</span>Cervezas</span>
+          <span>Cervezas</span>
           <span class="chip-count" id="cnt-cervezas">0</span>
         </div>
         <div class="filter-chip" data-subcat="vinos" onclick="selectSubcat(this)">
-          <span><span class="chip-icon">🍷</span>Vinos</span>
+          <span>Vinos</span>
           <span class="chip-count" id="cnt-vinos">0</span>
         </div>
         <div class="filter-chip" data-subcat="blancas" onclick="selectSubcat(this)">
-          <span><span class="chip-icon">🥃</span>Bebidas blancas</span>
+          <span>Bebidas blancas</span>
           <span class="chip-count" id="cnt-blancas">0</span>
         </div>
         <div class="filter-chip" data-subcat="aperitivos" onclick="selectSubcat(this)">
-          <span><span class="chip-icon">🌿</span>Fernet y aperitivos</span>
+          <span>Fernet y aperitivos</span>
           <span class="chip-count" id="cnt-aperitivos">0</span>
         </div>
         <div class="filter-chip" data-subcat="isotonicos" onclick="selectSubcat(this)">
-          <span><span class="chip-icon">🏃</span>Isotónicos</span>
+          <span>Isotónicos</span>
           <span class="chip-count" id="cnt-isotonicos">0</span>
         </div>
         <!--
         <div class="filter-chip" data-subcat="te-cafe" onclick="selectSubcat(this)">
-          <span><span class="chip-icon">☕</span>Té y café</span>
+          <span>Té y café</span>
           <span class="chip-count" id="cnt-te-cafe">0</span>
         </div>
         -->
       </div>
     </div>
+    <button class="filters-toggle" type="button" aria-expanded="false" aria-controls="filtersExtra" onclick="this.setAttribute('aria-expanded', this.closest('.filters-sidebar').classList.toggle('filters-open'))"><i class="fa-solid fa-sliders"></i>Más filtros<i class="fa-solid fa-chevron-down chev"></i></button>
+    <div class="filters-extra" id="filtersExtra">
 
     <!-- Rango de precio -->
     <div class="filter-group">
@@ -230,9 +221,9 @@
         <button class="filter-clear" onclick="clearFilter('badge')">limpiar</button>
       </div>
       <div class="filter-badges">
-        <button class="filter-badge-btn offer" id="badgeOffer" onclick="toggleBadge('offer')">🔖 Ofertas</button>
-        <button class="filter-badge-btn new"   id="badgeNew"   onclick="toggleBadge('new')">✨ Nuevos</button>
-        <button class="filter-badge-btn hot"   id="badgeHot"   onclick="toggleBadge('hot')">🔥 Hot</button>
+        <button class="filter-badge-btn offer" id="badgeOffer" onclick="toggleBadge('offer')">Ofertas</button>
+        <button class="filter-badge-btn new"   id="badgeNew"   onclick="toggleBadge('new')">Nuevos</button>
+        <button class="filter-badge-btn hot"   id="badgeHot"   onclick="toggleBadge('hot')">Hot</button>
       </div>
     </div>
 
@@ -244,12 +235,13 @@
           <span>Todo</span>
         </div>
         <div class="filter-chip" data-stock="in" onclick="selectStock(this)">
-          <span>✅ En stock</span>
+          <span>En stock</span>
         </div>
       </div>
     </div>
 
-    <button class="reset-all-btn" onclick="resetAllFilters()">↺ Limpiar todos los filtros</button>
+    <button class="reset-all-btn" onclick="resetAllFilters()"><i class="fa-solid fa-rotate-left"></i>Limpiar todos los filtros</button>
+    </div><!-- /filters-extra -->
   </aside>
 
   <!-- ÁREA DE PRODUCTOS -->
@@ -259,15 +251,70 @@
     </div>
     <div class="products-grid" id="productsGrid">
       <!-- skeletons mientras carga -->
-      ${Array(8).fill(`
-        <div class="skeleton">
-          <div class="sk-img"></div>
-          <div class="sk-body">
-            <div class="sk-line"></div>
-            <div class="sk-line short"></div>
-            <div class="sk-line price"></div>
-          </div>
-        </div>`).join('')}
+      <div class="skeleton">
+        <div class="sk-img"></div>
+        <div class="sk-body">
+          <div class="sk-line"></div>
+          <div class="sk-line short"></div>
+          <div class="sk-line price"></div>
+        </div>
+      </div>
+      <div class="skeleton">
+        <div class="sk-img"></div>
+        <div class="sk-body">
+          <div class="sk-line"></div>
+          <div class="sk-line short"></div>
+          <div class="sk-line price"></div>
+        </div>
+      </div>
+      <div class="skeleton">
+        <div class="sk-img"></div>
+        <div class="sk-body">
+          <div class="sk-line"></div>
+          <div class="sk-line short"></div>
+          <div class="sk-line price"></div>
+        </div>
+      </div>
+      <div class="skeleton">
+        <div class="sk-img"></div>
+        <div class="sk-body">
+          <div class="sk-line"></div>
+          <div class="sk-line short"></div>
+          <div class="sk-line price"></div>
+        </div>
+      </div>
+      <div class="skeleton">
+        <div class="sk-img"></div>
+        <div class="sk-body">
+          <div class="sk-line"></div>
+          <div class="sk-line short"></div>
+          <div class="sk-line price"></div>
+        </div>
+      </div>
+      <div class="skeleton">
+        <div class="sk-img"></div>
+        <div class="sk-body">
+          <div class="sk-line"></div>
+          <div class="sk-line short"></div>
+          <div class="sk-line price"></div>
+        </div>
+      </div>
+      <div class="skeleton">
+        <div class="sk-img"></div>
+        <div class="sk-body">
+          <div class="sk-line"></div>
+          <div class="sk-line short"></div>
+          <div class="sk-line price"></div>
+        </div>
+      </div>
+      <div class="skeleton">
+        <div class="sk-img"></div>
+        <div class="sk-body">
+          <div class="sk-line"></div>
+          <div class="sk-line short"></div>
+          <div class="sk-line price"></div>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -299,7 +346,7 @@
   </div>
 
   <div class="footer-legal-notice">
-    🍷 <strong>Ley 24.788</strong> — Beber con moderación. Prohibida su venta a menores de 18 años.
+    <i class="fa-solid fa-wine-glass"></i><strong>Ley 24.788</strong> — Beber con moderación. Prohibida su venta a menores de 18 años.
   </div>
 
   <div class="footer-bottom">
@@ -310,14 +357,14 @@
     </div>
     
     <span>© 2025 Lobo24 — Todos los derechos reservados</span>
-    <span>🐺 Abierto 24/7 · Siempre para vos</span>
+    <span>Abierto 24/7 · Siempre para vos</span>
   </div>
 </footer>
 
 <!-- CART -->
 <div class="drawer-overlay" id="drawerOverlay" onclick="toggleCart()"></div>
 <div class="cart-drawer" id="cartDrawer">
-  <div class="drawer-header"><h2>TU CARRITO 🛒</h2><button class="drawer-close" onclick="toggleCart()">✕</button></div>
+  <div class="drawer-header"><h2>TU CARRITO</h2><button class="drawer-close" onclick="toggleCart()">✕</button></div>
   <div class="drawer-items" id="drawerItems">
     <div class="drawer-empty"><div class="empty-icon">🛒</div><p>Tu carrito está vacío.</p></div>
   </div>
@@ -475,13 +522,13 @@ onAuthStateChanged(auth, async (user) => {
         </div>
       </div>`;
   } else {
-    container.innerHTML = `<button class="nav-btn" onclick="openModal()"><span>👤</span> Ingresar</button>`;
+    container.innerHTML = `<button class="nav-btn" onclick="openModal()" aria-label="Ingresar"><i class="fa-regular fa-user"></i><span class="nav-label">Ingresar</span></button>`;
   }
 });
 </script>
 
 <!-- ══ LÓGICA DE LA PÁGINA ══ -->
-<script src="js/app-global.js"></script>
-<script src="js/bebidas.js"></script>
+<script src="js/app-global.js?v=2"></script>
+<script src="js/bebidas.js?v=2"></script>
 </body>
 </html>

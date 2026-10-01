@@ -157,7 +157,7 @@ function renderProducts(list) {
   if (!list.length) {
     grid.innerHTML = `
       <div class="no-results">
-        <div class="nr-icon">🔍</div>
+        <div class="nr-icon"><i class="fa-solid fa-magnifying-glass"></i></div>
         <p>No encontramos ofertas con esos filtros.</p>
         <button onclick="resetAllFilters()">Limpiar filtros</button>
       </div>`;
@@ -193,7 +193,7 @@ function renderProducts(list) {
 
     return `
       <div class="product-card${sinStock ? ' out-of-stock' : ''}">
-        ${p.badge ? `<span class="product-badge badge-${p.badge}">${p.badge === 'offer' ? 'OFERTA' : p.badge === 'new' ? 'NUEVO' : '🔥 HOT'}</span>` : ''}
+        ${p.badge ? `<span class="product-badge badge-${p.badge}">${p.badge === 'offer' ? 'OFERTA' : p.badge === 'new' ? 'NUEVO' : 'HOT'}</span>` : ''}
         ${stockBadgeHtml}
 
         <div class="product-img">
