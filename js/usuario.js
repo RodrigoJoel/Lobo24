@@ -74,10 +74,10 @@ async function loadUserData() {
     if (userDoc.exists()) {
       userData = userDoc.data();
       console.log('Usuario encontrado:', userData);
-      // Asegurar que puntos tenga un valor
+      // Asegurar que puntos tenga un valor para mostrar. El saldo solo lo
+      // escribe el backend: las reglas no dejan tocarlo desde el navegador.
       if (userData.points === undefined) {
         userData.points = 0;
-        await updateDoc(userDocRef, { points: 0 });
       }
     } else {
       userData = { 
