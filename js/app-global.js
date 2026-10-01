@@ -549,6 +549,15 @@ function checkout() {
 ───────────────────────────────────── */
 document.addEventListener('DOMContentLoaded', () => {
   applyTheme(theme);
+
+  // En celular el menú de categorías se desliza: dejar a la vista la categoría actual.
+  const catNav = document.querySelector('.cat-nav');
+  const catActive = catNav?.querySelector('a.active');
+  if (catNav && catActive) {
+    const navBox = catNav.getBoundingClientRect();
+    const linkBox = catActive.getBoundingClientRect();
+    catNav.scrollLeft += linkBox.left - navBox.left - (navBox.width - linkBox.width) / 2;
+  }
   loadCartFromLocalStorage();
   updateCartUI();
 

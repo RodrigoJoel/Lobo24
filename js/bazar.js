@@ -167,7 +167,7 @@ function renderProducts(list) {
   if (!list.length) {
     grid.innerHTML = `
       <div class="no-results">
-        <div class="nr-icon">🔍</div>
+        <div class="nr-icon"><i class="fa-solid fa-magnifying-glass"></i></div>
         <p>No encontramos productos en Bazar con esos filtros.</p>
         <button onclick="resetAllFilters()">Limpiar filtros</button>
       </div>`;
@@ -192,7 +192,7 @@ function renderProducts(list) {
 
     return `
       <div class="product-card${sinStock ? ' out-of-stock' : ''}">
-        ${p.badge ? `<span class="product-badge badge-${p.badge}">${p.badge === 'offer' ? 'OFERTA' : p.badge === 'new' ? 'NUEVO' : '🔥 HOT'}</span>` : ''}
+        ${p.badge ? `<span class="product-badge badge-${p.badge}">${p.badge === 'offer' ? 'OFERTA' : p.badge === 'new' ? 'NUEVO' : 'HOT'}</span>` : ''}
         ${stockBadgeHtml}
 
         <div class="product-img">
@@ -274,8 +274,8 @@ function renderActiveFilterTags() {
   const tags = [];
 
   if (filters.subcat !== 'all') {
-    const label = document.querySelector(`[data-subcat="${filters.subcat}"] .chip-icon`)?.textContent || '';
-    tags.push({ label: label + ' ' + filters.subcat, key: 'subcat' });
+    const chip = document.querySelector(`#subcatFilters [data-subcat="${filters.subcat}"] > span`);
+    tags.push({ label: (chip?.textContent || filters.subcat).trim(), key: 'subcat' });
   }
 
   if (filters.search) {

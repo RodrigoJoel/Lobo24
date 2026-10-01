@@ -125,7 +125,7 @@ function renderProducts(list, id) {
 
   grid.innerHTML = list.map(p => `
     <div class="product-card">
-      ${p.badge ? `<span class="product-badge badge-${p.badge}">${p.badge === 'offer' ? 'OFERTA' : p.badge === 'new' ? 'NUEVO' : '🔥 HOT'}</span>` : ''}
+      ${p.badge ? `<span class="product-badge badge-${p.badge}">${p.badge === 'offer' ? 'OFERTA' : p.badge === 'new' ? 'NUEVO' : 'HOT'}</span>` : ''}
       <div class="product-img">
         <img src="${p.img || ''}" alt="${p.name || ''}" loading="lazy"/>
       </div>

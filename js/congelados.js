@@ -173,7 +173,7 @@ function renderProducts(list) {
   if (!list.length) {
     grid.innerHTML = `
       <div class="no-results">
-        <div class="nr-icon">🔍</div>
+        <div class="nr-icon"><i class="fa-solid fa-magnifying-glass"></i></div>
         <p>No encontramos productos de congelados con esos filtros.</p>
         <button onclick="resetAllFilters()">Limpiar filtros</button>
       </div>`;
@@ -209,7 +209,7 @@ function renderProducts(list) {
 
     return `
       <div class="product-card${sinStock ? ' out-of-stock' : ''}">
-        ${p.badge ? `<span class="product-badge badge-${p.badge}">${p.badge === 'offer' ? 'OFERTA' : p.badge === 'new' ? 'NUEVO' : '🔥 HOT'}</span>` : ''}
+        ${p.badge ? `<span class="product-badge badge-${p.badge}">${p.badge === 'offer' ? 'OFERTA' : p.badge === 'new' ? 'NUEVO' : 'HOT'}</span>` : ''}
         ${stockBadgeHtml}
 
         <div class="product-img">
@@ -291,25 +291,23 @@ function renderActiveFilterTags() {
   const tags = [];
 
   if (filters.subcat !== 'all') {
-    const chip = document.querySelector(`[data-subcat="${filters.subcat}"] .chip-icon`);
-    const icon = chip?.textContent || '';
-    const subcatName = filters.subcat.replace(/-/g, ' ');
-    tags.push({ label: icon + ' ' + subcatName, key: 'subcat' });
+    const chip = document.querySelector(`#subcatFilters [data-subcat="${filters.subcat}"] > span`);
+    tags.push({ label: (chip?.textContent || filters.subcat.replace(/-/g, ' ')).trim(), key: 'subcat' });
   }
 
-  if (filters.search) tags.push({ label: `🔍 "${filters.search}"`, key: 'search' });
+  if (filters.search) tags.push({ label: `"${filters.search}"`, key: 'search' });
 
   if (filters.priceMin > 0 || filters.priceMax !== Infinity) {
     const max = filters.priceMax === Infinity ? '∞' : `$${filters.priceMax}`;
-    tags.push({ label: `💰 $${filters.priceMin} — ${max}`, key: 'price' });
+    tags.push({ label: `$${filters.priceMin} — ${max}`, key: 'price' });
   }
 
   filters.badges.forEach(b => {
-    const badgeLabel = b === 'offer' ? '🔖 OFERTA' : b === 'new' ? '✨ NUEVO' : '🔥 HOT';
+    const badgeLabel = b === 'offer' ? 'OFERTA' : b === 'new' ? 'NUEVO' : 'HOT';
     tags.push({ label: badgeLabel, key: `badge-${b}` });
   });
 
-  if (filters.stock === 'in') tags.push({ label: '✅ En stock', key: 'stock' });
+  if (filters.stock === 'in') tags.push({ label: 'En stock', key: 'stock' });
 
   wrap.innerHTML = tags.map(t => `
     <span class="active-filter-tag">
