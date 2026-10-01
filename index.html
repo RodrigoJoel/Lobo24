@@ -361,7 +361,7 @@
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
-import { getFirestore, doc, collection, onSnapshot, getDocs, setDoc, getDoc }
+import { getFirestore, doc, collection, onSnapshot, getDocs, setDoc, getDoc, getCountFromServer }
   from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
 import {
   getAuth,
@@ -538,16 +538,23 @@ const CATEGORY_SLUGS = [
 
 window._catCounts = {};
 
-CATEGORY_SLUGS.forEach(slug => {
-  onSnapshot(collection(db, slug), snap => {
-    const count = snap.size;
+// Acá solo hace falta la cantidad. Una consulta de conteo cuesta una lectura
+// por categoría; escuchar la colección entera costaba una lectura por
+// producto en cada visita al inicio, y eso agotaba la cuota diaria gratuita
+// de Firestore.
+CATEGORY_SLUGS.forEach(async slug => {
+  try {
+    const snap = await getCountFromServer(collection(db, slug));
+    const count = snap.data().count;
 
     if (typeof updateCategoryCount === 'function') {
       updateCategoryCount(slug, count);
     } else {
       window._catCounts[slug] = count;
     }
-  });
+  } catch (error) {
+    console.error('No se pudo contar los productos de ' + slug + ':', error);
+  }
 });
 
 /* ─── OFERTAS DEL DÍA ─── */

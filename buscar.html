@@ -237,6 +237,7 @@ import {
   doc,
   collection,
   onSnapshot,
+  getDocs,
   setDoc,
   getDoc,
   updateDoc
@@ -296,20 +297,57 @@ const CATALOG_SLUGS = [
 ];
 let catalogStarted = false;
 
-window.startCatalog = () => {
+/* Cada búsqueda es una carga de esta página, y leer el catálogo cuesta una
+   lectura de Firestore por producto. Se guarda unos minutos en la pestaña
+   para que las búsquedas siguientes no lo vuelvan a leer; así precios y
+   stock quedan, como mucho, ese rato desactualizados en los resultados. */
+const CATALOG_CACHE_KEY = 'lobo24_catalog';
+const CATALOG_CACHE_MS = 10 * 60 * 1000;
+
+function readCatalogCache() {
+  try {
+    const cached = JSON.parse(sessionStorage.getItem(CATALOG_CACHE_KEY));
+    if (cached && Date.now() - cached.savedAt < CATALOG_CACHE_MS) return cached.catalog;
+  } catch (e) { /* caché ilegible: se vuelve a leer de Firestore */ }
+  return null;
+}
+
+function writeCatalogCache(catalog) {
+  try {
+    sessionStorage.setItem(CATALOG_CACHE_KEY, JSON.stringify({ savedAt: Date.now(), catalog }));
+  } catch (e) { /* sin espacio en la pestaña: la próxima búsqueda lee de Firestore */ }
+}
+
+window.startCatalog = async () => {
   if (catalogStarted) return;
   catalogStarted = true;
 
-  CATALOG_SLUGS.forEach(slug => {
-    onSnapshot(collection(db, slug), snap => {
-      window['_' + slug + 'All'] = snap.docs
-        .map(d => ({ docId: d.id, coleccion: slug, ...d.data() }));
+  const cached = readCatalogCache();
+  if (cached) {
+    CATALOG_SLUGS.forEach(slug => {
+      window['_' + slug + 'All'] = cached[slug] || [];
       if (typeof onCatalogUpdate === 'function') onCatalogUpdate(slug);
-    }, error => {
+    });
+    return;
+  }
+
+  const catalog = {};
+  let complete = true;
+
+  await Promise.all(CATALOG_SLUGS.map(async slug => {
+    try {
+      const snap = await getDocs(collection(db, slug));
+      catalog[slug] = snap.docs.map(d => ({ docId: d.id, coleccion: slug, ...d.data() }));
+      window['_' + slug + 'All'] = catalog[slug];
+      if (typeof onCatalogUpdate === 'function') onCatalogUpdate(slug);
+    } catch (error) {
+      complete = false;
       console.error('No se pudo cargar la categoría ' + slug + ':', error);
       if (typeof onCatalogUpdate === 'function') onCatalogUpdate(slug, error);
-    });
-  });
+    }
+  }));
+
+  if (complete) writeCatalogCache(catalog);
 };
 
 if (window._catalogWanted) window.startCatalog();

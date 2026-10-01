@@ -197,6 +197,10 @@ function render(page) {
     sections: pageSections
   };
   for (const key of window.CATEGORY_COLLECTIONS) pages[key] = () => pageCategoryManager(key);
+  // Los productos de una categoría se piden a Firestore recién al abrirla.
+  if (window.CATEGORY_COLLECTIONS.includes(page) && typeof window.ensureCategoryLoaded === "function") {
+    window.ensureCategoryLoaded(page);
+  }
   main.innerHTML = pages[page] ? pages[page]() : '<p style="color:var(--muted)">Página no encontrada</p>';
   if (page === 'pedidos' && typeof renderOrdersList === 'function') renderOrdersList();
 }
@@ -208,6 +212,20 @@ function getSubcatOptions(collectionName, selected) {
 
 function pageCategoryManager(collectionName) {
   const conf = window.CATEGORY_CONFIG[collectionName];
+
+  // Todavía no llegaron los productos: el listener vuelve a llamar a
+  // render() cuando lleguen.
+  if (window.CATEGORY_LOADED && !window.CATEGORY_LOADED[collectionName]) {
+    return `
+    <div class="page-header">
+      <div>
+        <div class="page-title">${conf.title}</div>
+        <div class="page-sub">${conf.pageSub}</div>
+      </div>
+    </div>
+    <p style="color:var(--muted);text-align:center;padding:20px">Cargando productos…</p>`;
+  }
+
   const list = window.DATA[collectionName] || [];
 
   const searchTerm = window.adminProductSearch?.[collectionName] || "";
@@ -715,7 +733,8 @@ window.deleteOffer = deleteOffer;
 function dashboard() {
   const d = window.DATA;
   const visCount = Object.values(d.sections || {}).filter(Boolean).length;
-  const categoryTotal = window.CATEGORY_COLLECTIONS.reduce((acc, key) => acc + (window.DATA[key]?.length || 0), 0);
+  // Cantidad por categoría sin haber cargado sus productos (ver loadAll en admin.html).
+  const categoryTotal = window.CATEGORY_COLLECTIONS.reduce((acc, key) => acc + (window.CATEGORY_COUNTS?.[key] ?? window.DATA[key]?.length ?? 0), 0);
   return `
     <div class="page-header">
       <div>
