@@ -7,11 +7,11 @@ let userData = null;
 
 // Estados de pedido para mostrar al usuario
 const USER_ORDER_STATUS = {
-  pending: { label: '⏳ Pendiente de confirmación', icon: '🕐', color: '#f0c040' },
-  confirmed: { label: '✅ Pago confirmado', icon: '✅', color: '#4ade80' },
-  processing: { label: '📦 En proceso de armado', icon: '📦', color: '#a78bfa' },
-  shipped: { label: '🚚 Despachado', icon: '🚚', color: '#60a5fa' },
-  completed: { label: '🎉 Completado', icon: '🎉', color: '#34d399' }
+  pending: { label: 'Pendiente de confirmación', icon: 'fa-clock', color: '#f0c040' },
+  confirmed: { label: 'Pago confirmado', icon: 'fa-circle-check', color: '#4ade80' },
+  processing: { label: 'En proceso de armado', icon: 'fa-box', color: '#a78bfa' },
+  shipped: { label: 'Despachado', icon: 'fa-truck', color: '#60a5fa' },
+  completed: { label: 'Completado', icon: 'fa-flag-checkered', color: '#34d399' }
 };
 
 // Datos de la tienda
@@ -200,10 +200,10 @@ async function loadUserOrders() {
     
     if (querySnapshot.empty) {
       ordersList.innerHTML = `
-        <div style="text-align:center;padding:40px">
-          <i class="fas fa-shopping-bag" style="font-size:48px;color:var(--muted);margin-bottom:16px"></i>
-          <p style="color:var(--muted)">No realizaste ninguna compra todavía.</p>
-          <a href="index.html" class="btn btn-primary" style="margin-top:16px">Ir a la tienda</a>
+        <div class="orders-empty">
+          <i class="fa-solid fa-bag-shopping"></i>
+          <p>No realizaste ninguna compra todavía.</p>
+          <a href="index.html" class="btn btn-primary">Ir a la tienda</a>
         </div>
       `;
       return;
@@ -235,12 +235,12 @@ function createOrderCard(order) {
         <i class="fas fa-calendar-alt"></i>
         <span>${formattedDate}</span>
       </div>
-      <div class="order-status-badge" style="background:${status.color}20;color:${status.color};border:1px solid ${status.color}40;padding:4px 12px;border-radius:20px;font-size:12px">
-        ${status.icon} ${status.label}
+      <div class="order-status-badge" style="--st:${status.color}">
+        <i class="fa-solid ${status.icon}"></i>${status.label}
       </div>
       <div class="order-total">
         <span class="order-amount">$${(order.total || 0).toLocaleString('es-AR')}</span>
-        <span class="order-points">⭐ +${orderPoints} puntos</span>
+        <span class="order-points"><i class="fa-solid fa-star"></i>+${orderPoints} puntos</span>
       </div>
     </div>
     <div class="order-products">
@@ -267,26 +267,26 @@ function createOrderCard(order) {
     <div class="order-details-user" id="order-details-${order.id}" style="display:none;padding:16px;border-top:1px solid var(--border);background:var(--bg3)">
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
         <div>
-          <strong>📦 Dirección de envío:</strong><br>
+          <strong>Dirección de envío:</strong><br>
           ${order.delivery === 'local' ? 'Retiro en sucursal - ' + STORE.address : `${escapeHtml(order.contact?.street || '')}, ${escapeHtml(order.contact?.city || '')}, ${escapeHtml(order.contact?.province || '')}`}
         </div>
         <div>
-          <strong>💳 Método de pago:</strong><br>
+          <strong>Método de pago:</strong><br>
           ${order.payment === 'mp' ? 'Mercado Pago' : order.payment === 'transfer' ? 'Transferencia bancaria' : 'Efectivo en local'}
         </div>
         ${order.pointsUsed > 0 ? `
         <div>
-          <strong>⭐ Puntos usados:</strong><br>
+          <strong>Puntos usados:</strong><br>
           ${order.pointsUsed} puntos ($${order.pointsUsed.toLocaleString('es-AR')})
         </div>
         ` : ''}
         <div>
-          <strong>⭐ Puntos ganados:</strong><br>
+          <strong>Puntos ganados:</strong><br>
           +${orderPoints} puntos
         </div>
         ${order.contact?.notes ? `
         <div style="grid-column:span 2">
-          <strong>📝 Notas adicionales:</strong><br>
+          <strong>Notas adicionales:</strong><br>
           ${escapeHtml(order.contact.notes)}
         </div>
         ` : ''}
@@ -418,14 +418,6 @@ document.addEventListener('click', function(e) {
     dropdown.classList.remove('show');
   }
 });
-
-// Funciones vacías para compatibilidad
-window.toggleCart = () => {};
-window.checkout = () => {};
-window.toggleTheme = () => {};
-window.handleSearch = () => {};
-window.openModal = () => {};
-window.closeModal = () => {};
 
 // Exponer funciones globales
 window.enableEditMode = enableEditMode;
