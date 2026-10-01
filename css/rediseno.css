@@ -1,7 +1,7 @@
 /* ══════════════════════════════════════
    LOBO24 · REDISEÑO DE LA PORTADA
    Se carga después de styles.css (y de secciones.css en las categorías) y solo los pisa.
-   Lo usan la portada, las 12 páginas de categoría, las 6 de información y usuario.html.
+   Lo usan la portada, las 12 páginas de categoría, las 6 de información, usuario.html y buscar.html.
    Marca intacta: tema oscuro, amarillo, Bebas Neue + DM Sans + Space Mono.
 ══════════════════════════════════════ */
 
@@ -340,6 +340,9 @@ footer{margin-top:72px;border-top-color:var(--line);transition:background-color 
 .no-results .nr-icon{font-size:34px;color:var(--muted);opacity:.7}
 .no-results button{height:42px;padding:0 20px;border-radius:10px;color:#0c0c0e;transition:background-color .16s var(--ease-out),transform .16s var(--ease-out)}
 .no-results button:active{transform:scale(.98)}
+/* Segundo botón: repetir la búsqueda en toda la tienda. */
+.no-results button{margin:4px}
+.no-results .nr-all{background:transparent;border:1px solid var(--line);color:var(--text);transition:border-color .16s var(--ease-out),color .16s,transform .16s var(--ease-out)}
 .skeleton{border-radius:16px;border-color:var(--line)}
 .cat-layout .sk-img{height:auto;aspect-ratio:1 / 1}
 .load-more-btn{border-radius:12px;border-color:var(--line);background:var(--card);transition:border-color .16s var(--ease-out),color .16s,transform .16s var(--ease-out)}
@@ -354,6 +357,7 @@ footer{margin-top:72px;border-top-color:var(--line);transition:background-color 
   .reset-all-btn:hover{border-color:var(--accent);color:var(--accent-text)}
   .see-more-subcats:hover{background:var(--bg3);color:var(--accent-text)}
   .load-more-btn:hover{border-color:var(--accent);color:var(--accent-text)}
+  .no-results .nr-all:hover{border-color:var(--accent);color:var(--accent-text)}
 }
 @media (hover:none){
   .filter-chip:hover{border-color:transparent;color:var(--text)}

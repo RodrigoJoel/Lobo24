@@ -170,6 +170,7 @@ function renderProducts(list) {
         <div class="nr-icon"><i class="fa-solid fa-magnifying-glass"></i></div>
         <p>No encontramos productos lácteos con esos filtros.</p>
         <button onclick="resetAllFilters()">Limpiar filtros</button>
+        ${filters.search ? '<button class="nr-all" onclick="searchWholeStore()">Buscar en toda la tienda</button>' : ''}
       </div>`;
 
     renderLoadMoreButton(0);

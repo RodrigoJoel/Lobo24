@@ -1,0 +1,58 @@
+/* ══════════════════════════════════════
+   LOBO24 · RESULTADOS DE BÚSQUEDA (buscar.html)
+   Se carga después de styles.css, secciones.css y rediseno.css y reutiliza sus piezas:
+   la cabecera y la grilla de las categorías, y las fichas de categoría de la portada.
+══════════════════════════════════════ */
+
+/* ── Cabecera ── */
+.search-hero h1{font-size:clamp(34px,4.4vw,58px);line-height:.96;overflow-wrap:anywhere;text-wrap:balance}
+.search-hero p{max-width:60ch;min-height:1.5em}
+
+/* ── Categorías con resultados y orden ── */
+.search-bar[hidden],.search-state[hidden],.products-grid[hidden]{display:none}
+.search-bar-inner{max-width:1400px;margin:0 auto;display:flex;align-items:center;gap:16px}
+.search-cats{flex:1;min-width:0;display:flex;gap:8px;overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:none;padding:2px 0}
+.search-cats::-webkit-scrollbar{display:none}
+.search-chip{flex:0 0 auto;display:inline-flex;align-items:center;gap:8px;height:42px;padding:0 16px;border:1px solid var(--line);border-radius:999px;background:var(--card);color:var(--text);font-family:var(--font-body);font-size:14px;white-space:nowrap;cursor:pointer;transition:border-color .16s var(--ease-out),background-color .16s var(--ease-out),transform .16s var(--ease-out)}
+.search-chip:active{transform:scale(.97)}
+.search-chip .chip-count{font-family:var(--font-mono);font-size:11.5px;color:var(--muted);font-variant-numeric:tabular-nums}
+.search-chip.active{background:var(--accent);border-color:var(--accent);color:#0c0c0e;font-weight:600}
+.search-chip.active .chip-count{color:#0c0c0e}
+.search-bar .cat-sort-select{flex-shrink:0}
+
+/* ── Resultados: la grilla de las categorías, sin la columna de filtros ── */
+/* El ancho suma los márgenes laterales para que la grilla arranque alineada con la cabecera. */
+.search-layout{grid-template-columns:minmax(0,1fr);max-width:calc(1400px + var(--pad) * 2)}
+.search-layout .products-area{min-width:0;padding:24px 0 0;border-left:0;border-top:0}
+
+/* ── Sin texto, sin resultados o sin conexión ── */
+.search-msg{max-width:520px;margin:0 auto;padding:28px 0 44px;text-align:center}
+.search-msg .nr-icon{font-size:34px;color:var(--muted);opacity:.7;margin-bottom:14px}
+.search-msg h2{font-family:var(--font-body);font-size:20px;font-weight:600;line-height:1.3;overflow-wrap:anywhere;margin-bottom:8px}
+.search-msg p{color:var(--muted);font-size:15px;line-height:1.6;text-wrap:pretty}
+.search-help,.search-retry{display:inline-flex;align-items:center;gap:8px;height:44px;margin-top:20px;padding:0 20px;border:1px solid var(--line);border-radius:12px;background:var(--card);color:var(--text);font-family:var(--font-body);font-size:14.5px;font-weight:500;cursor:pointer;transition:border-color .16s var(--ease-out),color .16s,transform .16s var(--ease-out)}
+.search-help:active,.search-retry:active{transform:scale(.98)}
+.search-help i{font-size:17px;color:#25d366}
+.search-sub{font-family:var(--font-mono);font-size:11px;font-weight:400;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:14px}
+.search-state .categories-grid{grid-template-columns:repeat(4,minmax(0,1fr))}
+
+@media (hover:hover) and (pointer:fine){
+  .search-chip:hover{border-color:var(--accent)}
+  .search-help:hover,.search-retry:hover{border-color:var(--accent);color:var(--accent-text)}
+}
+
+@media (max-width:1099px){
+  .search-state .categories-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+}
+@media (max-width:900px){
+  .search-layout .products-area{padding-top:16px}
+}
+@media (max-width:640px){
+  .search-hero h1{font-size:clamp(30px,9vw,40px)}
+  .search-bar-inner{flex-direction:column;align-items:stretch;gap:10px}
+  /* La fila de categorías se desliza hasta el borde de la pantalla. */
+  .search-cats{margin:0 calc(var(--pad) * -1);padding:2px var(--pad)}
+  .search-cats:empty{display:none}
+  .search-msg{padding:16px 0 36px}
+  .search-state .categories-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}

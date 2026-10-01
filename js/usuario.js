@@ -7,12 +7,27 @@ let userData = null;
 
 // Estados de pedido para mostrar al usuario
 const USER_ORDER_STATUS = {
+  pending_payment: { label: 'Pendiente de pago', icon: 'fa-credit-card', color: '#f59e0b' },
   pending: { label: 'Pendiente de confirmación', icon: 'fa-clock', color: '#f0c040' },
+  payment_confirmed: { label: 'Pago confirmado', icon: 'fa-circle-check', color: '#4ade80' },
   confirmed: { label: 'Pago confirmado', icon: 'fa-circle-check', color: '#4ade80' },
   processing: { label: 'En proceso de armado', icon: 'fa-box', color: '#a78bfa' },
   shipped: { label: 'Despachado', icon: 'fa-truck', color: '#60a5fa' },
-  completed: { label: 'Completado', icon: 'fa-flag-checkered', color: '#34d399' }
+  completed: { label: 'Completado', icon: 'fa-flag-checkered', color: '#34d399' },
+  cancelled: { label: 'Cancelado', icon: 'fa-circle-xmark', color: '#f87171' }
 };
+
+// Reglas de los puntos (las mismas que se explican en "¿Cómo funcionan los puntos?").
+const POINTS_VALID_DAYS = 60;   // caducan a los 60 días de obtenidos
+const POINTS_WARNING_DAYS = 7;  // la tarjeta avisa los que vencen en la próxima semana
+// Un pedido sin pagar o cancelado no llegó a sumar puntos.
+const ORDERS_WITHOUT_POINTS = ['pending_payment', 'cancelled'];
+
+function orderPointsEarned(order) {
+  if (ORDERS_WITHOUT_POINTS.includes(order.status)) return 0;
+  if (order.pointsEarned != null) return Number(order.pointsEarned) || 0;
+  return Math.floor((order.subtotal || order.total || 0) / 100);
+}
 
 // Datos de la tienda
 const STORE = {
@@ -226,7 +241,7 @@ function createOrderCard(order) {
   
   let orderDate = order.createdAt?.toDate ? order.createdAt.toDate() : new Date(order.createdAt);
   const formattedDate = orderDate.toLocaleDateString('es-AR', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' });
-  const orderPoints = Math.floor((order.subtotal || order.total) / 100);
+  const orderPoints = orderPointsEarned(order);
   const status = USER_ORDER_STATUS[order.status] || USER_ORDER_STATUS.pending;
   
   card.innerHTML = `
@@ -240,7 +255,7 @@ function createOrderCard(order) {
       </div>
       <div class="order-total">
         <span class="order-amount">$${(order.total || 0).toLocaleString('es-AR')}</span>
-        <span class="order-points"><i class="fa-solid fa-star"></i>+${orderPoints} puntos</span>
+        ${orderPoints > 0 ? `<span class="order-points"><i class="fa-solid fa-star"></i>+${orderPoints} puntos</span>` : ''}
       </div>
     </div>
     <div class="order-products">
@@ -280,10 +295,12 @@ function createOrderCard(order) {
           ${order.pointsUsed} puntos ($${order.pointsUsed.toLocaleString('es-AR')})
         </div>
         ` : ''}
+        ${orderPoints > 0 ? `
         <div>
           <strong>Puntos ganados:</strong><br>
           +${orderPoints} puntos
         </div>
+        ` : ''}
         ${order.contact?.notes ? `
         <div style="grid-column:span 2">
           <strong>Notas adicionales:</strong><br>
@@ -336,28 +353,34 @@ async function loadUserPoints() {
       if (pointsValueEl) pointsValueEl.textContent = `$${totalPoints.toLocaleString('es-AR')}`;
     }
     
-    // Calcular puntos a vencer desde los pedidos
+    // El texto de la tarjeta sale de la misma constante que usa el cálculo.
+    const expiringLabelEl = document.getElementById('expiringLabel');
+    if (expiringLabelEl) expiringLabelEl.textContent = `Vencen en los próximos ${POINTS_WARNING_DAYS} días`;
+
+    // Puntos por vencer: los ganados en compras que cumplen 60 días dentro de la próxima semana.
     const ordersRef = collection(window.db, 'pedidos');
     const q = query(ordersRef, where('userId', '==', currentUser.uid));
     const querySnapshot = await getDocs(q);
-    
+
     const now = new Date();
     let expiringPoints = 0;
-    const nextWeek = new Date();
-    nextWeek.setDate(nextWeek.getDate() + 7);
-    
+    const warningLimit = new Date();
+    warningLimit.setDate(warningLimit.getDate() + POINTS_WARNING_DAYS);
+
     querySnapshot.forEach(docSnap => {
       const order = docSnap.data();
       let orderDate = order.createdAt?.toDate ? order.createdAt.toDate() : new Date(order.createdAt);
-      const orderPoints = Math.floor((order.subtotal || order.total) / 100);
       const expiryDate = new Date(orderDate);
-      expiryDate.setDate(expiryDate.getDate() + 60);
-      
-      if (expiryDate > now && expiryDate <= nextWeek) {
-        expiringPoints += orderPoints;
+      expiryDate.setDate(expiryDate.getDate() + POINTS_VALID_DAYS);
+
+      if (expiryDate > now && expiryDate <= warningLimit) {
+        expiringPoints += orderPointsEarned(order);
       }
     });
-    
+
+    // No pueden estar por vencer más puntos de los que la persona tiene hoy.
+    expiringPoints = Math.min(expiringPoints, Number(userData?.points) || 0);
+
     const expiringPointsEl = document.getElementById('expiringPoints');
     if (expiringPointsEl) expiringPointsEl.textContent = expiringPoints;
     

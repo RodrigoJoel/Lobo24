@@ -51,23 +51,31 @@ window.scrollCatNav = scrollCatNav;
 /* ─────────────────────────────────────
    SEARCH GLOBAL
 ───────────────────────────────────── */
+// El buscador de la barra busca en toda la tienda (buscar.html).
+// El de cada categoría ("Buscar en Almacén...") sigue filtrando solo esa categoría.
+function goToStoreSearch(q) {
+  window.location.href = 'buscar.html?q=' + encodeURIComponent(q);
+}
+
 function handleSearch() {
-  const q = document.getElementById('searchInput')?.value.trim();
+  const input = document.getElementById('searchInput');
+  const q = input?.value.trim();
   if (!q) return;
 
-  const catSearch = document.getElementById('catSearch');
-  if (catSearch) {
-    catSearch.value = q;
-    if (typeof applyFilters === 'function') {
-      applyFilters();
-    }
-    document.querySelector('.cat-search-bar')?.scrollIntoView({
-      behavior: 'smooth',
-      block: 'center'
-    });
-  } else {
-    showToast(`🔍 Buscando "${q}"...`);
+  // En buscar.html los resultados se actualizan en el lugar, sin recargar.
+  if (typeof window.runStoreSearch === 'function') {
+    window.runStoreSearch(q);
+    input.blur();
+    return;
   }
+
+  goToStoreSearch(q);
+}
+
+// Desde una categoría que no tiene lo buscado: repetir la búsqueda en toda la tienda.
+function searchWholeStore() {
+  const q = document.getElementById('catSearch')?.value.trim();
+  if (q) goToStoreSearch(q);
 }
 
 /* ─────────────────────────────────────
@@ -595,6 +603,7 @@ window.handleRegister = handleRegister;
 window.handleLogout = handleLogout;
 window.toggleUserDropdown = toggleUserDropdown;
 window.handleSearch = handleSearch;
+window.searchWholeStore = searchWholeStore;
 window.showToast = showToast;
 window.addToCart = addToCart;
 window.changeQty = changeQty;
