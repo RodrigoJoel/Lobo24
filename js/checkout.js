@@ -234,7 +234,7 @@ function renderStep1() {
     return `
       <div class="panel step-content">
         <div class="panel-header">
-          <div class="panel-icon">🛒</div>
+          <div class="panel-icon"><i class="fa-solid fa-bag-shopping"></i></div>
           <div>
             <div class="panel-title">TU <span>CARRITO</span></div>
             <div class="panel-sub">Revisá tus productos</div>
@@ -242,9 +242,9 @@ function renderStep1() {
         </div>
         <div class="panel-body">
           <div class="empty-cart">
-            <div class="empty-icon">🛒</div>
+            <div class="empty-icon"><i class="fa-solid fa-bag-shopping"></i></div>
             <p>Tu carrito está vacío</p>
-            <a href="index.html" class="btn btn-primary" style="display:inline-flex;margin:0 auto">Ver productos →</a>
+            <a href="index.html" class="btn btn-primary">Ver productos<i class="fa-solid fa-arrow-right"></i></a>
           </div>
         </div>
       </div>`;
@@ -257,8 +257,8 @@ function renderStep1() {
     const maxQty = Math.min(stock ?? 999999, limit ?? 999999);
     const atMax = item.qty >= maxQty;
     const maxReason = (limit !== null && limit <= (stock ?? Infinity))
-      ? `⚠️ Límite de compra: ${limit} unidad${limit !== 1 ? 'es' : ''}`
-      : '⚠️ Stock máximo alcanzado';
+      ? `Límite de compra: ${limit} unidad${limit !== 1 ? 'es' : ''}`
+      : 'Stock máximo alcanzado';
 
     return `
       <div class="cart-item-row" id="ci-${item.docId}">
@@ -269,22 +269,22 @@ function renderStep1() {
           <div class="cart-item-name">${esc(item.name || '')}</div>
           <div class="cart-item-brand">${esc(item.brand || '')}</div>
           <div class="cart-item-unit">$${Number(precioSegunPago(item)).toLocaleString('es-AR')} c/u</div>
-          ${atMax && maxQty < 999999 ? `<div class="stock-warning">${maxReason}</div>` : ''}
+          ${atMax && maxQty < 999999 ? `<div class="stock-warning"><i class="fa-solid fa-circle-info"></i>${maxReason}</div>` : ''}
         </div>
         <div class="qty-row">
-          <button class="qty-btn" onclick="changeQtyCheckout('${item.docId}', -1)">−</button>
+          <button class="qty-btn" onclick="changeQtyCheckout('${item.docId}', -1)" aria-label="Quitar una unidad">−</button>
           <span class="qty-num">${item.qty}</span>
-          <button class="qty-btn" onclick="changeQtyCheckout('${item.docId}', 1)" ${atMax ? 'disabled' : ''}>+</button>
+          <button class="qty-btn" onclick="changeQtyCheckout('${item.docId}', 1)" aria-label="Agregar una unidad" ${atMax ? 'disabled' : ''}>+</button>
         </div>
         <div class="cart-item-price">$${total.toLocaleString('es-AR')}</div>
-        <button class="remove-btn" onclick="removeFromCheckout('${item.docId}')" title="Eliminar">✕</button>
+        <button class="remove-btn" onclick="removeFromCheckout('${item.docId}')" title="Eliminar" aria-label="Eliminar ${esc(item.name || '')}"><i class="fa-regular fa-trash-can"></i></button>
       </div>`;
   }).join('');
 
   return `
     <div class="panel step-content">
       <div class="panel-header">
-        <div class="panel-icon">🛒</div>
+        <div class="panel-icon"><i class="fa-solid fa-bag-shopping"></i></div>
         <div>
           <div class="panel-title">TU <span>CARRITO</span></div>
           <div class="panel-sub">${cartItems.length} producto${cartItems.length !== 1 ? 's' : ''} · Revisá antes de continuar</div>
@@ -293,10 +293,9 @@ function renderStep1() {
       <div class="panel-body">
         ${itemsHtml}
         <div class="cart-actions">
-          <button class="btn btn-danger" onclick="clearCart()">🗑 Vaciar carrito</button>
-          <div style="flex:1"></div>
-          <a href="index.html" class="btn btn-ghost">← Seguir comprando</a>
-          <button class="btn btn-primary" onclick="renderStep(2)">Proceder al pago →</button>
+          <button class="btn btn-danger" onclick="clearCart()"><i class="fa-regular fa-trash-can"></i>Vaciar carrito</button>
+          <a href="index.html" class="btn btn-ghost"><i class="fa-solid fa-arrow-left"></i>Seguir comprando</a>
+          <button class="btn btn-primary" onclick="renderStep(2)">Continuar<i class="fa-solid fa-arrow-right"></i></button>
         </div>
       </div>
     </div>`;
@@ -354,7 +353,7 @@ function renderStep2() {
   return `
     <div class="panel step-content">
       <div class="panel-header">
-        <div class="panel-icon">👤</div>
+        <div class="panel-icon"><i class="fa-solid fa-user"></i></div>
         <div>
           <div class="panel-title">INFORMACIÓN DE <span>CONTACTO</span></div>
           <div class="panel-sub">Tus datos para gestionar el pedido</div>
@@ -382,7 +381,7 @@ function renderStep2() {
         </div>
 
         <div class="address-section">
-          <div class="address-section-title">📍 Dirección de entrega</div>
+          <div class="address-section-title"><i class="fa-solid fa-location-dot"></i>Dirección de entrega</div>
           <div class="form-grid">
             <div class="form-group full">
               <label class="form-label">Calle y número <span class="req">*</span></label>
@@ -404,15 +403,15 @@ function renderStep2() {
             </div>
 
             <div class="form-group full">
-              <label class="form-label">Notas adicionales <span style="color:var(--muted);font-weight:400">(opcional)</span></label>
+              <label class="form-label">Notas adicionales <span class="optional">(opcional)</span></label>
               <textarea class="form-input" id="f-notes" rows="2" placeholder="Instrucciones especiales, departamento, timbre...">${esc(c.notes || '')}</textarea>
             </div>
           </div>
         </div>
 
         <div class="btn-row">
-          <button class="btn btn-ghost" onclick="renderStep(1)">← Volver al carrito</button>
-          <button class="btn btn-primary" onclick="submitStep2()">Continuar al envío →</button>
+          <button class="btn btn-ghost" onclick="renderStep(1)"><i class="fa-solid fa-arrow-left"></i>Volver al carrito</button>
+          <button class="btn btn-primary" onclick="submitStep2()">Continuar al envío<i class="fa-solid fa-arrow-right"></i></button>
         </div>
       </div>
     </div>`;
@@ -460,6 +459,7 @@ function submitStep2() {
   validate('f-street', 'err-street', street && street.length >= 3);
   validate('f-city', 'err-city', city && city.length >= 2);
 
+  document.getElementById('f-province')?.classList.toggle('error', !province);
   if (!province) {
     showToast('⚠️ Seleccioná tu provincia', 'warn');
     ok = false;
@@ -489,7 +489,7 @@ function renderStep3() {
   return `
     <div class="panel step-content">
       <div class="panel-header">
-        <div class="panel-icon">🚚</div>
+        <div class="panel-icon"><i class="fa-solid fa-truck"></i></div>
         <div>
           <div class="panel-title">MÉTODO DE <span>ENTREGA</span></div>
           <div class="panel-sub">Envíos hasta ${SHIPPING.RADIO_KM} km desde ${STORE.address}</div>
@@ -497,77 +497,74 @@ function renderStep3() {
       </div>
 
       <div class="panel-body">
-        <div class="delivery-option${STATE.delivery === 'local' ? ' selected' : ''}" id="del-local" onclick="selectDelivery('local', 0)">
+        <div class="delivery-option${STATE.delivery === 'local' ? ' selected' : ''}" id="del-local" role="button" tabindex="0" onclick="selectDelivery('local', 0)">
           <div class="delivery-option-header">
             <div class="delivery-option-left">
               <div class="delivery-radio"></div>
-              <div class="delivery-icon">🏪</div>
+              <div class="delivery-icon"><i class="fa-solid fa-store"></i></div>
               <div>
                 <div class="delivery-name">Retiro en sucursal</div>
-                <div class="delivery-sub" style="font-size:12px;color:var(--muted)">Pasá a retirarlo cuando quieras</div>
+                <div class="delivery-sub">Pasá a retirarlo cuando quieras</div>
               </div>
             </div>
             <div class="delivery-price free">GRATIS</div>
           </div>
 
           <div class="delivery-details">
-            📍 ${STORE.address}<br>
-            🕐 ${STORE.hours}<br>
-            <span class="delivery-badge">✅ Disponible hoy</span>
+            <span class="detail-line"><i class="fa-solid fa-location-dot"></i>${STORE.address}</span>
+            <span class="detail-line"><i class="fa-regular fa-clock"></i>${STORE.hours}</span>
+            <span class="delivery-badge"><i class="fa-solid fa-check"></i>Disponible hoy</span>
           </div>
         </div>
 
         <div
           class="delivery-option${!isChaco ? ' disabled' : ''}${STATE.delivery === 'domicilio' ? ' selected' : ''}"
           id="del-dom"
+          role="button"
+          tabindex="0"
           onclick="${isChaco ? `selectDeliveryDomicilio()` : `showToast('No realizamos envíos a otras provincias', 'warn')`}"
         >
           <div class="delivery-option-header">
             <div class="delivery-option-left">
               <div class="delivery-radio"></div>
-              <div class="delivery-icon">🛵</div>
+              <div class="delivery-icon"><i class="fa-solid fa-motorcycle"></i></div>
               <div>
                 <div class="delivery-name">Envío a domicilio</div>
-                <div class="delivery-sub" style="font-size:12px;color:var(--muted)">
+                <div class="delivery-sub">
                   Solo hasta ${SHIPPING.RADIO_KM} km desde Av. Sarmiento 322, Resistencia
                 </div>
               </div>
             </div>
 
             <div class="delivery-price ${shippingCost === 0 ? 'free' : 'paid'}">
-              ${shippingCost === 0
-                ? '<span style="color:var(--green)">GRATIS</span>'
-                : `$${shippingCost.toLocaleString('es-AR')}`}
+              ${shippingCost === 0 ? 'GRATIS' : `$${shippingCost.toLocaleString('es-AR')}`}
             </div>
           </div>
 
           <div class="delivery-details">
             ${isChaco ? `
-              Radio máximo de entrega: <strong style="color:var(--accent)">${SHIPPING.RADIO_KM} km</strong><br>
-              Costo fijo: <strong style="color:var(--accent)">$${SHIPPING.COSTO_FIJO.toLocaleString('es-AR')}</strong><br>
+              <span class="detail-line">Radio máximo de entrega: <strong>${SHIPPING.RADIO_KM} km</strong></span>
+              <span class="detail-line">Costo fijo: <strong>$${SHIPPING.COSTO_FIJO.toLocaleString('es-AR')}</strong></span>
               ${subtotal >= SHIPPING.LOCAL_MIN
-                ? `<span class="delivery-badge">🎉 ¡Envío gratis superando $${SHIPPING.LOCAL_MIN.toLocaleString('es-AR')}!</span>`
-                : `<span class="delivery-badge">🚚 Envío gratis desde $${SHIPPING.LOCAL_MIN.toLocaleString('es-AR')}</span>`
+                ? `<span class="delivery-badge"><i class="fa-solid fa-check"></i>Tenés envío gratis por superar $${SHIPPING.LOCAL_MIN.toLocaleString('es-AR')}</span>`
+                : `<span class="delivery-badge"><i class="fa-solid fa-truck"></i>Envío gratis desde $${SHIPPING.LOCAL_MIN.toLocaleString('es-AR')}</span>`
               }
             ` : `
-              <strong style="color:var(--red)">No realizamos envíos a otras provincias, pero próximamente estaremos expandiendo nuestros servicios.</strong><br>
-              Podés elegir retiro en sucursal.
+              <strong class="delivery-unavailable">No realizamos envíos a otras provincias, pero próximamente estaremos expandiendo nuestros servicios.</strong>
+              <span class="detail-line">Podés elegir retiro en sucursal.</span>
             `}
           </div>
         </div>
 
         <div class="delivery-info-box">
-          <strong>📦 Tu dirección registrada:</strong><br>
-          ${esc(STATE.contact.street || '')}, ${esc(STATE.contact.city || '')}, ${esc(STATE.contact.province || '')}
-          <br><br>
-          <span style="color:var(--muted)">
-            * El envío queda sujeto a validación del radio máximo de ${SHIPPING.RADIO_KM} km desde el local.
-          </span>
+          <strong><i class="fa-solid fa-location-dot"></i>Tu dirección registrada</strong>
+          <span>${esc(STATE.contact.street || '')}, ${esc(STATE.contact.city || '')}, ${esc(STATE.contact.province || '')}</span>
+          <small>El envío queda sujeto a validación del radio máximo de ${SHIPPING.RADIO_KM} km desde el local.</small>
         </div>
 
         <div class="btn-row">
-          <button class="btn btn-ghost" onclick="renderStep(2)">← Volver</button>
-          <button class="btn btn-primary" onclick="submitStep3()">Continuar al pago →</button>
+          <button class="btn btn-ghost" onclick="renderStep(2)"><i class="fa-solid fa-arrow-left"></i>Volver</button>
+          <button class="btn btn-primary" onclick="submitStep3()">Continuar al pago<i class="fa-solid fa-arrow-right"></i></button>
         </div>
       </div>
     </div>`;
@@ -627,8 +624,8 @@ async function submitStep3() {
 
     // Avisa antes de llegar al pago; el backend vuelve a validar al confirmar.
     const btn = document.querySelector('.btn-row .btn-primary');
-    const btnText = btn ? btn.textContent : '';
-    if (btn) { btn.disabled = true; btn.textContent = '⏳ Verificando dirección...'; }
+    const btnText = btn ? btn.innerHTML : '';
+    if (btn) { btn.disabled = true; btn.textContent = 'Verificando dirección…'; }
     try {
       const res = await fetch('https://lobo24-backend-zibj.onrender.com/validar-distancia', {
         method: 'POST',
@@ -650,7 +647,7 @@ async function submitStep3() {
       showToast('❌ No se pudo validar la dirección. Intentá de nuevo o elegí retiro en sucursal.', 'error');
       return;
     } finally {
-      if (btn) { btn.disabled = false; btn.textContent = btnText; }
+      if (btn) { btn.disabled = false; btn.innerHTML = btnText; }
     }
   }
 
@@ -659,6 +656,8 @@ async function submitStep3() {
 /* ══════════════════════════════════════════════════════════
    PASO 4 — PAGO (CON SISTEMA DE PUNTOS)
 ══════════════════════════════════════════════════════════ */
+
+const CONFIRM_LABEL = '<i class="fa-solid fa-lock"></i>Confirmar y pagar';
 
 function renderStep4() {
   const subtotal = getSubtotal();
@@ -679,7 +678,7 @@ function renderStep4() {
   return `
     <div class="panel step-content">
       <div class="panel-header">
-        <div class="panel-icon">💳</div>
+        <div class="panel-icon"><i class="fa-solid fa-credit-card"></i></div>
         <div>
           <div class="panel-title">MÉTODO DE <span>PAGO</span></div>
           <div class="panel-sub">Elegí cómo querés pagar tu pedido</div>
@@ -687,50 +686,46 @@ function renderStep4() {
       </div>
       <div class="panel-body">
         ${belowMin ? `
-        <div class="points-section" style="background:rgba(229,62,62,0.1);border-color:rgba(229,62,62,0.2)">
-          <div style="font-size:13px;color:var(--red);text-align:center;padding:8px 0">
-            ⚠️ Te faltan $${(MIN_PURCHASE - subtotal).toLocaleString('es-AR')} para el mínimo de compra de $${MIN_PURCHASE.toLocaleString('es-AR')}
-          </div>
+        <div class="notice notice-warn">
+          <i class="fa-solid fa-triangle-exclamation"></i>
+          <span>Te faltan $${(MIN_PURCHASE - subtotal).toLocaleString('es-AR')} para el mínimo de compra de $${MIN_PURCHASE.toLocaleString('es-AR')}</span>
         </div>
         ` : ''}
         ${hasPoints ? `
         <div class="points-section">
           <div class="points-header">
             <div class="points-title">
-              ⭐ Usar mis puntos
+              <i class="fa-solid fa-star"></i>Usar mis puntos
               <span class="points-badge">${userPts.toLocaleString('es-AR')} pts disponibles</span>
             </div>
             <div class="points-available">Podés usar hasta el 30% del total</div>
           </div>
           <div class="points-slider-wrap">
-            <span style="font-size:12px;color:var(--muted)">$0</span>
+            <span class="points-min">$0</span>
             <input type="range" class="points-slider" id="pointsSlider"
               min="0" max="${availPts}" value="${puntosActuales}"
+              aria-label="Puntos a usar en esta compra"
               oninput="updatePoints(this.value)"/>
             <div class="points-amount" id="pointsAmount">-$${puntosActuales.toLocaleString('es-AR')}</div>
           </div>
           <div class="points-desc">
-            Máximo aplicable: <strong style="color:var(--accent)">$${availPts.toLocaleString('es-AR')}</strong>
+            Máximo aplicable: <strong>$${availPts.toLocaleString('es-AR')}</strong>
             (30% de $${totalSinDesc.toLocaleString('es-AR')}) · 1 punto = $1
           </div>
         </div>
         ` : `
-        <div class="points-section" style="background:rgba(229,62,62,0.1);border-color:rgba(229,62,62,0.2)">
-          <div class="points-header">
-            <div class="points-title">
-              ⭐ Puntos
-            </div>
-          </div>
-          <div style="font-size:13px;color:var(--red);text-align:center;padding:8px 0">
-            ❌ No tenés puntos disponibles para usar en esta compra.
-          </div>
+        <div class="notice">
+          <i class="fa-regular fa-star"></i>
+          <span>${window._currentUser
+            ? 'Todavía no tenés puntos para usar en esta compra.'
+            : 'Con una cuenta sumás puntos en cada compra y los usás como descuento.'}</span>
         </div>
         `}
 
-        <div class="payment-option${STATE.payment === 'mp' ? ' selected' : ''}" id="pay-mp" onclick="selectPayment('mp')">
+        <div class="payment-option${STATE.payment === 'mp' ? ' selected' : ''}" id="pay-mp" role="button" tabindex="0" onclick="selectPayment('mp')">
           <div class="payment-option-header">
             <div class="payment-radio"></div>
-            <div class="payment-icon">⚡</div>
+            <div class="payment-icon"><i class="fa-solid fa-credit-card"></i></div>
             <div>
               <div class="payment-name">Mercado Pago</div>
               <div class="payment-sub">Tarjeta de crédito/débito · Cuotas disponibles</div>
@@ -740,19 +735,17 @@ function renderStep4() {
             <div class="mp-form">
               <div class="mp-brand">
                 <div class="mp-logo">mercadopago</div>
-                <div class="mp-secure">🔒 Pago seguro y encriptado</div>
+                <div class="mp-secure"><i class="fa-solid fa-lock"></i>Pago seguro y encriptado</div>
               </div>
-              <p style="font-size:13px;color:var(--muted);text-align:center;padding:12px 0">
-                Al confirmar serás redirigido al sitio de Mercado Pago para completar el pago de forma segura.
-              </p>
+              <p>Al confirmar serás redirigido al sitio de Mercado Pago para completar el pago de forma segura.</p>
             </div>
           </div>
         </div>
 
-        <div class="payment-option${STATE.payment === 'transfer' ? ' selected' : ''}" id="pay-transfer" onclick="selectPayment('transfer')">
+        <div class="payment-option${STATE.payment === 'transfer' ? ' selected' : ''}" id="pay-transfer" role="button" tabindex="0" onclick="selectPayment('transfer')">
           <div class="payment-option-header">
             <div class="payment-radio"></div>
-            <div class="payment-icon">🏦</div>
+            <div class="payment-icon"><i class="fa-solid fa-building-columns"></i></div>
             <div>
               <div class="payment-name">Transferencia bancaria</div>
               <div class="payment-sub">Envianos el comprobante por WhatsApp</div>
@@ -770,21 +763,22 @@ function renderStep4() {
         </div>
 
         <div class="payment-option${canEfectivo ? '' : ' disabled'}${STATE.payment === 'efectivo' ? ' selected' : ''}" id="pay-efectivo"
+          ${canEfectivo ? 'role="button" tabindex="0"' : 'aria-disabled="true"'}
           onclick="${canEfectivo ? `selectPayment('efectivo')` : `showToast('Solo disponible con retiro en sucursal','warn')`}">
           <div class="payment-option-header">
             <div class="payment-radio"></div>
-            <div class="payment-icon">💵</div>
+            <div class="payment-icon"><i class="fa-solid fa-money-bill-wave"></i></div>
             <div>
               <div class="payment-name">Efectivo en local</div>
-              <div class="payment-sub">${canEfectivo ? 'Pagás cuando venís a retirar' : '⚠️ Solo disponible con retiro en sucursal'}</div>
+              <div class="payment-sub">${canEfectivo ? 'Pagás cuando venís a retirar' : 'Solo disponible con retiro en sucursal'}</div>
             </div>
           </div>
         </div>
 
         <div class="btn-row">
-          <button class="btn btn-ghost" onclick="renderStep(3)">← Volver</button>
+          <button class="btn btn-ghost" onclick="renderStep(3)"><i class="fa-solid fa-arrow-left"></i>Volver</button>
           <button class="btn btn-primary btn-large" id="btnConfirmar" onclick="submitStep4()" ${!STATE.payment || belowMin ? 'disabled' : ''}>
-            🔒 Confirmar y Pagar
+            ${CONFIRM_LABEL}
           </button>
         </div>
       </div>
@@ -821,7 +815,7 @@ async function submitStep4() {
   const btn = document.getElementById('btnConfirmar');
   if (btn) {
     btn.disabled = true;
-    btn.textContent = '⏳ Procesando...';
+    btn.textContent = 'Procesando…';
   }
   
   try {
@@ -990,7 +984,8 @@ async function submitStep4() {
 
         STATE.cart = [];
         localStorage.removeItem('lobo24_cart');
-        showToast('🎉 Pedido #' + orderId + ' realizado con éxito! Ganaste ' + confirmData.pointsEarned + ' puntos.', 'success');
+        // Los puntos solo se acreditan con sesión iniciada.
+        showToast('Pedido #' + orderId + ' realizado con éxito.' + (window._currentUser ? ' Ganaste ' + confirmData.pointsEarned + ' puntos.' : ''), 'success');
         renderStep(5);
       }
 
@@ -999,7 +994,7 @@ async function submitStep4() {
     showToast(`❌ ${err.message || 'Error al procesar el pedido. Intentá de nuevo.'}`, 'error');
     if (btn) {
       btn.disabled = false;
-      btn.textContent = '🔒 Confirmar y Pagar';
+      btn.innerHTML = CONFIRM_LABEL;
     }
   }
 }
@@ -1011,9 +1006,9 @@ async function submitStep4() {
 function renderStep5() {
   const paymentLabels = { mp: 'Mercado Pago', transfer: 'Transferencia bancaria', efectivo: 'Efectivo en local' };
   const deliveryLabels = {
-  local: 'Retiro en sucursal',
-  domicilio: 'Envío a domicilio hasta 4 km'
-};
+    local: 'Retiro en sucursal',
+    domicilio: 'Envío a domicilio'
+  };
 
   const order = STATE.lastOrder || {};
   const contact = order.contact || STATE.contact || {};
@@ -1030,13 +1025,13 @@ function renderStep5() {
   );
 
   return `
-    <div class="panel step-content" style="grid-column:1/-1;max-width:680px;margin:0 auto;width:100%">
+    <div class="panel step-content panel-confirmation">
       <div class="confirmation">
-        <div class="confirmation-icon">✅</div>
+        <div class="confirmation-icon"><i class="fa-solid fa-check"></i></div>
         <h2>¡PEDIDO REALIZADO!</h2>
         <p>Tu pedido fue registrado con éxito. Recibirás confirmación en <strong>${esc(contact.email || 'tu correo')}</strong>.</p>
 
-        <div class="order-number">📋 Pedido #${orderNum}</div>
+        <div class="order-number"><i class="fa-solid fa-receipt"></i>Pedido #${orderNum}</div>
 
         <div class="confirmation-detail">
           <div class="cd-row">
@@ -1059,42 +1054,42 @@ function renderStep5() {
             <span class="cd-value">${paymentLabels[payment] || payment || '—'}</span>
           </div>
 
-          <div class="cd-row">
-            <span class="cd-label">Total abonado</span>
-            <span class="cd-value" style="color:var(--accent)">$${totalFinal.toLocaleString('es-AR')}</span>
+          <div class="cd-row cd-total">
+            <span class="cd-label">Total</span>
+            <span class="cd-value">$${totalFinal.toLocaleString('es-AR')}</span>
           </div>
 
-          <div class="cd-row">
-            <span class="cd-label">⭐ Puntos ganados</span>
-            <span class="cd-value" style="color:var(--green)">+${pointsEarned} puntos</span>
-          </div>
+          ${window._currentUser && pointsEarned > 0
+            ? `<div class="cd-row cd-earned"><span class="cd-label"><i class="fa-solid fa-star"></i>Puntos ganados</span><span class="cd-value">+${pointsEarned} puntos</span></div>`
+            : ''
+          }
 
           ${pointsUsed > 0
-            ? `<div class="cd-row"><span class="cd-label">⭐ Puntos usados</span><span class="cd-value" style="color:var(--accent2)">-${pointsUsed} puntos</span></div>`
+            ? `<div class="cd-row cd-used"><span class="cd-label"><i class="fa-solid fa-star"></i>Puntos usados</span><span class="cd-value">-${pointsUsed} puntos</span></div>`
             : ''
           }
         </div>
 
         ${payment === 'transfer' ? `
-          <div style="background:rgba(240,192,64,.08);border:1px solid rgba(240,192,64,.2);border-radius:12px;padding:16px 20px;margin-bottom:20px;font-size:13px;color:var(--muted);text-align:left">
-            <strong style="color:var(--accent)">📌 Próximo paso:</strong><br>
-            Realizá la transferencia por <strong>$${totalFinal.toLocaleString('es-AR')}</strong> al alias <strong>LOBO24HS</strong>
+          <div class="next-step">
+            <strong><i class="fa-solid fa-thumbtack"></i>Próximo paso</strong>
+            Realizá la transferencia por <b>$${totalFinal.toLocaleString('es-AR')}</b> al alias <b>LOBO24HS</b>
             y enviá el comprobante por WhatsApp mencionando el pedido #${orderNum}.
           </div>
         ` : ''}
 
         ${payment === 'mp' ? `
-          <div style="background:rgba(240,192,64,.08);border:1px solid rgba(240,192,64,.2);border-radius:12px;padding:16px 20px;margin-bottom:20px;font-size:13px;color:var(--muted);text-align:left">
-            <strong style="color:var(--accent)">📌 Sobre tu pago:</strong><br>
+          <div class="next-step">
+            <strong><i class="fa-solid fa-thumbtack"></i>Sobre tu pago</strong>
             ${order.mpPending
               ? 'Mercado Pago todavía está procesando tu pago. Te vamos a avisar por email en cuanto se confirme.'
               : 'Mercado Pago está validando la acreditación del pago. En unos minutos vas a recibir la confirmación por email.'}
           </div>
         ` : ''}
 
-        <div style="display:flex;flex-wrap:wrap;gap:12px;justify-content:center">
-          <a href="https://wa.me/54${STORE.phone}?text=${whatsMsg}" target="_blank" class="whatsapp-btn">💬 Contactar por WhatsApp</a>
-          <a href="index.html" class="btn btn-ghost">🛍️ Seguir comprando</a>
+        <div class="confirmation-actions">
+          <a href="https://wa.me/54${STORE.phone}?text=${whatsMsg}" target="_blank" rel="noopener" class="whatsapp-btn"><i class="fa-brands fa-whatsapp"></i>Contactar por WhatsApp</a>
+          <a href="index.html" class="btn btn-ghost">Seguir comprando</a>
         </div>
       </div>
     </div>`;
@@ -1107,11 +1102,15 @@ function renderStep5() {
 function renderSummary() {
   const itemsEl = document.getElementById('summaryItems');
   const totalsEl = document.getElementById('summaryTotals');
+  const miniEl = document.getElementById('summaryMini');
+  const noticeEl = document.getElementById('summaryNotice');
   if (!itemsEl || !totalsEl) return;
-  
+
   if (STATE.cart.length === 0) {
-    itemsEl.innerHTML = `<p style="text-align:center;color:var(--muted);padding:20px">Carrito vacío</p>`;
+    itemsEl.innerHTML = `<p class="summary-empty">Carrito vacío</p>`;
     totalsEl.innerHTML = '';
+    if (miniEl) miniEl.textContent = '';
+    if (noticeEl) noticeEl.innerHTML = '';
     return;
   }
   
@@ -1130,11 +1129,23 @@ function renderSummary() {
   
   totalsEl.innerHTML = `
     <div class="summary-row"><span class="label">Subtotal</span><span class="value">$${subtotal.toLocaleString('es-AR')}</span></div>
-    <div class="summary-row${shipping > 0 ? ' shipping-cost' : ''}"><span class="label">Envío</span><span class="value">${shipping === 0 ? '<span style="color:var(--green)">Gratis</span>' : '$' + shipping.toLocaleString('es-AR')}</span></div>
-    ${pointsDisc > 0 ? `<div class="summary-row discount"><span class="label">⭐ Descuento puntos</span><span class="value">-$${pointsDisc.toLocaleString('es-AR')}</span></div>` : ''}
+    <div class="summary-row${shipping > 0 ? ' shipping-cost' : ''}"><span class="label">Envío</span><span class="value">${shipping === 0 ? '<span class="free">Gratis</span>' : '$' + shipping.toLocaleString('es-AR')}</span></div>
+    ${pointsDisc > 0 ? `<div class="summary-row discount"><span class="label"><i class="fa-solid fa-star"></i>Descuento puntos</span><span class="value">-$${pointsDisc.toLocaleString('es-AR')}</span></div>` : ''}
     <div class="summary-row total"><span class="label">Total</span><span class="value">$${total.toLocaleString('es-AR')}</span></div>
-    ${subtotal < MIN_PURCHASE ? `<div class="summary-row" style="color:var(--red);font-size:12px;margin-top:6px">⚠️ Faltan $${(MIN_PURCHASE - subtotal).toLocaleString('es-AR')} para el mínimo de compra ($${MIN_PURCHASE.toLocaleString('es-AR')})</div>` : ''}
   `;
+
+  // En celular el resumen está plegado: el total y el aviso de mínimo quedan siempre a la vista.
+  if (miniEl) miniEl.textContent = `$${total.toLocaleString('es-AR')}`;
+  if (noticeEl) {
+    noticeEl.innerHTML = subtotal < MIN_PURCHASE
+      ? `<i class="fa-solid fa-circle-info"></i><span>Faltan $${(MIN_PURCHASE - subtotal).toLocaleString('es-AR')} para el mínimo de compra ($${MIN_PURCHASE.toLocaleString('es-AR')})</span>`
+      : '';
+  }
+}
+
+function toggleSummary() {
+  const open = document.getElementById('orderSummary')?.classList.toggle('summary-open');
+  document.getElementById('summaryToggle')?.setAttribute('aria-expanded', String(!!open));
 }
 
 function getSubtotal() {
@@ -1153,10 +1164,15 @@ function copyText(text, msg) {
   navigator.clipboard.writeText(text).then(() => showToast(`📋 ${msg}`)).catch(() => showToast('Error al copiar', 'error'));
 }
 
+const TOAST_ICONS = { ok: 'fa-circle-check', warn: 'fa-triangle-exclamation', error: 'fa-circle-xmark' };
+
 function showToast(msg, type = 'ok') {
+  const kind = type === 'error' || type === 'warn' ? type : 'ok';
+  // El icono sale del tipo de aviso: se quita el emoji con el que empiezan los textos.
+  const text = String(msg).replace(/^[\p{Extended_Pictographic}\p{Mn}\p{Cf}\s]+/u, '');
   const t = document.createElement('div');
-  t.className = 'toast' + ((type === 'error' || type === 'warn') ? ' error' : '');
-  t.innerHTML = `<span>${type === 'error' ? '❌' : type === 'warn' ? '⚠️' : '🐺'}</span> ${msg}`;
+  t.className = 'toast' + (kind === 'ok' ? '' : ' ' + kind);
+  t.innerHTML = `<i class="fa-solid ${TOAST_ICONS[kind]}"></i><span>${text}</span>`;
   const container = document.getElementById('toastContainer');
   if (container) {
     container.appendChild(t);
@@ -1203,9 +1219,19 @@ function updateStepTabs(active) {
     const conn = document.getElementById(`conn-${i}`);
     if (!tab) continue;
     tab.className = 'step' + (i < active ? ' done' : i === active ? ' active' : '');
+    if (i === active) tab.setAttribute('aria-current', 'step');
+    else tab.removeAttribute('aria-current');
     if (conn) conn.className = 'step-connector' + (i < active ? ' done' : '');
   }
 }
+
+// Las opciones de entrega y de pago son tarjetas: con teclado se eligen con Enter o Espacio.
+document.addEventListener('keydown', e => {
+  if ((e.key === 'Enter' || e.key === ' ') && e.target.matches?.('.delivery-option, .payment-option')) {
+    e.preventDefault();
+    e.target.click();
+  }
+});
 
 /* ══════════════════════════════════════════════════════════
    EXPORTAR FUNCIONES GLOBALES
@@ -1225,6 +1251,7 @@ window.updatePoints = updatePoints;
 window.submitStep4 = submitStep4;
 window.copyText = copyText;
 window.showToast = showToast;
+window.toggleSummary = toggleSummary;
 window.initCheckout = initCheckout;
 
 // Inicializar
