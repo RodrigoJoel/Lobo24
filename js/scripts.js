@@ -23,7 +23,7 @@ function buildCarousel(slides) {
         <h1>${(s.title || '').replace(/\n/g, '<br>')}</h1>
         <p class="slide-desc">${s.desc || ''}</p>
         <div class="hero-cta">
-          <a href="${s.btnLink || '#'}" class="btn btn-yellow">${s.btnText || 'Ver más'}</a>
+          <a href="${s.btnLink || '#'}" class="btn btn-yellow">${cleanLabel(s.btnText || 'Ver más')}</a>
           <button class="btn btn-ghost" onclick="openModal()">Crear cuenta gratis →</button>
         </div>
       </div>
@@ -61,6 +61,22 @@ function carouselMove(dir) {
 /* ══════════════════════════════════════
    HOME - CATEGORÍAS
 ══════════════════════════════════════ */
+const CAT_ICONS = {
+  bebidas: 'fa-bottle-water', snacks: 'fa-cookie-bite', almacen: 'fa-basket-shopping', higiene: 'fa-pump-soap',
+  limpieza: 'fa-spray-can-sparkles', congelados: 'fa-snowflake', lacteos: 'fa-cheese', panaderia: 'fa-bread-slice',
+  mascotas: 'fa-paw', perfumeria: 'fa-bottle-droplet', bazar: 'fa-utensils', ofertas: 'fa-tags'
+};
+
+// Quita el emoji inicial de un texto cargado desde el panel ("🛒 Ver productos" → "Ver productos").
+function cleanLabel(text) {
+  return String(text).replace(/^[\p{Extended_Pictographic}\uFE0F\u200D\s]+/u, '');
+}
+
+function countLabel(slug, count) {
+  if (slug === 'ofertas') return 'Ver descuentos';
+  return count > 0 ? count + ' productos' : '';
+}
+
 function buildCategories(cats) {
   const grid = document.getElementById('categoriesGrid');
   if (!grid) return;
@@ -69,12 +85,17 @@ function buildCategories(cats) {
     const slug = c.slug || '';
     const cache = window._catCounts || {};
     const count = (typeof cache[slug] === 'number') ? cache[slug] : (c.count || 0);
+    const icon = CAT_ICONS[slug]
+      ? `<i class="fa-solid ${CAT_ICONS[slug]}"></i>`
+      : (c.emoji || '<i class="fa-solid fa-store"></i>');
 
     return `
       <a class="category-card" href="${slug}.html">
-        <div class="cat-emoji">${c.emoji || '🛒'}</div>
-        <div class="cat-name">${c.name || ''}</div>
-        <div class="cat-count" id="catcount-${slug}">${count} productos</div>
+        <div class="cat-emoji">${icon}</div>
+        <div class="cat-text">
+          <div class="cat-name">${c.name || ''}</div>
+          <div class="cat-count" id="catcount-${slug}">${countLabel(slug, count)}</div>
+        </div>
       </a>
     `;
   }).join('');
@@ -85,7 +106,7 @@ function updateCategoryCount(slug, count) {
   window._catCounts[slug] = count;
 
   const el = document.getElementById('catcount-' + slug);
-  if (el) el.textContent = count + ' productos';
+  if (el) el.textContent = countLabel(slug, count);
 }
 
 window.updateCategoryCount = updateCategoryCount;
