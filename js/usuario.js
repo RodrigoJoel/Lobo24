@@ -387,6 +387,8 @@ async function loadUserPoints() {
 
     const expiringPointsEl = document.getElementById('expiringPoints');
     if (expiringPointsEl) expiringPointsEl.textContent = expiringPoints;
+
+    loadReservedPoints();
     
   } catch (error) {
     console.error('Error al cargar puntos:', error);
@@ -395,6 +397,62 @@ async function loadUserPoints() {
       document.getElementById('totalPoints').textContent = userData.points;
       document.getElementById('pointsValue').textContent = `$${userData.points.toLocaleString('es-AR')}`;
     }
+  }
+}
+
+// Puntos reservados en pagos de Mercado Pago que todavía no se hicieron.
+// Al consultarlos, el servidor devuelve los de los pagos que ya vencieron.
+// Si no responde (puede tardar cuando estaba dormido), se muestra el saldo
+// que ya se leyó.
+async function loadReservedPoints() {
+  try {
+    const token = await currentUser.getIdToken();
+    const res = await fetch('https://lobo24-backend-zibj.onrender.com/puntos-reservados', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token }
+    });
+    if (!res.ok) return;
+
+    const data = await res.json();
+
+    // Volvieron puntos de un pago vencido: se actualiza el saldo en pantalla.
+    if (data.points != null) {
+      const saldo = Number(data.points) || 0;
+      userData.points = saldo;
+      window._userPoints = saldo;
+      const totalPointsEl = document.getElementById('totalPoints');
+      const pointsValueEl = document.getElementById('pointsValue');
+      if (totalPointsEl) totalPointsEl.textContent = saldo;
+      if (pointsValueEl) pointsValueEl.textContent = `$${saldo.toLocaleString('es-AR')}`;
+    }
+
+    const reservas = Array.isArray(data.reservas) ? data.reservas.filter(r => Number(r.puntos) > 0) : [];
+    const summary = document.querySelector('.points-summary');
+    if (!summary) return;
+
+    let note = document.getElementById('pointsReservedNote');
+    if (!reservas.length) {
+      if (note) note.remove();
+      return;
+    }
+    if (!note) {
+      note = document.createElement('div');
+      note.id = 'pointsReservedNote';
+      note.style.cssText = 'background:rgba(240,192,64,0.1);padding:12px 14px;border-radius:8px;margin:0 0 20px;font-size:14px;line-height:1.5';
+      summary.insertAdjacentElement('afterend', note);
+    }
+
+    note.innerHTML = reservas.map(r => {
+      const vence = r.vence ? new Date(r.vence) : null;
+      const cuando = r.pagoEnProceso
+        ? 'Mercado Pago todavía está procesando ese pago.'
+        : (vence && vence > new Date())
+          ? `Si no lo pagás, vuelven a tu cuenta a las ${vence.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', hour12: false })} h.`
+          : 'Si no lo pagaste, vuelven a tu cuenta en unos minutos.';
+      return `<div><i class="fas fa-clock"></i> Tenés <strong>${Number(r.puntos).toLocaleString('es-AR')} puntos</strong> reservados en el pedido #${escapeHtml(r.orderId)} de Mercado Pago, que todavía no se pagó. ${cuando}</div>`;
+    }).join('');
+  } catch (error) {
+    console.error('No se pudieron consultar los puntos reservados:', error);
   }
 }
 

@@ -173,6 +173,54 @@ async function loadUserData() {
   } catch (e) {
     console.error('Error loading user data:', e);
   }
+  loadPuntosReservados();
+}
+
+// Puntos reservados en pagos de Mercado Pago que todavía no se hicieron.
+// Al consultarlos, el servidor devuelve los de los pagos que ya vencieron.
+// Si no responde (puede tardar cuando estaba dormido), el checkout sigue
+// igual: al confirmar, el servidor vuelve a mirar el saldo.
+let puntosReservadosConsultados = false;
+
+async function loadPuntosReservados() {
+  // initCheckout puede correr más de una vez; la consulta se hace una sola.
+  if (!window._currentUser || puntosReservadosConsultados) return;
+  puntosReservadosConsultados = true;
+  try {
+    const res = await fetch('https://lobo24-backend-zibj.onrender.com/puntos-reservados', {
+      method: 'POST',
+      headers: await backendHeaders()
+    });
+    if (!res.ok) return;
+
+    const data = await res.json();
+    const reservas = Array.isArray(data.reservas) ? data.reservas.filter(r => Number(r.puntos) > 0) : [];
+    const cambioSaldo = data.points != null;
+
+    window._puntosReservados = reservas;
+    if (cambioSaldo) window._userPoints = Number(data.points) || 0;
+
+    if (STATE.step === 4 && (cambioSaldo || reservas.length)) renderStep(4);
+  } catch (e) {
+    console.error('No se pudieron consultar los puntos reservados:', e);
+  }
+}
+
+// Aviso del paso de pago: explica por qué hay menos puntos disponibles.
+function puntosReservadosHtml() {
+  return (window._puntosReservados || []).map(r => {
+    const vence = r.vence ? new Date(r.vence) : null;
+    const cuando = r.pagoEnProceso
+      ? 'Mercado Pago todavía está procesando ese pago.'
+      : (vence && vence > new Date())
+        ? `Si no lo pagás, vuelven a tu cuenta a las ${vence.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', hour12: false })} h.`
+        : 'Si no lo pagaste, vuelven a tu cuenta en unos minutos.';
+    return `
+        <div class="notice">
+          <i class="fa-regular fa-clock"></i>
+          <span>Tenés <strong>${Number(r.puntos).toLocaleString('es-AR')} puntos</strong> reservados en el pedido #${esc(r.orderId)} de Mercado Pago, que todavía no se pagó. ${cuando}</span>
+        </div>`;
+  }).join('');
 }
 
 /* ══════════════════════════════════════════════════════════
@@ -699,6 +747,7 @@ function renderStep4() {
           <span>Te faltan $${(MIN_PURCHASE - subtotal).toLocaleString('es-AR')} para el mínimo de compra de $${MIN_PURCHASE.toLocaleString('es-AR')}</span>
         </div>
         ` : ''}
+        ${puntosReservadosHtml()}
         ${hasPoints ? `
         <div class="points-section">
           <div class="points-header">

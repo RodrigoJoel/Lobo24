@@ -1615,6 +1615,11 @@ function orderStatusInfo(status) {
 
 // Qué pasó con los puntos que gana la compra (ver js/pedidos-estado.js).
 function orderPointsNote(order) {
+  // El cliente pagó con un descuento en puntos que ya había gastado en otro pedido.
+  const faltantes = Number(order.pointsFaltantes) || 0;
+  if (faltantes > 0 && order.status !== 'cancelled') {
+    return ` · ⚠️ usó puntos que ya había gastado en otro pedido: faltan cobrar $${faltantes.toLocaleString('es-AR')}`;
+  }
   if (order.status === 'cancelled') return ' · anulados';
   if (order.pointsApplied === false) return ' · se acreditan al confirmar el pago';
   return '';

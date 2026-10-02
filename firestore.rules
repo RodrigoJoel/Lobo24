@@ -40,41 +40,31 @@ service cloud.firestore {
       return isSignedIn() && request.auth.uid == userId;
     }
 
-    // Permite que un usuario NO autenticado descuente stock al comprar
-    // (transferencia/efectivo), pero solo eso: no puede tocar precio,
-    // nombre, ni subir el stock. Es un parche temporal — lo ideal es
-    // que este descuento lo haga el backend con la Admin SDK.
-    function isValidStockDecrement() {
-      let before = resource.data;
-      let after  = request.resource.data;
-      return after.diff(before).affectedKeys().hasOnly(['stock']) &&
-             after.stock is number && before.stock is number &&
-             after.stock >= 0 &&
-             after.stock <= before.stock;
-    }
-
     // ─── Catálogo de productos por categoría ──────────────────
     // bebidas, snacks, almacen, higiene, limpieza, congelados,
     // lacteos, panaderia, mascotas, perfumeria, bazar. "ofertas" ya no
     // es una colección real — la página de ofertas se arma en vivo con
     // los productos que tengan badge "offer" en su categoría real (ver
     // ofertas.html).
+    //
+    // Cualquiera puede leer el catálogo; solo el admin lo modifica desde
+    // el navegador. El stock que baja por una compra online o por una
+    // venta en el local lo escribe el backend (Admin SDK, que no pasa por
+    // estas reglas): /confirmar-pedido-manual, /webhook y
+    // /sincronizar-stock-pos en webVentas-backend/server.js. Antes había
+    // una excepción que dejaba a cualquier persona sin login bajar el
+    // stock de cualquier producto hasta 0.
     match /{coleccion}/{docId} {
       allow read: if coleccion in [
         'bebidas', 'snacks', 'almacen', 'higiene', 'limpieza',
         'congelados', 'lacteos', 'panaderia', 'mascotas',
         'perfumeria', 'bazar'
       ];
-      allow create, delete: if coleccion in [
+      allow write: if coleccion in [
         'bebidas', 'snacks', 'almacen', 'higiene', 'limpieza',
         'congelados', 'lacteos', 'panaderia', 'mascotas',
         'perfumeria', 'bazar'
       ] && isAdmin();
-      allow update: if coleccion in [
-        'bebidas', 'snacks', 'almacen', 'higiene', 'limpieza',
-        'congelados', 'lacteos', 'panaderia', 'mascotas',
-        'perfumeria', 'bazar'
-      ] && (isAdmin() || isValidStockDecrement());
     }
 
     // ─── Contenido de la home / admin (nombres reales de colección,
