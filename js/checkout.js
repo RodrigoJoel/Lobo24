@@ -94,7 +94,10 @@ function handleMpReturn() {
   if (!mpStatus) return false;
 
   mpReturnProcessed = true;
-  const orderId = params.get('order');
+  // El número viene en el link, que cualquiera puede armar a mano: solo se
+  // acepta si tiene el formato de un número de pedido.
+  const orderParam = params.get('order') || '';
+  const orderId = /^LB[A-Z0-9]{6,20}$/.test(orderParam) ? orderParam : null;
   window.history.replaceState({}, '', 'checkout.html');
 
   if (mpStatus === 'failure') {
@@ -1018,7 +1021,7 @@ function renderStep5() {
         <h2>¡PEDIDO REALIZADO!</h2>
         <p>Tu pedido fue registrado con éxito. Recibirás confirmación en <strong>${esc(contact.email || 'tu correo')}</strong>.</p>
 
-        <div class="order-number"><i class="fa-solid fa-receipt"></i>Pedido #${orderNum}</div>
+        <div class="order-number"><i class="fa-solid fa-receipt"></i>Pedido #${esc(orderNum)}</div>
 
         <div class="confirmation-detail">
           <div class="cd-row">
@@ -1028,7 +1031,7 @@ function renderStep5() {
 
           <div class="cd-row">
             <span class="cd-label">Entrega</span>
-            <span class="cd-value">${deliveryLabels[delivery] || delivery || '—'}</span>
+            <span class="cd-value">${deliveryLabels[delivery] || esc(delivery) || '—'}</span>
           </div>
 
           ${delivery !== 'local'
@@ -1038,7 +1041,7 @@ function renderStep5() {
 
           <div class="cd-row">
             <span class="cd-label">Pago</span>
-            <span class="cd-value">${paymentLabels[payment] || payment || '—'}</span>
+            <span class="cd-value">${paymentLabels[payment] || esc(payment) || '—'}</span>
           </div>
 
           <div class="cd-row cd-total">
@@ -1061,7 +1064,7 @@ function renderStep5() {
           <div class="next-step">
             <strong><i class="fa-solid fa-thumbtack"></i>Próximo paso</strong>
             Realizá la transferencia por <b>$${totalFinal.toLocaleString('es-AR')}</b> al alias <b>LOBO24HS</b>
-            y enviá el comprobante por WhatsApp mencionando el pedido #${orderNum}.
+            y enviá el comprobante por WhatsApp mencionando el pedido #${esc(orderNum)}.
           </div>
         ` : ''}
 

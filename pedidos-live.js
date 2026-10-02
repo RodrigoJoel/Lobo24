@@ -309,7 +309,7 @@ function renderOrders(pedidos) {
       <div class="pedido-card">
         <div class="status ${statusClass}">${statusLabel}</div>
 
-        <h2>#${pedido.orderId || pedido.firebaseId}</h2>
+        <h2>#${escapeHtml(pedido.orderId || pedido.firebaseId)}</h2>
         <div class="info fecha"><strong>Fecha:</strong> ${escapeHtml(fecha)}</div>
 
         ${esRetiro ? `<div class="pickup-badge">🏪 RETIRO EN SUCURSAL</div>` : ""}
@@ -334,7 +334,7 @@ function renderOrders(pedidos) {
           <strong>Productos:</strong>
           ${(pedido.items || []).map(item => `
             <div class="item">
-              ${escapeHtml(item.name || "Producto")} x${item.qty || 1}
+              ${escapeHtml(item.name || "Producto")} x${escapeHtml(item.qty || 1)}
               — $${Number(item.subtotal || ((item.price || 0) * (item.qty || 1))).toLocaleString("es-AR")}
             </div>
           `).join("")}

@@ -166,7 +166,15 @@ window.navigate = navigate;
 const card = (title, icon, body) => `<div class="card"><div class="card-header"><div class="card-title"><span>${icon}</span> ${title}</div></div><div class="card-body">${body}</div></div>`;
 const field = (lbl, el, hint = "") => `<div class="field"><label>${lbl}</label>${el}${hint ? `<div style="font-size:11px;color:var(--muted);margin-top:4px">${hint}</div>` : ""}</div>`;
 const prodBadge = (b) => b ? `<span class="badge-pill badge-${b}">${b === "offer" ? "OFERTA" : b === "new" ? "NUEVO" : "🔥 HOT"}</span>` : "";
-const esc = (v) => String(v || "").replace(/"/g, "&quot;");
+// Todo lo que escribe un cliente (nombre, notas, dirección) se muestra como
+// texto: sin esto, un nombre con código HTML se ejecutaría con los permisos
+// del admin. Sirve tanto dentro de una etiqueta como en value="...".
+const esc = (v) => String(v ?? "")
+  .replace(/&/g, "&amp;")
+  .replace(/</g, "&lt;")
+  .replace(/>/g, "&gt;")
+  .replace(/"/g, "&quot;")
+  .replace(/'/g, "&#39;");
 const stockHtml = (stock) => {
   const amount = stock ?? null;
   const color = amount === null ? "#4ade80" : amount <= 0 ? "#f87171" : amount <= 5 ? "#f0c040" : "#4ade80";
@@ -1158,9 +1166,9 @@ function pageUsuarios() {
     if (!term) return true;
 
     return (
-      (u.name || "").toLowerCase().includes(term) ||
-      (u.email || "").toLowerCase().includes(term) ||
-      (u.phone || "").toLowerCase().includes(term)
+      String(u.name || "").toLowerCase().includes(term) ||
+      String(u.email || "").toLowerCase().includes(term) ||
+      String(u.phone || "").toLowerCase().includes(term)
     );
   });
 
@@ -1209,10 +1217,10 @@ function pageUsuarios() {
                       </div>
 
                       <div class="prod-meta">
-                        <strong>${name}</strong>
+                        <strong>${esc(name)}</strong>
                         <div class="meta-row">
-                          <span class="meta-brand">${email}</span>
-                          ${phone ? `<span class="meta-brand">📞 ${phone}</span>` : ""}
+                          <span class="meta-brand">${esc(email)}</span>
+                          ${phone ? `<span class="meta-brand">📞 ${esc(phone)}</span>` : ""}
                           <span style="font-family:var(--font-mono);font-size:12px;color:var(--yellow)">
                             ⭐ ${points.toLocaleString("es-AR")} puntos
                           </span>
@@ -1597,10 +1605,10 @@ function renderOrdersList() {
   // Filtrar por búsqueda
   if (currentSearchTerm) {
     const term = currentSearchTerm.toLowerCase();
-    orders = orders.filter(o => 
-      o.orderId?.toLowerCase().includes(term) ||
-      o.contact?.name?.toLowerCase().includes(term) ||
-      o.contact?.email?.toLowerCase().includes(term)
+    orders = orders.filter(o =>
+      String(o.orderId || '').toLowerCase().includes(term) ||
+      String(o.contact?.name || '').toLowerCase().includes(term) ||
+      String(o.contact?.email || '').toLowerCase().includes(term)
     );
   }
 
@@ -1622,10 +1630,10 @@ function renderOrdersList() {
     const formattedDate = orderDate.toLocaleDateString('es-AR', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' });
     
     return `
-      <div class="order-card" data-order-id="${order.orderId || order.id}">
+      <div class="order-card" data-order-id="${esc(order.orderId || order.id)}">
         <div class="order-header">
           <div>
-            <span class="order-id">#${(order.orderId || order.id).slice(-8).toUpperCase()}</span>
+            <span class="order-id">#${esc(String(order.orderId || order.id).slice(-8).toUpperCase())}</span>
             <div style="font-size:12px;color:var(--muted);margin-top:4px">${formattedDate}</div>
           </div>
           <div class="order-customer">
@@ -1637,7 +1645,7 @@ function renderOrdersList() {
               ${status.label}
             </span>
           </div>
-          <div class="order-total">$${(order.total || 0).toLocaleString('es-AR')}</div>
+          <div class="order-total">$${Number(order.total || 0).toLocaleString('es-AR')}</div>
           <button class="btn btn-ghost btn-sm" onclick="toggleOrderDetails('${order.id}')">
             <i class="fas fa-chevron-down"></i> Ver detalles
           </button>
@@ -1654,7 +1662,7 @@ function renderOrdersList() {
             </div>
             <div class="order-info-item">
               <span class="order-info-label">🚚 Envío</span>
-              <span class="order-info-value">${order.delivery === 'local' ? 'Retiro en sucursal' : 'Envío a domicilio'} ${order.deliveryCost > 0 ? '($' + order.deliveryCost.toLocaleString('es-AR') + ')' : ''}</span>
+              <span class="order-info-value">${order.delivery === 'local' ? 'Retiro en sucursal' : 'Envío a domicilio'} ${Number(order.deliveryCost) > 0 ? '($' + Number(order.deliveryCost).toLocaleString('es-AR') + ')' : ''}</span>
             </div>
             <div class="order-info-item">
               <span class="order-info-label">💳 Pago</span>
@@ -1662,7 +1670,7 @@ function renderOrdersList() {
             </div>
             <div class="order-info-item">
               <span class="order-info-label">⭐ Puntos</span>
-              <span class="order-info-value">Usados: ${order.pointsUsed || 0} | Ganados: ${order.pointsEarned || 0}</span>
+              <span class="order-info-value">Usados: ${Number(order.pointsUsed || 0)} | Ganados: ${Number(order.pointsEarned || 0)}</span>
             </div>
             <div class="order-info-item">
               <span class="order-info-label">📝 Notas</span>
@@ -1675,8 +1683,8 @@ function renderOrdersList() {
             ${(order.items || []).map(item => `
               <div class="order-product">
                 <span class="order-product-name">${esc(item.name)}</span>
-                <span class="order-product-qty">x${item.qty}</span>
-                <span class="order-product-price">$${(item.price * item.qty).toLocaleString('es-AR')}</span>
+                <span class="order-product-qty">x${esc(item.qty)}</span>
+                <span class="order-product-price">$${(Number(item.price) * Number(item.qty)).toLocaleString('es-AR')}</span>
               </div>
             `).join('')}
           </div>
@@ -1820,7 +1828,7 @@ function renderEditPedidoItems() {
         </div>
         <div style="display:flex;align-items:center;gap:6px">
           <button class="btn btn-ghost btn-sm" onclick="changeEditingItemQty(${idx}, -1)">−</button>
-          <span style="min-width:20px;text-align:center">${item.qty}</span>
+          <span style="min-width:20px;text-align:center">${esc(item.qty)}</span>
           <button class="btn btn-ghost btn-sm" onclick="changeEditingItemQty(${idx}, 1)">+</button>
         </div>
         <div style="width:90px;text-align:right;font-weight:600">$${(Number(item.price || 0) * Number(item.qty || 0)).toLocaleString('es-AR')}</div>
