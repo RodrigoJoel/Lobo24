@@ -495,12 +495,6 @@ onAuthStateChanged(auth, async (user) => {
     container.innerHTML = `<button class="nav-btn" onclick="openModal()" aria-label="Ingresar"><i class="fa-regular fa-user"></i><span class="nav-label">Ingresar</span></button>`;
   }
 });
-
-/* Exponer función para descontar stock al comprar */
-window.fbDescontarStock = async (docId, currentStock) => {
-  const ref = doc(db, 'snacks', docId);
-  await updateDoc(ref, { stock: currentStock - 1 });
-};
 </script>
 
 <!-- ══ LÓGICA DE LA PÁGINA ══ -->

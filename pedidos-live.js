@@ -326,6 +326,15 @@ function renderOrders(pedidos) {
       mpNote = `<div class="mp-note mp-ok">✅ Pago confirmado</div>`;
     }
 
+    // El cliente pagó con un descuento en puntos que ya había gastado en otro pedido.
+    const puntosFaltantes = Number(pedido.pointsFaltantes) || 0;
+    if (puntosFaltantes > 0) {
+      mpNote += `
+      <div class="mp-note mp-wait">
+        ⚠️ Usó puntos que ya había gastado en otro pedido: faltan cobrar $${puntosFaltantes.toLocaleString("es-AR")}
+      </div>`;
+    }
+
     return `
       <div class="pedido-card">
         <div class="status ${statusClass}">${statusLabel}</div>
