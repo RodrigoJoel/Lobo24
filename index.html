@@ -34,7 +34,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link rel="stylesheet" href="css/styles.css?v=2">
+  <link rel="stylesheet" href="css/styles.css?v=3">
   <link rel="stylesheet" href="css/rediseno.css?v=4">
 </head>
 <body>
@@ -471,43 +471,89 @@ onSnapshot(collection(db, 'categories'), snap => {
   }
 });
 
-/* ── BEST SELLERS ── */
-onSnapshot(collection(db, 'bestSellers'), snap => {
-  const prods = snap.docs.map(d => {
-    const data = d.data();
-    return {
-      ...data,
-      id: d.id,
-      docId: data.docId || data.productId || d.id,
-      coleccion: data.coleccion || data.collection || data.sourceCollection || data.section || 'bestSellers'
-    };
-  });
+/* ── MÁS VENDIDOS / NOVEDADES ──
+   Cada documento de bestSellers / newProducts apunta a un producto de una
+   categoría (coleccion + productId). Lo que se muestra y se agrega al carrito
+   es ese producto: su precio, su stock y su límite por compra.
+   Los documentos más viejos son copias sueltas, sin vínculo: se muestran como
+   están y el servidor busca el producto real por nombre al confirmar el pedido. */
+const DESTACADOS_CACHE_KEY = 'lobo24_destacados';
+const DESTACADOS_CACHE_MS = 10 * 60 * 1000;
 
-  window._bestProds = prods;
-
-  if (typeof renderProducts === 'function') {
-    renderProducts(prods, 'productsGrid');
+function leerDestacadosCache() {
+  try {
+    const cache = JSON.parse(sessionStorage.getItem(DESTACADOS_CACHE_KEY) || '{}');
+    return (cache && typeof cache === 'object') ? cache : {};
+  } catch (e) {
+    return {};
   }
-});
+}
 
-/* ── NOVEDADES ── */
-onSnapshot(collection(db, 'newProducts'), snap => {
-  const prods = snap.docs.map(d => {
-    const data = d.data();
-    return {
-      ...data,
-      id: d.id,
-      docId: data.docId || data.productId || d.id,
-      coleccion: data.coleccion || data.collection || data.sourceCollection || data.section || 'newProducts'
-    };
-  });
+// Producto real de un destacado, o null si ya no existe. Queda guardado 10
+// minutos para no volver a leerlo de Firestore en cada visita al inicio.
+async function productoReal(coleccion, productId) {
+  const clave = coleccion + '/' + productId;
+  const guardado = leerDestacadosCache()[clave];
+  if (guardado && Date.now() - guardado.ts < DESTACADOS_CACHE_MS) return guardado.data;
 
-  window._newProds = prods;
+  const snap = await getDoc(doc(db, coleccion, productId));
+  const data = snap.exists() ? snap.data() : null;
 
-  if (typeof renderProducts === 'function') {
-    renderProducts(prods, 'newProductsGrid');
+  try {
+    const cache = leerDestacadosCache();
+    cache[clave] = { ts: Date.now(), data };
+    sessionStorage.setItem(DESTACADOS_CACHE_KEY, JSON.stringify(cache));
+  } catch (e) {
+    // Sin lugar o en modo privado: se sigue sin guardar.
   }
-});
+  return data;
+}
+
+async function resolverDestacados(snap, coleccionDestacados) {
+  const productos = await Promise.all(snap.docs.map(async d => {
+    const entrada = d.data();
+    const copia = { ...entrada, id: d.id, docId: d.id, coleccion: coleccionDestacados };
+
+    if (!CATEGORY_SLUGS.includes(entrada.coleccion) || !entrada.productId) return copia;
+
+    try {
+      const real = await productoReal(entrada.coleccion, entrada.productId);
+      if (!real) return null; // el producto se borró de su categoría: no se muestra
+
+      return {
+        ...real,
+        id: entrada.productId,
+        docId: entrada.productId,
+        coleccion: entrada.coleccion,
+        badge: entrada.badge || real.badge || null
+      };
+    } catch (error) {
+      console.error('No se pudo leer el producto de ' + entrada.coleccion + ':', error);
+      return copia;
+    }
+  }));
+
+  return productos.filter(Boolean);
+}
+
+function escucharDestacados(coleccionDestacados, gridId, guardar) {
+  let tanda = 0;
+
+  onSnapshot(collection(db, coleccionDestacados), async snap => {
+    const estaTanda = ++tanda;
+    const prods = await resolverDestacados(snap, coleccionDestacados);
+    if (estaTanda !== tanda) return; // llegó una actualización más nueva
+
+    guardar(prods);
+
+    if (typeof renderProducts === 'function') {
+      renderProducts(prods, gridId);
+    }
+  });
+}
+
+escucharDestacados('bestSellers', 'productsGrid', prods => { window._bestProds = prods; });
+escucharDestacados('newProducts', 'newProductsGrid', prods => { window._newProds = prods; });
 
 /* ── OCULTAR LOADING ── */
 const unsubLoad = onSnapshot(doc(db, 'config', 'general'), () => {
@@ -619,6 +665,6 @@ onAuthStateChanged(auth, async (user) => {
 
 
 <script src="js/app-global.js?v=3"></script>
-<script src="js/scripts.js?v=4"></script>
+<script src="js/scripts.js?v=5"></script>
 </body>
 </html>

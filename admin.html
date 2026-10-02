@@ -101,16 +101,19 @@
     <div class="modal-title">EDITAR <span style="color:var(--purple-lt)">PRODUCTO</span></div>
     <input type="hidden" id="mDocId"/>
     <input type="hidden" id="mCollection"/>
-    <div class="field"><label>Nombre</label><input id="mName"/></div>
-    <div class="field"><label>Marca</label><input id="mBrand"/></div>
-    <div class="field-row">
-      <div class="field"><label>Precio ($)</label><input id="mPrice" type="number"/></div>
-      <div class="field"><label>Precio tachado ($)</label><input id="mOld" type="number" placeholder="0 = sin tachado"/></div>
-    </div>
-    <div class="field">
-      <label>URL imagen</label>
-      <input id="mImg" placeholder="https://..." oninput="previewImg('mImg','mImgPrev')"/>
-      <div class="img-preview-wrap"><div class="img-preview" id="mImgPrev"><span>Vista previa</span></div></div>
+    <div id="mLinkedNote" style="display:none;font-size:13px;color:var(--muted);margin-bottom:14px"></div>
+    <div id="mCopyFields">
+      <div class="field"><label>Nombre</label><input id="mName"/></div>
+      <div class="field"><label>Marca</label><input id="mBrand"/></div>
+      <div class="field-row">
+        <div class="field"><label>Precio ($)</label><input id="mPrice" type="number"/></div>
+        <div class="field"><label>Precio tachado ($)</label><input id="mOld" type="number" placeholder="0 = sin tachado"/></div>
+      </div>
+      <div class="field">
+        <label>URL imagen</label>
+        <input id="mImg" placeholder="https://..." oninput="previewImg('mImg','mImgPrev')"/>
+        <div class="img-preview-wrap"><div class="img-preview" id="mImgPrev"><span>Vista previa</span></div></div>
+      </div>
     </div>
     <div class="field">
       <label>Badge</label>
@@ -132,7 +135,7 @@
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
-import { getFirestore, doc, collection, onSnapshot, setDoc, addDoc, deleteDoc, updateDoc, getDocs, getCountFromServer } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
+import { getFirestore, doc, getDoc, collection, onSnapshot, setDoc, addDoc, deleteDoc, updateDoc, getDocs, getCountFromServer, query, where, limit } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-auth.js";
 import { cambiarEstadoPedido } from "./js/pedidos-estado.js?v=1";
 
@@ -159,6 +162,10 @@ window.fsDeleteDoc = deleteDoc;
 window.fsUpdateDoc = updateDoc;
 window.fsGetDocs = getDocs;
 window.fsOnSnapshot = onSnapshot;
+window.fsGetDoc = getDoc;
+window.fsQuery = query;
+window.fsWhere = where;
+window.fsLimit = limit;
 // Cambio de estado de un pedido, con sus puntos y su stock (js/pedidos-estado.js).
 window.cambiarEstadoPedido = (pedidoId, nuevoEstado) => cambiarEstadoPedido(db, pedidoId, nuevoEstado);
 
@@ -274,6 +281,11 @@ window.ensureCategoryLoaded = function (collectionName) {
     if (window.currentPage === collectionName && typeof window.render === "function") {
       window.render(collectionName);
     }
+    // El selector de producto de Más vendidos / Novedades espera esta categoría.
+    if ((window.currentPage === "best" || window.currentPage === "newp") &&
+        window.destacadoPicker?.cat === collectionName && typeof window.render === "function") {
+      window.render(window.currentPage);
+    }
   });
 };
 
@@ -321,6 +333,6 @@ onAuthStateChanged(auth, (user) => {
 });
 </script>
 
-<script src="js/admin-script.js?v=9"></script>
+<script src="js/admin-script.js?v=10"></script>
 </body>
 </html>

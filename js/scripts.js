@@ -123,9 +123,14 @@ function renderProducts(list, id) {
     return;
   }
 
-  grid.innerHTML = list.map(p => `
-    <div class="product-card">
+  grid.innerHTML = list.map(p => {
+    // stock sin cargar = producto sin control de stock
+    const sinStock = p.stock != null && Number(p.stock) <= 0;
+
+    return `
+    <div class="product-card${sinStock ? ' out-of-stock' : ''}">
       ${p.badge ? `<span class="product-badge badge-${p.badge}">${p.badge === 'offer' ? 'OFERTA' : p.badge === 'new' ? 'NUEVO' : 'HOT'}</span>` : ''}
+      ${sinStock ? '<span class="stock-badge out">Sin stock</span>' : ''}
       <div class="product-img">
         <img src="${p.img || ''}" alt="${p.name || ''}" loading="lazy"/>
       </div>
@@ -139,11 +144,12 @@ function renderProducts(list, id) {
               <span class="curr">$</span>${Number(p.price || 0).toLocaleString('es-AR')}
             </span>
           </div>
-          <button class="add-btn" onclick="addToCart('${p.docId || p.id}', event)">+</button>
+          <button class="add-btn" ${sinStock ? 'disabled' : ''} onclick="addToCart('${p.docId || p.id}', event)" title="${sinStock ? 'Sin stock' : 'Agregar al carrito'}">${sinStock ? '✕' : '+'}</button>
         </div>
       </div>
     </div>
-  `).join('');
+  `;
+  }).join('');
 }
 
 /* ══════════════════════════════════════
