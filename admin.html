@@ -134,6 +134,7 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
 import { getFirestore, doc, collection, onSnapshot, setDoc, addDoc, deleteDoc, updateDoc, getDocs, getCountFromServer } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-auth.js";
+import { cambiarEstadoPedido } from "./js/pedidos-estado.js?v=1";
 
 const firebaseConfig = {
   apiKey: "AIzaSyBiN4r47hmNycD7aZjkZa6XakZSzXwbL8Q",
@@ -158,6 +159,8 @@ window.fsDeleteDoc = deleteDoc;
 window.fsUpdateDoc = updateDoc;
 window.fsGetDocs = getDocs;
 window.fsOnSnapshot = onSnapshot;
+// Cambio de estado de un pedido, con sus puntos y su stock (js/pedidos-estado.js).
+window.cambiarEstadoPedido = (pedidoId, nuevoEstado) => cambiarEstadoPedido(db, pedidoId, nuevoEstado);
 
 window.toggleAdminMenu = function () {
   document.getElementById("adminDropdown").classList.toggle("show");
@@ -318,6 +321,6 @@ onAuthStateChanged(auth, (user) => {
 });
 </script>
 
-<script src="js/admin-script.js?v=8"></script>
+<script src="js/admin-script.js?v=9"></script>
 </body>
 </html>

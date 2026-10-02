@@ -8,7 +8,7 @@ let userData = null;
 // Estados de pedido para mostrar al usuario
 const USER_ORDER_STATUS = {
   pending_payment: { label: 'Pendiente de pago', icon: 'fa-credit-card', color: '#f59e0b' },
-  pending: { label: 'Pendiente de confirmación', icon: 'fa-clock', color: '#f0c040' },
+  pending: { label: 'Pendiente de pago', icon: 'fa-clock', color: '#f0c040' },
   payment_confirmed: { label: 'Pago confirmado', icon: 'fa-circle-check', color: '#4ade80' },
   confirmed: { label: 'Pago confirmado', icon: 'fa-circle-check', color: '#4ade80' },
   processing: { label: 'En proceso de armado', icon: 'fa-box', color: '#a78bfa' },
@@ -25,6 +25,8 @@ const ORDERS_WITHOUT_POINTS = ['pending_payment', 'cancelled'];
 
 function orderPointsEarned(order) {
   if (ORDERS_WITHOUT_POINTS.includes(order.status)) return 0;
+  // Los puntos de la compra se acreditan cuando el local confirma el pago.
+  if (order.pointsApplied === false) return 0;
   if (order.pointsEarned != null) return Number(order.pointsEarned) || 0;
   return Math.floor((order.subtotal || order.total || 0) / 100);
 }
@@ -309,7 +311,9 @@ function createOrderCard(order) {
         ` : ''}
         ${order.status === 'pending' ? `
         <div style="grid-column:span 2;background:rgba(240,192,64,0.1);padding:10px;border-radius:8px;text-align:center">
-          <i class="fas fa-clock"></i> Tu pedido está pendiente de confirmación. Te llegará un email cuando sea confirmado.
+          <i class="fas fa-clock"></i> ${order.payment === 'efectivo'
+            ? 'Tu pedido está registrado. Lo pagás en efectivo al retirarlo, y ahí se acreditan los puntos de esta compra.'
+            : 'Estamos esperando tu pago. Cuando lo confirmemos se acreditan los puntos de esta compra.'}
         </div>
         ` : ''}
         ${order.status === 'shipped' ? `

@@ -1398,15 +1398,34 @@ window.showToast = showToast;
    PAGE: PEDIDOS (Gestión de órdenes)
 ══════════════════════════════════════════ */
 
-// Estado de pedidos disponibles
+// Estados de un pedido. El orden es el de las tarjetas y el del filtro.
+//   pending          transferencia o efectivo: todavía no pagó
+//   pending_payment  Mercado Pago: el cliente todavía no pagó
+//   payment_confirmed  Mercado Pago avisó que el pago se acreditó
+//   confirmed        el admin confirmó el pago a mano
+// "next" es el paso siguiente que ofrece el botón; "nextLabel", su texto.
 const ORDER_STATUS = {
-  pending_payment: { label: '💳 Pendiente de pago', color: '#f59e0b', next: 'confirmed' },
-  pending: { label: '⏳ Pendiente de confirmación', color: '#f0c040', next: 'confirmed' },
-  confirmed: { label: '✅ Pago confirmado', color: '#4ade80', next: 'processing' },
-  processing: { label: '📦 En proceso de armado', color: '#a78bfa', next: 'shipped' },
-  shipped: { label: '🚚 Despachado', color: '#60a5fa', next: 'completed' },
-  completed: { label: '🎉 Completado', color: '#34d399', next: null }
+  pending: { label: '⏳ Pendiente de pago', short: 'Pendiente de pago', color: '#f0c040', next: 'confirmed', nextLabel: '✅ Confirmar pago' },
+  pending_payment: { label: '💳 Mercado Pago sin pagar', short: 'MP sin pagar', color: '#f59e0b', next: 'confirmed', nextLabel: '✅ Dar por pagado a mano' },
+  payment_confirmed: { label: '✅ Pago acreditado (Mercado Pago)', short: 'Pago acreditado MP', color: '#4ade80', next: 'processing' },
+  confirmed: { label: '✅ Pago confirmado', short: 'Pago confirmado', color: '#4ade80', next: 'processing' },
+  processing: { label: '📦 En proceso de armado', short: 'En armado', color: '#a78bfa', next: 'shipped' },
+  shipped: { label: '🚚 Despachado', short: 'Despachado', color: '#60a5fa', next: 'completed' },
+  completed: { label: '🎉 Completado', short: 'Completado', color: '#34d399', next: null },
+  cancelled: { label: '❌ Cancelado', short: 'Cancelado', color: '#f87171', next: null }
 };
+
+// Un estado que el panel no conoce se muestra tal cual, sin disfrazarlo de otro.
+function orderStatusInfo(status) {
+  return ORDER_STATUS[status] || { label: esc(status || 'Sin estado'), short: '', color: '#9ca3af', next: null };
+}
+
+// Qué pasó con los puntos que gana la compra (ver js/pedidos-estado.js).
+function orderPointsNote(order) {
+  if (order.status === 'cancelled') return ' · anulados';
+  if (order.pointsApplied === false) return ' · se acreditan al confirmar el pago';
+  return '';
+}
 
 function pagePedidos() {
   const orders = window.DATA.pedidos || [];
@@ -1424,12 +1443,12 @@ function pagePedidos() {
       </div>
     </div>
 
-    <div class="orders-stats" style="display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:24px">
+    <div class="orders-stats" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:24px">
       ${Object.entries(ORDER_STATUS).map(([key, value]) => `
-        <div class="stat-card" style="text-align:center;padding:12px;cursor:pointer" onclick="filterOrdersByStatus('${key}')">
+        <div class="stat-card" style="display:flex;flex-direction:column;align-items:center;gap:2px;text-align:center;padding:12px;cursor:pointer" onclick="filterOrdersByStatus('${key}')">
           <div style="font-size:24px">${value.label.split(' ')[0]}</div>
           <div style="font-size:28px;font-weight:bold;color:${value.color}" id="count-${key}">0</div>
-          <div style="font-size:11px;color:var(--muted)">pedidos</div>
+          <div style="font-size:11px;line-height:1.3;color:var(--muted)">${value.short}</div>
         </div>
       `).join('')}
     </div>
@@ -1625,7 +1644,8 @@ function renderOrdersList() {
   }
 
   container.innerHTML = orders.map(order => {
-    const status = ORDER_STATUS[order.status] || ORDER_STATUS.pending;
+    const status = orderStatusInfo(order.status);
+    const cerrado = order.status === 'completed' || order.status === 'cancelled';
     const orderDate = order.createdAt?.toDate ? order.createdAt.toDate() : new Date(order.createdAt);
     const formattedDate = orderDate.toLocaleDateString('es-AR', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' });
     
@@ -1666,11 +1686,11 @@ function renderOrdersList() {
             </div>
             <div class="order-info-item">
               <span class="order-info-label">💳 Pago</span>
-              <span class="order-info-value">${order.payment === 'mp' ? 'Mercado Pago' : order.payment === 'transfer' ? 'Transferencia' : 'Efectivo'}</span>
+              <span class="order-info-value">${order.payment === 'mp' ? 'Mercado Pago' : order.payment === 'transfer' ? 'Transferencia' : 'Efectivo'}${order.mpPaymentId ? ' · pago n.º ' + esc(order.mpPaymentId) : ''}</span>
             </div>
             <div class="order-info-item">
               <span class="order-info-label">⭐ Puntos</span>
-              <span class="order-info-value">Usados: ${Number(order.pointsUsed || 0)} | Ganados: ${Number(order.pointsEarned || 0)}</span>
+              <span class="order-info-value">Usados: ${Number(order.pointsUsed || 0)} | Ganados: ${Number(order.pointsEarned || 0)}${orderPointsNote(order)}</span>
             </div>
             <div class="order-info-item">
               <span class="order-info-label">📝 Notas</span>
@@ -1690,17 +1710,22 @@ function renderOrdersList() {
           </div>
 
           <div class="status-buttons">
-            <button class="btn btn-ghost btn-xs" onclick="openEditPedidoModal('${order.id}')">✏️ Editar pedido</button>
+            ${cerrado ? '' : `
+              <button class="btn btn-danger btn-xs" style="margin-right:auto" onclick="updateOrderStatus('${order.id}', 'cancelled')">
+                ❌ Cancelar pedido
+              </button>
+              <button class="btn btn-ghost btn-xs" onclick="openEditPedidoModal('${order.id}')">✏️ Editar pedido</button>
+            `}
             ${status.next ? `
               <button class="btn btn-primary btn-xs" onclick="updateOrderStatus('${order.id}', '${status.next}')">
-                → ${ORDER_STATUS[status.next].label}
+                ${status.nextLabel || '→ ' + ORDER_STATUS[status.next].label}
               </button>
             ` : ''}
-            ${order.status !== 'completed' ? `
-              <button class="btn btn-danger btn-xs" onclick="updateOrderStatus('${order.id}', 'completed')">
+            ${cerrado ? '' : `
+              <button class="btn btn-ghost btn-xs" onclick="updateOrderStatus('${order.id}', 'completed')">
                 ✓ Marcar como completado
               </button>
-            ` : ''}
+            `}
           </div>
         </div>
       </div>
@@ -1740,19 +1765,37 @@ function filterOrders() {
   renderOrdersList();
 }
 
+// Texto del aviso antes de cambiar el estado: dice qué más va a pasar.
+function orderStatusConfirmText(order, newStatus) {
+  if (newStatus === 'cancelled') {
+    return '¿Cancelar este pedido?\n\nSe devuelve el stock al catálogo, se le devuelven al cliente los puntos que usó y se le quitan los que ganó con esta compra.\n\nNo se puede deshacer.';
+  }
+  if (order?.status === 'pending_payment' && (newStatus === 'confirmed' || newStatus === 'completed')) {
+    return 'Mercado Pago todavía no avisó que este pedido esté pago.\n\n¿Lo das por pagado igual? Se descuenta el stock y se aplican los puntos del cliente.';
+  }
+  if (order?.pointsApplied === false && (newStatus === 'confirmed' || newStatus === 'completed')) {
+    return `¿Cambiar el estado del pedido a "${ORDER_STATUS[newStatus]?.label}"?\n\nAl cliente se le acreditan los puntos de esta compra.`;
+  }
+  return `¿Cambiar el estado del pedido a "${ORDER_STATUS[newStatus]?.label}"?`;
+}
+
 async function updateOrderStatus(orderId, newStatus) {
-  if (!confirm(`¿Cambiar el estado del pedido a "${ORDER_STATUS[newStatus]?.label}"?`)) return;
+  const order = (window.DATA.pedidos || []).find(o => o.id === orderId);
+  if (!confirm(orderStatusConfirmText(order, newStatus))) return;
 
   try {
-    const orderRef = window.fsDoc(window.db, 'pedidos', orderId);
-    await window.fsUpdateDoc(orderRef, {
-      status: newStatus
-    });
+    // El cambio de estado, los puntos y el stock van juntos (js/pedidos-estado.js).
+    const r = await window.cambiarEstadoPedido(orderId, newStatus);
 
-    showToast(`✅ Pedido actualizado a ${ORDER_STATUS[newStatus]?.label}`);
+    const extras = [];
+    if (r.puntos > 0) extras.push(`+${r.puntos} puntos al cliente`);
+    if (r.puntos < 0) extras.push(`${r.puntos} puntos al cliente`);
+    if (r.stock) extras.push(`stock ${r.stock}`);
+
+    showToast(`✅ Pedido actualizado a ${ORDER_STATUS[newStatus]?.label}${extras.length ? ' · ' + extras.join(' · ') : ''}`);
   } catch (error) {
     console.error('Error al actualizar estado:', error);
-    showToast('❌ Error al actualizar el estado', 'err');
+    showToast('❌ ' + esc(error?.message || 'Error al actualizar el estado'), 'err');
   }
 }
 
