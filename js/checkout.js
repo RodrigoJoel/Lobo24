@@ -974,8 +974,9 @@ async function submitStep4() {
 
         STATE.cart = [];
         localStorage.removeItem('lobo24_cart');
-        // Los puntos solo se acreditan con sesión iniciada.
-        showToast('Pedido #' + confirmData.orderId + ' realizado con éxito.' + (window._currentUser ? ' Ganaste ' + confirmData.pointsEarned + ' puntos.' : ''), 'success');
+        // Los puntos solo se acreditan con sesión iniciada, y recién cuando
+        // el local confirma el pago.
+        showToast('Pedido #' + confirmData.orderId + ' realizado con éxito.' + (window._currentUser && confirmData.pointsEarned > 0 ? ' Vas a sumar ' + confirmData.pointsEarned + ' puntos cuando confirmemos tu pago.' : ''), 'success');
         renderStep(5);
       }
 
@@ -1050,7 +1051,7 @@ function renderStep5() {
           </div>
 
           ${window._currentUser && pointsEarned > 0
-            ? `<div class="cd-row cd-earned"><span class="cd-label"><i class="fa-solid fa-star"></i>Puntos ganados</span><span class="cd-value">+${pointsEarned} puntos</span></div>`
+            ? `<div class="cd-row cd-earned"><span class="cd-label"><i class="fa-solid fa-star"></i>${payment === 'mp' ? 'Puntos ganados' : 'Puntos al confirmar el pago'}</span><span class="cd-value">+${pointsEarned} puntos</span></div>`
             : ''
           }
 

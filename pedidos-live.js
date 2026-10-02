@@ -4,14 +4,13 @@ import {
   collection,
   query,
   orderBy,
-  onSnapshot,
-  doc,
-  updateDoc
+  onSnapshot
 } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
 import {
   getAuth,
   onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-auth.js";
+import { cambiarEstadoPedido } from "./js/pedidos-estado.js?v=1";
 
 const firebaseConfig = {
   apiKey: "AIzaSyBiN4r47hmNycD7aZjkZa6XakZSzXwbL8Q",
@@ -45,19 +44,23 @@ const knownOrders = new Map();
 let firstLoad = true;
 
 const STATUS_LABELS = {
-  pending_payment: "Pendiente de pago",
-  payment_confirmed: "Pago confirmado",
-  confirmed: "Confirmado",
+  pending: "Pendiente de pago",
+  pending_payment: "Mercado Pago sin pagar",
+  payment_confirmed: "Pago acreditado",
+  confirmed: "Pago confirmado",
   processing: "En preparación",
+  shipped: "Despachado",
   completed: "Entregado",
   cancelled: "Cancelado"
 };
 
 const STATUS_CLASS = {
+  pending: "pendiente",
   pending_payment: "pendiente",
   payment_confirmed: "preparacion",
-  confirmed: "pendiente",
+  confirmed: "preparacion",
   processing: "preparacion",
+  shipped: "preparacion",
   completed: "entregado",
   cancelled: "pendiente"
 };
@@ -297,13 +300,31 @@ function renderOrders(pedidos) {
     const entrega = esRetiro ? "Retiro en sucursal" : "Envío a domicilio";
     const fecha = formatFecha(pedido.createdAt);
 
-    const mpValidado = pedido.status === "payment_confirmed";
-    const mpNote = pedido.payment === "mp" ? `
-      <div class="mp-note ${mpValidado ? "mp-ok" : "mp-wait"}">
+    // Aviso de cobro: si el pedido está pago o qué falta para que lo esté.
+    // pointsApplied pasa a true cuando el pedido se da por pagado
+    // (js/pedidos-estado.js); los pedidos viejos no tienen esa marca.
+    const mpValidado = pedido.status === "payment_confirmed" || !!pedido.mpPaymentId;
+    const dadoPorPagado = pedido.pointsApplied === true;
+    let mpNote = "";
+    if (pedido.payment === "mp") {
+      mpNote = `
+      <div class="mp-note ${mpValidado || dadoPorPagado ? "mp-ok" : "mp-wait"}">
         ${mpValidado
           ? "✅ Pago acreditado por Mercado Pago"
-          : "⏳ Esperar validación: confirmar que el dinero ingresó a la cuenta antes de entregar/preparar"}
-      </div>` : "";
+          : dadoPorPagado
+            ? "✅ Dado por pagado a mano (Mercado Pago no avisó)"
+            : "⏳ Esperar validación: confirmar que el dinero ingresó a la cuenta antes de entregar/preparar"}
+      </div>`;
+    } else if (pedido.pointsApplied === false) {
+      mpNote = `
+      <div class="mp-note mp-wait">
+        ${pedido.payment === "transfer"
+          ? "⏳ Transferencia sin confirmar: esperar el comprobante antes de entregar"
+          : "💵 Cobrar en efectivo al entregar"}
+      </div>`;
+    } else if (dadoPorPagado) {
+      mpNote = `<div class="mp-note mp-ok">✅ Pago confirmado</div>`;
+    }
 
     return `
       <div class="pedido-card">
@@ -359,16 +380,14 @@ function renderOrders(pedidos) {
   }).join("");
 }
 
+// El cambio de estado va por js/pedidos-estado.js: al marcar un pedido como
+// entregado se acreditan los puntos de esa compra, si faltaba acreditarlos.
 async function updateOrderStatus(orderFirebaseId, status) {
   try {
-    const ref = doc(db, "pedidos", orderFirebaseId);
-    await updateDoc(ref, {
-      status,
-      updatedAt: new Date()
-    });
+    await cambiarEstadoPedido(db, orderFirebaseId, status);
   } catch (error) {
     console.error("Error actualizando pedido:", error);
-    alert("No se pudo actualizar el pedido.");
+    alert("No se pudo actualizar el pedido. " + (error?.message || ""));
   }
 }
 
