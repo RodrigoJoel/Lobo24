@@ -942,53 +942,252 @@ async function saveBanner() {
 }
 window.saveBanner = saveBanner;
 
+/* ══════════════════════════════════════════
+   PAGE: MÁS VENDIDOS / NOVEDADES
+   Cada entrada apunta a un producto de una categoría (coleccion +
+   productId). En la tienda se muestra y se vende ese producto: su precio,
+   su stock y su límite por compra. Lo que queda guardado acá (nombre,
+   precio, imagen) es solo una foto del momento en que se eligió.
+   Las entradas viejas, cargadas a mano, no tienen vínculo.
+══════════════════════════════════════════ */
+
+// Lo que está eligiendo el admin en el selector de producto.
+// target: docId de la entrada que se está vinculando, o null si se agrega una nueva.
+window.destacadoPicker = window.destacadoPicker || { cat: "", prodId: "", badge: "", target: null };
+
+function destacadoVinculado(p) {
+  return window.CATEGORY_COLLECTIONS.includes(p.coleccion) && !!p.productId;
+}
+
+function destacadosList(sec) {
+  return sec === "best" ? window.DATA.best : window.DATA.newProds;
+}
+
+// Lee el producto real de cada entrada vinculada: así la lista muestra su
+// precio de hoy y avisa si el producto se borró de su categoría (en ese caso
+// la tienda no lo muestra). p._real queda en el producto, en false si no
+// existe, o en null si no se pudo leer.
+async function refreshDestacados(sec) {
+  const pendientes = destacadosList(sec).filter((p) => destacadoVinculado(p) && p._real === undefined);
+  if (!pendientes.length || typeof window.fsGetDoc !== "function") return;
+
+  pendientes.forEach((p) => { p._real = null; });
+  await Promise.all(pendientes.map(async (p) => {
+    try {
+      const snap = await window.fsGetDoc(window.fsDoc(window.db, p.coleccion, p.productId));
+      p._real = snap.exists() ? snap.data() : false;
+    } catch (e) {
+      console.error("No se pudo leer el producto vinculado", p.coleccion, p.productId, e);
+    }
+  }));
+
+  if (window.currentPage === destacadosPage(sec)) render(destacadosPage(sec));
+}
+
 function pageProducts(sec) {
-  const list = sec === "best" ? window.DATA.best : window.DATA.newProds;
+  const list = destacadosList(sec);
   const colName = sec === "best" ? "bestSellers" : "newProducts";
+  refreshDestacados(sec);
   const title = sec === "best" ? "MÁS VENDIDOS" : "NOVEDADES";
+  const sinVincular = list.filter((p) => !destacadoVinculado(p));
+
+  const picker = window.destacadoPicker;
+  const target = picker.target ? list.find((p) => p.docId === picker.target) : null;
+  const catLoaded = picker.cat && window.CATEGORY_LOADED?.[picker.cat];
+  const catProducts = catLoaded
+    ? [...(window.DATA[picker.cat] || [])].sort((a, b) => String(a.name || "").localeCompare(String(b.name || ""), "es"))
+    : [];
+
+  const productSelect = !picker.cat
+    ? `<select id="npProd" disabled><option>Elegí primero la categoría</option></select>`
+    : !catLoaded
+      ? `<select id="npProd" disabled><option>Cargando productos…</option></select>`
+      : `<select id="npProd" onchange="destacadoPickerProd(this.value)">
+           <option value="">Elegí el producto (${catProducts.length})</option>
+           ${catProducts.map((p) => `<option value="${esc(p.docId)}" ${picker.prodId === p.docId ? "selected" : ""}>${esc(p.name || "")} — $${Number(p.price || 0).toLocaleString("es-AR")}${p.stock != null && Number(p.stock) <= 0 ? " (sin stock)" : ""}</option>`).join("")}
+         </select>`;
+
   return `
-    <div class="page-header"><div><div class="page-title">${title.split(" ")[0]} <span>${title.split(" ").slice(1).join(" ")}</span></div><div class="page-sub">Los cambios se sincronizan en tiempo real</div></div></div>
+    <div class="page-header"><div><div class="page-title">${title.split(" ")[0]} <span>${title.split(" ").slice(1).join(" ")}</span></div><div class="page-sub">En la tienda se muestran con el precio y el stock del producto real de su categoría</div></div></div>
+    ${sinVincular.length ? `
+      <div style="padding:14px 18px;background:rgba(240,192,64,.06);border:1px solid rgba(240,192,64,.2);border-radius:10px;font-size:13px;color:var(--yellow);margin-bottom:16px;display:flex;gap:12px;align-items:center;flex-wrap:wrap">
+        <span style="flex:1;min-width:240px">⚠️ ${sinVincular.length} producto${sinVincular.length !== 1 ? "s" : ""} sin vincular a su categoría. Se ${sinVincular.length !== 1 ? "muestran" : "muestra"} con el precio cargado acá, que puede estar desactualizado, y no ${sinVincular.length !== 1 ? "avisan" : "avisa"} si falta stock.</span>
+        <button class="btn btn-primary btn-sm" onclick="autoLinkDestacados('${colName}','${sec}')">🔗 Vincular automáticamente por nombre</button>
+      </div>` : ""}
     ${card(`Productos (${list.length})`, "🛍️", `
       <div class="prod-list">
-        ${list.map((p) => `
+        ${list.map((entrada) => {
+          const vinculado = destacadoVinculado(entrada);
+          const borrado = vinculado && entrada._real === false;
+          // Si ya se leyó el producto real, se muestran sus datos de hoy.
+          const p = vinculado && entrada._real ? { ...entrada, ...entrada._real, docId: entrada.docId, badge: entrada.badge || entrada._real.badge } : entrada;
+          const categoria = esc(window.CATEGORY_CONFIG[entrada.coleccion]?.label || entrada.coleccion);
+          return `
           <div class="prod-item">
-            <div class="prod-thumb"><img src="${p.img || ""}" alt="${p.name || ""}"/></div>
+            <div class="prod-thumb"><img src="${esc(p.img || "")}" alt="${esc(p.name || "")}"/></div>
             <div class="prod-meta">
-              <strong>${p.name || ""}</strong>
+              <strong>${esc(p.name || "")}</strong>
               <div class="meta-row">
                 <span class="meta-price">$${Number(p.price || 0).toLocaleString("es-AR")}</span>
                 ${p.old ? `<span style="font-size:12px;color:var(--muted);text-decoration:line-through;font-family:var(--font-mono)">$${Number(p.old).toLocaleString("es-AR")}</span>` : ""}
-                <span class="meta-brand">${p.brand || ""}</span>
+                <span class="meta-brand">${esc(p.brand || "")}</span>
                 ${prodBadge(p.badge)}
+                ${borrado
+                  ? `<span style="font-family:var(--font-mono);font-size:11px;color:#f87171">❌ Ya no existe en ${categoria}: no se muestra en la tienda</span>`
+                  : vinculado
+                    ? `<span style="font-family:var(--font-mono);font-size:11px;color:#4ade80">🔗 ${categoria}</span>${p.stock != null && Number(p.stock) <= 0 ? `<span style="font-family:var(--font-mono);font-size:11px;color:#f87171">Sin stock</span>` : ""}`
+                    : `<span style="font-family:var(--font-mono);font-size:11px;color:var(--yellow)">⚠️ Sin vincular</span>`}
               </div>
             </div>
             <div class="prod-actions">
+              <button class="btn btn-ghost btn-sm" onclick="startLinkDestacado('${p.docId}','${sec}')">${vinculado ? "🔁 Cambiar producto" : "🔗 Vincular"}</button>
               <button class="btn btn-ghost btn-sm" onclick="openEditModal('${p.docId}','${colName}')">✏️ Editar</button>
               <button class="btn btn-danger btn-sm" onclick="delProd('${p.docId}','${colName}','${sec}')">🗑</button>
             </div>
-          </div>`).join("")}
+          </div>`;
+        }).join("")}
       </div>`)}
-    <div class="add-panel">
-      <div class="add-panel-title">➕ AGREGAR PRODUCTO</div>
+    <div class="add-panel" id="destacadoPickerPanel">
+      <div class="add-panel-title">${target ? `🔗 VINCULAR «${esc(target.name || "")}» CON SU PRODUCTO` : "➕ AGREGAR PRODUCTO"}</div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:12px">Elegí el producto de su categoría. El precio, la imagen y el stock salen de ahí.</div>
       <div class="field-row">
-        ${field("Nombre", `<input id="npName" placeholder="Ej: Coca-Cola 2.25L"/>`)}
-        ${field("Marca", `<input id="npBrand" placeholder="Ej: Coca-Cola"/>`)}
+        ${field("Categoría", `<select id="npCat" onchange="destacadoPickerCat('${sec}', this.value)">
+          <option value="">Elegí la categoría</option>
+          ${window.CATEGORY_COLLECTIONS.map((c) => `<option value="${c}" ${picker.cat === c ? "selected" : ""}>${window.CATEGORY_CONFIG[c].label}</option>`).join("")}
+        </select>`)}
+        ${field("Producto", productSelect)}
       </div>
-      <div class="field-row3">
-        ${field("Precio ($)", `<input id="npPrice" type="number"/>`)}
-        ${field("Precio tachado ($)", `<input id="npOld" type="number" placeholder="0 = sin tachado"/>`)}
-        ${field("Badge", `<select id="npBadge"><option value="">Ninguno</option><option value="new">NUEVO</option><option value="offer">OFERTA</option><option value="hot">HOT</option></select>`)}
+      ${target ? "" : field("Badge", `<select id="npBadge" onchange="window.destacadoPicker.badge = this.value"><option value="" ${!picker.badge ? "selected" : ""}>El del producto</option><option value="new" ${picker.badge === "new" ? "selected" : ""}>NUEVO</option><option value="offer" ${picker.badge === "offer" ? "selected" : ""}>OFERTA</option><option value="hot" ${picker.badge === "hot" ? "selected" : ""}>HOT</option></select>`)}
+      <div class="btn-row" style="margin-top:14px">
+        <button class="btn btn-primary" onclick="confirmDestacadoPicker('${colName}','${sec}')">${target ? "🔗 Vincular" : "✅ Agregar"}</button>
+        ${target ? `<button class="btn btn-ghost" onclick="cancelLinkDestacado('${sec}')">Cancelar</button>` : ""}
       </div>
-      ${field("URL imagen", `<input id="npImg" placeholder="https://..." oninput="previewImg('npImg','npImgPrev')"/>`)}
-      <div class="img-preview-wrap"><div class="img-preview" id="npImgPrev"><span>Vista previa</span></div></div>
-      <div class="btn-row" style="margin-top:14px"><button class="btn btn-primary" onclick="addProd('${colName}','${sec}')">✅ Agregar a Firebase</button></div>
     </div>`;
 }
+
+const destacadosPage = (sec) => (sec === "best" ? "best" : "newp");
+
+function destacadoPickerCat(sec, cat) {
+  window.destacadoPicker.cat = window.CATEGORY_COLLECTIONS.includes(cat) ? cat : "";
+  window.destacadoPicker.prodId = "";
+  // Los productos de la categoría se piden recién acá (ver ensureCategoryLoaded en admin.html).
+  if (window.destacadoPicker.cat && typeof window.ensureCategoryLoaded === "function") {
+    window.ensureCategoryLoaded(window.destacadoPicker.cat);
+  }
+  render(destacadosPage(sec));
+}
+window.destacadoPickerCat = destacadoPickerCat;
+
+function destacadoPickerProd(prodId) {
+  window.destacadoPicker.prodId = prodId;
+}
+window.destacadoPickerProd = destacadoPickerProd;
+
+function startLinkDestacado(docId, sec) {
+  const p = destacadosList(sec).find((x) => x.docId === docId);
+  if (!p) return;
+  const cat = window.CATEGORY_COLLECTIONS.includes(p.coleccion) ? p.coleccion : "";
+  window.destacadoPicker = { cat, prodId: cat ? (p.productId || "") : "", badge: "", target: docId };
+  if (cat && typeof window.ensureCategoryLoaded === "function") window.ensureCategoryLoaded(cat);
+  render(destacadosPage(sec));
+  document.getElementById("destacadoPickerPanel")?.scrollIntoView({ behavior: "smooth", block: "center" });
+}
+window.startLinkDestacado = startLinkDestacado;
+
+function cancelLinkDestacado(sec) {
+  window.destacadoPicker = { cat: "", prodId: "", badge: "", target: null };
+  render(destacadosPage(sec));
+}
+window.cancelLinkDestacado = cancelLinkDestacado;
+
+async function confirmDestacadoPicker(colName, sec) {
+  const picker = window.destacadoPicker;
+  const list = destacadosList(sec);
+  const real = picker.cat ? (window.DATA[picker.cat] || []).find((p) => p.docId === picker.prodId) : null;
+  if (!real) return showToast("⚠️ Elegí la categoría y el producto", "err");
+
+  if (list.some((p) => p.docId !== picker.target && p.coleccion === picker.cat && p.productId === real.docId)) {
+    return showToast("⚠️ Ese producto ya está en la lista", "err");
+  }
+
+  // Vínculo + foto del producto para verlo en esta lista.
+  const data = {
+    coleccion: picker.cat,
+    productId: real.docId,
+    name: real.name || "",
+    brand: real.brand || "",
+    price: Number(real.price) || 0,
+    old: Number(real.old) || null,
+    img: real.img || ""
+  };
+
+  if (picker.target) {
+    const ok = await fbSave(colName, picker.target, data);
+    if (!ok) return;
+    const entry = list.find((p) => p.docId === picker.target);
+    if (entry) Object.assign(entry, data, { _real: real });
+    showToast("🔗 Producto vinculado - la tienda ya muestra su precio y stock reales");
+  } else {
+    data.badge = picker.badge || null;
+    const newId = await fbAdd(colName, data);
+    if (!newId) return;
+    list.push({ docId: newId, ...data, _real: real });
+    showToast("✅ Producto agregado - ya visible en el sitio");
+  }
+
+  window.destacadoPicker = { cat: picker.cat, prodId: "", badge: "", target: null };
+  render(destacadosPage(sec));
+}
+window.confirmDestacadoPicker = confirmDestacadoPicker;
+
+// Busca cada entrada sin vincular por su nombre exacto en las 11 categorías.
+// Solo vincula cuando hay un único producto con ese nombre.
+async function autoLinkDestacados(colName, sec) {
+  const list = destacadosList(sec);
+  const pendientes = list.filter((p) => !destacadoVinculado(p));
+  if (!pendientes.length) return;
+  if (!confirm(`Se va a buscar cada uno de los ${pendientes.length} productos sin vincular por su nombre exacto en las categorías.\n\nLos que tengan un único producto con ese nombre quedan vinculados. Los demás hay que vincularlos a mano.`)) return;
+
+  let vinculados = 0;
+  const sinResolver = [];
+
+  for (const p of pendientes) {
+    try {
+      const encontrados = [];
+      if (p.name) {
+        const snaps = await Promise.all(window.CATEGORY_COLLECTIONS.map((c) =>
+          window.fsGetDocs(window.fsQuery(window.fsCollection(window.db, c), window.fsWhere("name", "==", p.name), window.fsLimit(2)))
+        ));
+        snaps.forEach((snap, i) => snap.forEach((d) => encontrados.push({ coleccion: window.CATEGORY_COLLECTIONS[i], productId: d.id })));
+      }
+
+      if (encontrados.length === 1) {
+        const ok = await fbSave(colName, p.docId, encontrados[0]);
+        if (ok) {
+          Object.assign(p, encontrados[0]);
+          vinculados += 1;
+          continue;
+        }
+      }
+      sinResolver.push(p.name || p.docId);
+    } catch (e) {
+      console.error("No se pudo vincular", p.name, e);
+      sinResolver.push(p.name || p.docId);
+    }
+  }
+
+  render(destacadosPage(sec));
+  showToast(sinResolver.length
+    ? `🔗 ${vinculados} vinculado${vinculados !== 1 ? "s" : ""}. ${sinResolver.length} sin un producto único con ese nombre: vinculalos a mano.`
+    : `🔗 ${vinculados} producto${vinculados !== 1 ? "s" : ""} vinculado${vinculados !== 1 ? "s" : ""}`, sinResolver.length ? "err" : "ok");
+}
+window.autoLinkDestacados = autoLinkDestacados;
 
 function openEditModal(docId, colName) {
   const list = colName === "bestSellers" ? window.DATA.best : window.DATA.newProds;
   const p = list.find((x) => x.docId === docId);
   if (!p) return;
+  const vinculado = destacadoVinculado(p);
   document.getElementById("mDocId").value = docId;
   document.getElementById("mCollection").value = colName;
   document.getElementById("mName").value = p.name || "";
@@ -997,6 +1196,12 @@ function openEditModal(docId, colName) {
   document.getElementById("mOld").value = p.old || "";
   document.getElementById("mImg").value = p.img || "";
   document.getElementById("mBadge").value = p.badge || "";
+  // Un producto vinculado toma nombre, precio e imagen de su categoría: acá solo se elige el badge.
+  document.getElementById("mCopyFields").style.display = vinculado ? "none" : "";
+  document.getElementById("mLinkedNote").style.display = vinculado ? "" : "none";
+  if (vinculado) {
+    document.getElementById("mLinkedNote").textContent = `«${p.name || ""}» está vinculado a ${window.CATEGORY_CONFIG[p.coleccion]?.label || p.coleccion}. El nombre, el precio, la imagen y el stock se editan en esa categoría; acá solo se elige el badge.`;
+  }
   previewImg("mImg", "mImgPrev");
   document.getElementById("editModal").classList.add("open");
 }
@@ -1005,16 +1210,22 @@ window.openEditModal = openEditModal;
 async function saveEditModal() {
   const docId = document.getElementById("mDocId").value;
   const colName = document.getElementById("mCollection").value;
-  const data = {
-    name: document.getElementById("mName").value,
-    brand: document.getElementById("mBrand").value,
-    price: Number(document.getElementById("mPrice").value) || 0,
-    old: Number(document.getElementById("mOld").value) || null,
-    img: document.getElementById("mImg").value,
-    badge: document.getElementById("mBadge").value || null
-  };
+  const list = colName === "bestSellers" ? window.DATA.best : window.DATA.newProds;
+  const entry = list.find((x) => x.docId === docId);
+  const badge = document.getElementById("mBadge").value || null;
+  const data = entry && destacadoVinculado(entry)
+    ? { badge }
+    : {
+        name: document.getElementById("mName").value,
+        brand: document.getElementById("mBrand").value,
+        price: Number(document.getElementById("mPrice").value) || 0,
+        old: Number(document.getElementById("mOld").value) || null,
+        img: document.getElementById("mImg").value,
+        badge
+      };
   const ok = await fbSave(colName, docId, data);
   if (ok) {
+    if (entry) Object.assign(entry, data);
     closeModal();
     render(colName === "bestSellers" ? "best" : "newp");
     showToast("✅ Producto actualizado en Firebase");
@@ -1036,30 +1247,12 @@ async function delProd(docId, colName, sec) {
   if (ok) {
     if (sec === "best") window.DATA.best = window.DATA.best.filter((p) => p.docId !== docId);
     else window.DATA.newProds = window.DATA.newProds.filter((p) => p.docId !== docId);
+    if (window.destacadoPicker.target === docId) window.destacadoPicker.target = null;
     render(sec === "best" ? "best" : "newp");
     showToast("🗑 Producto eliminado de Firebase");
   }
 }
 window.delProd = delProd;
-
-async function addProd(colName, sec) {
-  const name = document.getElementById("npName").value.trim();
-  const brand = document.getElementById("npBrand").value.trim();
-  const price = Number(document.getElementById("npPrice").value) || 0;
-  const old = Number(document.getElementById("npOld").value) || null;
-  const img = document.getElementById("npImg").value.trim();
-  const badge = document.getElementById("npBadge").value || null;
-  if (!name || !price) return showToast("⚠️ Completá nombre y precio", "err");
-  const newId = await fbAdd(colName, { name, brand, price, old, img, badge });
-  if (newId) {
-    const prod = { docId: newId, name, brand, price, old, img, badge };
-    if (sec === "best") window.DATA.best.push(prod);
-    else window.DATA.newProds.push(prod);
-    render(sec === "best" ? "best" : "newp");
-    showToast("✅ Producto agregado - ya visible en el sitio");
-  }
-}
-window.addProd = addProd;
 
 function pageCategories() {
   const cats = [...window.DATA.categories].sort((a, b) => (a.order || 0) - (b.order || 0));
