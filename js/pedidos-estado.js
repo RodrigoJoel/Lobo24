@@ -36,7 +36,8 @@ const COLECCIONES_PRODUCTOS = [
 // Qué se hizo ya con el pedido. Los pedidos anteriores a estas marcas no las
 // tienen: los de transferencia/efectivo descontaban stock y puntos al
 // crearse, y los de Mercado Pago recién cuando se acreditaba el pago.
-function estadoDelPedido(pedido) {
+// pedidos-live.js la usa para explicar qué se devuelve antes de cancelar.
+export function estadoDelPedido(pedido) {
   const esMP = pedido.payment === 'mp';
   const stockDescontado = pedido.stockDescontado ?? (!esMP || !!pedido.mpPaymentId);
   const ganadosAcreditados = pedido.pointsApplied ?? !esMP;
