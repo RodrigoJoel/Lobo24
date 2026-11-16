@@ -1120,3 +1120,30 @@ textarea.form-input { height: auto; min-height: 76px; padding: 12px 14px; line-h
   .step-content { animation: none; }
   .toast { transition: opacity .2s; transform: none; }
 }
+
+/* ══ TIENDA ONLINE CERRADA (js/tienda-cierre.js) ══
+   Se cierra desde "Pedidos en vivo": la página de pago no deja confirmar. */
+.aviso-cierre {
+  background: var(--accent-soft);
+  border-bottom: 1px solid var(--line);
+}
+.aviso-cierre-in {
+  max-width: calc(1120px + var(--pad) * 2);
+  margin: 0 auto;
+  padding: 12px var(--pad);
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  color: var(--text);
+  font-size: 14.5px;
+  line-height: 1.5;
+}
+.aviso-cierre-in i {
+  flex: none;
+  margin-top: 3px;
+  color: var(--accent-text);
+  font-size: 17px;
+}
+.aviso-cierre-in p { margin: 0; text-wrap: pretty; }
+.aviso-cierre strong { color: var(--accent-text); font-weight: 700; }
+.aviso-cierre-nota { display: block; margin-top: 2px; color: var(--muted); }

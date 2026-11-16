@@ -610,3 +610,15 @@ footer{margin-top:72px;border-top-color:var(--line);transition:background-color 
 @media (prefers-reduced-motion:reduce){
   .content-page details summary::after{transition:none}
 }
+
+/* ── Tienda online cerrada (js/tienda-cierre.js) ──
+   Se cierra desde "Pedidos en vivo": se ven los productos, pero no se compra. */
+.aviso-cierre{background:var(--accent-soft);border-bottom:1px solid var(--line)}
+.aviso-cierre-in{max-width:1400px;margin:0 auto;padding:12px var(--pad);display:flex;align-items:flex-start;gap:12px;color:var(--text);font-size:14.5px;line-height:1.5}
+.aviso-cierre-in i{flex:none;margin-top:3px;color:var(--accent-text);font-size:17px}
+.aviso-cierre-in p{margin:0;text-wrap:pretty}
+.aviso-cierre strong{color:var(--accent-text);font-weight:700}
+.aviso-cierre-nota{display:block;margin-top:2px;color:var(--muted)}
+html.tienda-cerrada .add-btn{opacity:.35;filter:grayscale(1);cursor:not-allowed}
+html.tienda-cerrada .checkout-btn{opacity:.5;cursor:not-allowed}
+.cierre-carrito{margin:0 0 12px;padding:10px 12px;border-radius:10px;background:var(--accent-soft);color:var(--text);font-size:13px;line-height:1.45}

@@ -808,6 +808,210 @@ header h1{
     }
 }
 
+/* Estado de la tienda online: abrir y cerrar (pedidos-live.js) */
+.tienda-estado{
+    display:flex;
+    flex-wrap:wrap;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px 16px;
+    padding:12px max(20px, env(safe-area-inset-right, 0px)) 12px max(20px, env(safe-area-inset-left, 0px));
+    background:var(--bg2);
+    border-bottom:1px solid var(--border);
+}
+
+.tienda-estado[hidden]{
+    display:none;
+}
+
+.tienda-estado-texto{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    min-width:0;
+}
+
+.tienda-punto{
+    flex:none;
+    width:10px;
+    height:10px;
+    border-radius:50%;
+    background:var(--green);
+    box-shadow:0 0 0 4px rgba(53,208,127,.15);
+}
+
+.tienda-estado strong{
+    display:block;
+    font-size:15px;
+}
+
+.tienda-detalle{
+    display:block;
+    margin-top:2px;
+    color:var(--muted);
+    font-size:13px;
+}
+
+.tienda-estado.cerrada{
+    background:rgba(255,93,93,.1);
+    border-bottom-color:rgba(255,93,93,.35);
+}
+
+.tienda-estado.cerrada .tienda-punto{
+    background:var(--red);
+    box-shadow:0 0 0 4px rgba(255,93,93,.18);
+}
+
+.tienda-estado.cerrada strong{
+    color:var(--red);
+}
+
+.tienda-estado.cerrada .tienda-detalle{
+    color:#e6c4c4;
+}
+
+.tienda-estado-acciones{
+    display:flex;
+    gap:8px;
+}
+
+.tienda-estado-acciones [hidden]{
+    display:none;
+}
+
+.btn-ok{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+    min-height:44px;
+    padding:10px 16px;
+    border:none;
+    border-radius:10px;
+    background:var(--green);
+    color:#000;
+    font:inherit;
+    font-size:14px;
+    font-weight:bold;
+    cursor:pointer;
+    transition:transform 140ms var(--ease-out), opacity 160ms ease;
+}
+
+.btn-ok:active{
+    transform:scale(.97);
+}
+
+.btn-ok:disabled{
+    opacity:.6;
+    cursor:default;
+}
+
+@media (max-width:520px){
+    .tienda-estado-acciones{
+        width:100%;
+    }
+    .tienda-estado-acciones button{
+        flex:1;
+    }
+}
+
+/* Ventana para cerrar la tienda */
+.cierre-opciones{
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+    margin:16px 0 0;
+    padding:0;
+    border:none;
+}
+
+.cierre-opciones legend{
+    margin-bottom:8px;
+    color:var(--muted);
+    font-size:12px;
+    font-weight:bold;
+    letter-spacing:.06em;
+    text-transform:uppercase;
+}
+
+.cierre-opcion{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    min-height:44px;
+    padding:10px 12px;
+    border:1px solid var(--border);
+    border-radius:10px;
+    color:var(--text);
+    cursor:pointer;
+    transition:border-color 160ms ease, background-color 160ms ease;
+}
+
+.cierre-opcion input{
+    flex:none;
+    width:18px;
+    height:18px;
+    accent-color:var(--accent);
+}
+
+.cierre-opcion:has(input:checked){
+    border-color:var(--accent);
+    background:rgba(240,192,64,.08);
+}
+
+.cierre-fecha,
+.cierre-campo input{
+    width:100%;
+    min-height:44px;
+    padding:10px 12px;
+    border:1px solid var(--border);
+    border-radius:10px;
+    background:var(--bg);
+    color:var(--text);
+    font:inherit;
+    font-size:16px;
+    color-scheme:dark;
+}
+
+.cierre-fecha[hidden]{
+    display:none;
+}
+
+.cierre-campo{
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+    margin-top:16px;
+    color:var(--muted);
+    font-size:13px;
+    font-weight:bold;
+}
+
+.cierre-preview{
+    margin-top:16px;
+    padding:12px;
+    border:1px solid rgba(240,192,64,.25);
+    border-radius:10px;
+    background:rgba(240,192,64,.08);
+}
+
+.cierre-preview > span{
+    display:block;
+    margin-bottom:4px;
+    color:var(--muted);
+    font-size:12px;
+}
+
+.cierre-preview p{
+    color:var(--text);
+    font-size:14px;
+    line-height:1.45;
+}
+
+.cierre-preview strong{
+    color:var(--accent);
+}
+
 /* Comanda para imprimir: solo se ve en papel */
 #printArea{
     display:none;
@@ -1030,6 +1234,21 @@ header h1{
     </div>
 </header>
 
+<!-- Estado de la tienda online: se cierra para que no puedan comprar -->
+<div id="tiendaEstado" class="tienda-estado" hidden>
+    <div class="tienda-estado-texto">
+        <span class="tienda-punto" aria-hidden="true"></span>
+        <div>
+            <strong id="tiendaTitulo">Tienda online abierta</strong>
+            <span id="tiendaDetalle" class="tienda-detalle"></span>
+        </div>
+    </div>
+    <div class="tienda-estado-acciones">
+        <button type="button" id="tiendaAbrirBtn" class="btn-ok" hidden>Abrir ahora</button>
+        <button type="button" id="tiendaCerrarBtn" class="btn-peligro">Cerrar tienda</button>
+    </div>
+</div>
+
 <div class="container">
 
     <div id="pedidosContainer" class="pedidos-grid"></div>
@@ -1078,6 +1297,46 @@ header h1{
     </div>
 </div>
 
+<div id="cierreModal" class="confirm-modal" role="dialog" aria-modal="true" aria-labelledby="cierreTitulo">
+    <form id="cierreForm" class="confirm-box" novalidate>
+        <h2 id="cierreTitulo">Cerrar la tienda online</h2>
+        <p class="confirm-cliente">Los clientes van a poder ver los productos, pero no comprar.</p>
+
+        <fieldset class="cierre-opciones">
+            <legend>¿Hasta cuándo?</legend>
+            <label class="cierre-opcion">
+                <input type="radio" name="hasta" value="sugerida" checked>
+                <span id="cierreOpcionSugerida">Hasta mañana a las 7:00 h</span>
+            </label>
+            <label class="cierre-opcion">
+                <input type="radio" name="hasta" value="otro">
+                <span>Hasta otro día y hora</span>
+            </label>
+            <input type="datetime-local" id="cierreFecha" class="cierre-fecha" aria-label="Día y hora en que vuelve a abrir" hidden>
+            <label class="cierre-opcion">
+                <input type="radio" name="hasta" value="manual">
+                <span>Hasta que la vuelva a abrir</span>
+            </label>
+        </fieldset>
+
+        <label class="cierre-campo">
+            Mensaje extra para los clientes (opcional)
+            <input type="text" id="cierreNota" maxlength="140" placeholder="Ej.: Cerramos por el feriado." autocomplete="off">
+        </label>
+
+        <div class="cierre-preview">
+            <span>Así lo ven los clientes:</span>
+            <p id="cierrePreview"></p>
+        </div>
+
+        <p id="cierreError" class="confirm-error" role="alert"></p>
+        <div class="confirm-acciones">
+            <button type="button" id="cierreVolverBtn" class="btn-sec">Volver</button>
+            <button type="submit" id="cierreConfirmarBtn" class="btn-peligro lleno">Cerrar la tienda</button>
+        </div>
+    </form>
+</div>
+
 <div id="printArea"></div>
 
 <div id="alertModal" role="alertdialog" aria-live="assertive">
@@ -1090,7 +1349,8 @@ header h1{
     </div>
 </div>
 
-<script type="module" src="./pedidos-live.js?v=5"></script>
+<script src="js/tienda-cierre.js?v=1"></script>
+<script type="module" src="./pedidos-live.js?v=6"></script>
 <script>
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => navigator.serviceWorker.register('/sw.js').catch(() => {}));

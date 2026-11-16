@@ -1169,8 +1169,55 @@ async function enviarEmailsPedido(pedido) {
 // ===================== RUTAS =====================
 
 app.get('/', (req, res) => {
-    res.json({ status: 'ok', message: 'Servidor Lobo24 funcionando!' });
+    res.json({ status: 'ok', message: 'Servidor Lobo24 funcionando!', version: '2026-11-15' });
 });
+
+// ===================== TIENDA CERRADA =====================
+// El local cierra la tienda online desde "Pedidos en vivo" (config/general,
+// campo cierre: { activo, hasta, nota }). Mientras está cerrada no se
+// aceptan pedidos nuevos, aunque el cliente tenga la página abierta desde
+// antes. Si tiene "hasta", vuelve a aceptar pedidos sola a esa hora.
+// Si no se puede leer el estado, el pedido sigue: un problema de lectura
+// no tiene que frenar las ventas.
+const ZONA_AR = 'America/Argentina/Buenos_Aires';
+
+function diaAR(fecha) {
+    return fecha.toLocaleDateString('en-CA', { timeZone: ZONA_AR }); // AAAA-MM-DD
+}
+
+// "mañana a partir de las 7:00 h" (mismo texto que js/tienda-cierre.js)
+function cuandoAbreTienda(hasta, ahora = new Date()) {
+    const partes = new Intl.DateTimeFormat('en-GB', { timeZone: ZONA_AR, hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).formatToParts(hasta);
+    const horas = Number(partes.find(p => p.type === 'hour').value);
+    const minutos = partes.find(p => p.type === 'minute').value;
+    const aLas = (horas === 1 ? 'a partir de la ' : 'a partir de las ') + horas + ':' + minutos + ' h';
+    const dias = Math.round((Date.parse(diaAR(hasta)) - Date.parse(diaAR(ahora))) / 86400000);
+    if (dias <= 0) return 'hoy ' + aLas;
+    if (dias === 1) return 'mañana ' + aLas;
+    const diaSemana = hasta.toLocaleDateString('es-AR', { timeZone: ZONA_AR, weekday: 'long' });
+    const fecha = dias < 7 ? '' : ' ' + hasta.toLocaleDateString('es-AR', { timeZone: ZONA_AR, day: 'numeric', month: 'numeric' });
+    return `el ${diaSemana}${fecha} ${aLas}`;
+}
+
+// Devuelve null si la tienda está abierta, o { mensaje } si está cerrada.
+async function tiendaCerrada() {
+    if (!db) return null;
+    try {
+        const snap = await db.collection('config').doc('general').get();
+        const cierre = snap.exists ? snap.data().cierre : null;
+        if (!cierre || cierre.activo !== true) return null;
+        const hasta = aFecha(cierre.hasta);
+        if (hasta && hasta.getTime() <= Date.now()) return null;
+        return {
+            mensaje: 'La tienda online está cerrada. ' + (hasta
+                ? `Volvemos a tomar pedidos ${cuandoAbreTienda(hasta)}.`
+                : 'Por ahora no estamos tomando pedidos.')
+        };
+    } catch (error) {
+        console.error('⚠️ No se pudo leer si la tienda está cerrada; el pedido sigue:', error.message);
+        return null;
+    }
+}
 
 // ===================== VALIDAR DISTANCIA (checkout, paso 3) =====================
 // Aviso temprano al cliente. La validación que cuenta es la que corre
@@ -1193,6 +1240,11 @@ app.post('/crear-preferencia', async (req, res) => {
 
         if (!items || items.length === 0) {
             return res.status(400).json({ error: 'No hay productos' });
+        }
+
+        const cerrada = await tiendaCerrada();
+        if (cerrada) {
+            return res.status(403).json({ error: cerrada.mensaje, tiendaCerrada: true });
         }
 
         console.log('📦 BODY RECIBIDO:', JSON.stringify(req.body, null, 2));
@@ -1550,6 +1602,11 @@ app.post('/confirmar-pedido-manual', async (req, res) => {
         }
         if (!contact || typeof contact !== 'object') {
             return res.status(400).json({ error: 'Faltan datos de contacto' });
+        }
+
+        const cerrada = await tiendaCerrada();
+        if (cerrada) {
+            return res.status(403).json({ error: cerrada.mensaje, tiendaCerrada: true });
         }
 
         let userId;

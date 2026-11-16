@@ -4,7 +4,9 @@ import {
   collection,
   query,
   orderBy,
-  onSnapshot
+  onSnapshot,
+  doc,
+  setDoc
 } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
 import {
   getAuth,
@@ -113,6 +115,7 @@ onAuthStateChanged(auth, (user) => {
   }
   initNotifications();
   listenOrders();
+  listenTienda();
 });
 
 function listenOrders() {
@@ -1073,6 +1076,195 @@ function imprimirPedido(id) {
 
 window.addEventListener("afterprint", () => { printArea.innerHTML = ""; });
 
+// ---------- Tienda online: cerrar y abrir ----------
+// Cerrar guarda config/general.cierre = { activo, hasta, nota, desde }. Los
+// clientes siguen viendo los productos pero no pueden comprar
+// (js/tienda-cierre.js) y el servidor rechaza los pedidos. Con "hasta",
+// la tienda se vuelve a abrir sola a esa hora.
+
+const tiendaEstado = document.getElementById("tiendaEstado");
+const tiendaTitulo = document.getElementById("tiendaTitulo");
+const tiendaDetalle = document.getElementById("tiendaDetalle");
+const tiendaAbrirBtn = document.getElementById("tiendaAbrirBtn");
+const tiendaCerrarBtn = document.getElementById("tiendaCerrarBtn");
+const cierreModal = document.getElementById("cierreModal");
+const cierreForm = document.getElementById("cierreForm");
+const cierreTitulo = document.getElementById("cierreTitulo");
+const cierreOpcionSugerida = document.getElementById("cierreOpcionSugerida");
+const cierreFecha = document.getElementById("cierreFecha");
+const cierreNota = document.getElementById("cierreNota");
+const cierrePreview = document.getElementById("cierrePreview");
+const cierreError = document.getElementById("cierreError");
+const cierreConfirmarBtn = document.getElementById("cierreConfirmarBtn");
+const cierreVolverBtn = document.getElementById("cierreVolverBtn");
+
+// Hora que se sugiere para volver a abrir: la próxima vez que den las 7:00.
+const HORA_APERTURA = 7;
+const configRef = doc(db, "config", "general");
+let cierreActual = null;
+let tiendaCargada = false;
+
+function proximaApertura(ahora = new Date()) {
+  const fecha = new Date(ahora);
+  fecha.setHours(HORA_APERTURA, 0, 0, 0);
+  if (fecha <= ahora) fecha.setDate(fecha.getDate() + 1);
+  return fecha;
+}
+
+// Formato de <input type="datetime-local">, en la hora del celular.
+function valorFechaLocal(date) {
+  const dos = (n) => String(n).padStart(2, "0");
+  return `${date.getFullYear()}-${dos(date.getMonth() + 1)}-${dos(date.getDate())}T${dos(date.getHours())}:${dos(date.getMinutes())}`;
+}
+
+function listenTienda() {
+  onSnapshot(configRef, (snap) => {
+    cierreActual = snap.exists() ? snap.data().cierre || null : null;
+    tiendaCargada = true;
+    pintarTienda();
+  }, (error) => {
+    console.error("No se pudo leer el estado de la tienda:", error);
+  });
+}
+
+function pintarTienda() {
+  if (!tiendaCargada) return;
+  const est = window.TiendaCierre.estado(cierreActual);
+  tiendaEstado.hidden = false;
+  tiendaEstado.classList.toggle("cerrada", !!est);
+  tiendaAbrirBtn.hidden = !est;
+  if (!est) {
+    tiendaTitulo.textContent = "Tienda online abierta";
+    tiendaDetalle.textContent = "Los clientes pueden comprar.";
+    tiendaCerrarBtn.textContent = "Cerrar tienda";
+    tiendaCerrarBtn.className = "btn-peligro";
+  } else {
+    tiendaTitulo.textContent = "Tienda online cerrada";
+    tiendaDetalle.textContent = est.hasta
+      ? `Se vuelve a abrir sola ${window.TiendaCierre.cuando(est.hasta)}.`
+      : "Queda cerrada hasta que la abras.";
+    tiendaCerrarBtn.textContent = "Cambiar";
+    tiendaCerrarBtn.className = "btn-sec";
+  }
+}
+
+// Si se abre sola mientras la pantalla está abierta, el cartel cambia solo.
+setInterval(pintarTienda, 30 * 1000);
+
+function opcionCierre() {
+  return cierreForm.querySelector('input[name="hasta"]:checked')?.value || "sugerida";
+}
+
+// null = hasta que la abra a mano; undefined = falta elegir la fecha.
+function hastaElegido() {
+  const opcion = opcionCierre();
+  if (opcion === "manual") return null;
+  if (opcion === "otro") {
+    const fecha = cierreFecha.value ? new Date(cierreFecha.value) : null;
+    return fecha && !isNaN(fecha.getTime()) ? fecha : undefined;
+  }
+  return proximaApertura();
+}
+
+function actualizarCierrePreview() {
+  cierreFecha.hidden = opcionCierre() !== "otro";
+  const hasta = hastaElegido();
+  const t = window.TiendaCierre.textos({ hasta: hasta || null, nota: cierreNota.value.trim() });
+  const detalle = hasta === undefined ? "Volvemos a tomar pedidos el día y la hora que elijas." : t.detalle;
+  cierrePreview.innerHTML = `<strong>${escapeHtml(t.titulo)}</strong> ${escapeHtml(detalle)}${t.nota ? `<br>${escapeHtml(t.nota)}` : ""}`;
+}
+
+function abrirModalCierre() {
+  const est = window.TiendaCierre.estado(cierreActual);
+  const sugerida = proximaApertura();
+  cierreOpcionSugerida.textContent = "Hasta " + window.TiendaCierre.cuando(sugerida).replace(/a partir de (las?) /, "a $1 ");
+  cierreFecha.min = valorFechaLocal(new Date());
+
+  let opcion = "sugerida";
+  if (est) {
+    // Ya está cerrada: se cambia hasta cuándo o el mensaje.
+    cierreTitulo.textContent = "Cambiar el cierre de la tienda";
+    cierreConfirmarBtn.textContent = "Guardar cambios";
+    if (!est.hasta) opcion = "manual";
+    else if (est.hasta.getTime() !== sugerida.getTime()) opcion = "otro";
+    cierreFecha.value = valorFechaLocal(est.hasta || sugerida);
+    cierreNota.value = est.nota || "";
+  } else {
+    cierreTitulo.textContent = "Cerrar la tienda online";
+    cierreConfirmarBtn.textContent = "Cerrar la tienda";
+    cierreFecha.value = valorFechaLocal(sugerida);
+    cierreNota.value = "";
+  }
+  cierreForm.querySelector(`input[name="hasta"][value="${opcion}"]`).checked = true;
+  cierreError.textContent = "";
+  cierreConfirmarBtn.disabled = false;
+  cierreVolverBtn.disabled = false;
+  actualizarCierrePreview();
+  cierreModal.classList.add("show");
+  cierreVolverBtn.focus({ preventScroll: true });
+}
+
+function cerrarModalCierre() {
+  cierreModal.classList.remove("show");
+}
+
+async function guardarCierre(e) {
+  e.preventDefault();
+  const hasta = hastaElegido();
+  if (hasta === undefined) {
+    cierreError.textContent = "Elegí el día y la hora en que vuelve a abrir.";
+    cierreFecha.focus();
+    return;
+  }
+  if (hasta && hasta.getTime() <= Date.now() + 60 * 1000) {
+    cierreError.textContent = "Esa hora ya pasó: elegí una más adelante.";
+    cierreFecha.focus();
+    return;
+  }
+
+  const textoBoton = cierreConfirmarBtn.textContent;
+  cierreConfirmarBtn.disabled = true;
+  cierreVolverBtn.disabled = true;
+  cierreConfirmarBtn.textContent = "Guardando…";
+  cierreError.textContent = "";
+  try {
+    await setDoc(configRef, {
+      cierre: { activo: true, hasta, nota: cierreNota.value.trim().slice(0, 140), desde: new Date() }
+    }, { merge: true });
+    cerrarModalCierre();
+  } catch (error) {
+    console.error("Error cerrando la tienda:", error);
+    cierreError.textContent = "No se pudo guardar: " + (error?.message || "probá de nuevo.");
+    cierreConfirmarBtn.disabled = false;
+    cierreVolverBtn.disabled = false;
+    cierreConfirmarBtn.textContent = textoBoton;
+  }
+}
+
+async function abrirTienda() {
+  tiendaAbrirBtn.disabled = true;
+  tiendaAbrirBtn.textContent = "Abriendo…";
+  try {
+    await setDoc(configRef, { cierre: { activo: false, hasta: null, nota: "", desde: null } }, { merge: true });
+  } catch (error) {
+    console.error("Error abriendo la tienda:", error);
+    tiendaDetalle.textContent = "No se pudo abrir: " + (error?.message || "probá de nuevo.");
+  } finally {
+    tiendaAbrirBtn.disabled = false;
+    tiendaAbrirBtn.textContent = "Abrir ahora";
+  }
+}
+
+tiendaCerrarBtn.addEventListener("click", abrirModalCierre);
+tiendaAbrirBtn.addEventListener("click", abrirTienda);
+cierreForm.addEventListener("submit", guardarCierre);
+cierreForm.addEventListener("input", actualizarCierrePreview);
+cierreForm.addEventListener("change", actualizarCierrePreview);
+cierreVolverBtn.addEventListener("click", cerrarModalCierre);
+cierreModal.addEventListener("click", (e) => {
+  if (e.target === cierreModal && !cierreVolverBtn.disabled) cerrarModalCierre();
+});
+
 // ---------- Botones de las tarjetas y del panel ----------
 
 document.addEventListener("click", (e) => {
@@ -1092,7 +1284,9 @@ document.addEventListener("click", (e) => {
 
 document.addEventListener("keydown", (e) => {
   if (e.key !== "Escape") return;
-  if (cancelModal.classList.contains("show")) {
+  if (cierreModal.classList.contains("show")) {
+    if (!cierreVolverBtn.disabled) cerrarModalCierre();
+  } else if (cancelModal.classList.contains("show")) {
     if (!cancelNoBtn.disabled) cerrarModalCancelar();
   } else if (panelAbierto) {
     if (vista === "detalle") volverALista();
