@@ -10,7 +10,7 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="stylesheet" href="css/styles.css?v=2"/>
   <link rel="stylesheet" href="css/usuario.css"/>
-  <link rel="stylesheet" href="css/rediseno.css?v=4"/>
+  <link rel="stylesheet" href="css/rediseno.css?v=5"/>
   <link rel="icon" type="image/png" href="imagenes/iconoLobo24.png">
   <link rel="apple-touch-icon" href="imagenes/apple-touch-icon.png">
   <link rel="manifest" href="/manifest.json">
@@ -353,6 +353,7 @@ onSnapshot(doc(db, 'config', 'general'), snap => {
   const d = snap.data();
   const tb = document.getElementById('topbarText');
   if (tb && d.topbar) tb.innerHTML = d.topbar;
+  window.TiendaCierre?.aplicar(d.cierre);
 });
 
 // Redirigir si no está logueado
@@ -377,7 +378,8 @@ onAuthStateChanged(auth, (user) => {
 });
 </script>
 
-<script src="js/app-global.js?v=3"></script>
+<script src="js/tienda-cierre.js?v=1"></script>
+<script src="js/app-global.js?v=4"></script>
 <script src="js/usuario.js?v=6"></script>
 <script src="js/scripts.js?v=4"></script>
 <script>

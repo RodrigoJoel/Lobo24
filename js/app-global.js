@@ -382,6 +382,9 @@ function loadCartFromLocalStorage() {
 }
 
 function addToCart(id, e) {
+  // Tienda cerrada desde "Pedidos en vivo": se ve todo, pero no se compra.
+  if (window.TiendaCierre?.bloquearCompra()) return;
+
   const p = getAllAvailableProducts().find(x => (x.docId || x.id) === id);
   if (!p) {
     showToast('❌ No se encontró el producto');
@@ -547,6 +550,8 @@ function checkout() {
     showToast('⚠️ Tu carrito está vacío');
     return;
   }
+
+  if (window.TiendaCierre?.bloquearCompra()) return;
 
   saveCartToLocalStorage();
   window.location.href = 'checkout.html';

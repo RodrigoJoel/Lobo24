@@ -869,6 +869,10 @@ async function backendHeaders() {
 }
 
 async function submitStep4() {
+  // Tienda cerrada desde "Pedidos en vivo" (js/tienda-cierre.js). El
+  // servidor también rechaza el pedido; esto avisa antes de intentarlo.
+  if (window.TiendaCierre?.bloquearCompra()) return;
+
   if (!STATE.payment) {
     showToast('⚠️ Seleccioná un método de pago', 'warn');
     return;
